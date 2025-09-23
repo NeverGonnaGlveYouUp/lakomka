@@ -1,0 +1,28 @@
+{
+  "name": "lakomka_shop_frontend",
+  "version": "0.1.0",
+  "keywords": [
+    "rest",
+    "hateoas",
+    "spring",
+    "data",
+    "react"
+  ],
+  "scripts": {
+    "watch": "webpack --watch -d --output ./bundle.js",
+    "build": "webpack --mode production --output ./bundle.js"
+  },
+  "dependencies": {
+    "axios": "^1.12.2",
+    "react": "^19.1",
+    "react-dom": "^19.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.1.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.2",
+    "webpack": "^4.19.1",
+    "webpack-cli": "^3.3.12"
+  }
+}

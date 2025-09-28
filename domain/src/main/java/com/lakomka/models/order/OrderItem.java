@@ -63,7 +63,7 @@ public class OrderItem {
     /**
      * Цена товара
      */
-    @Column(name = "price", nullable = false, length = 8, scale = 2)
+    @Column(name = "price", nullable = false, length = 10, scale = 2)
     private BigDecimal price;
 
     /**

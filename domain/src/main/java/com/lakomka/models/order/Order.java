@@ -12,8 +12,11 @@ import java.util.Date;
 @Entity
 public class Order {
 
+    /**
+     * Номер заказа и ПК
+     */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false, precision = 12)
     private Long id;
 
@@ -25,12 +28,6 @@ public class Order {
     private BasePerson basePerson;
 
     /**
-     * Номер заказа
-     */
-    @Column(name = "number_order", unique = true, nullable = false, length = 12)
-    private String numberOrder;
-
-    /**
      * Дата-Время заказа
      */
     @CreationTimestamp
@@ -40,7 +37,7 @@ public class Order {
     /**
      * Общая сумма заказа
      */
-    @Column(name = "sum_order", nullable = false, precision = 8, scale = 2)
+    @Column(name = "sum_order", nullable = false, precision = 10, scale = 2)
     private BigDecimal sumOrder;
 
     /**
@@ -199,14 +196,6 @@ public class Order {
 
     public void setDateTimeOrder(Instant dateTimeOrder) {
         this.dateTimeOrder = dateTimeOrder;
-    }
-
-    public String getNumberOrder() {
-        return numberOrder;
-    }
-
-    public void setNumberOrder(String numberOrder) {
-        this.numberOrder = numberOrder;
     }
 
     public BasePerson getBasePerson() {

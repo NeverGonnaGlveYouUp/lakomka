@@ -1,10 +1,12 @@
 package com.lakomka.configs;
 
+import com.lakomka.models.misc.Route;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.person.JPerson;
 import com.lakomka.models.product.Product;
 import com.lakomka.models.product.ProductGroup;
-import com.lakomka.repository.misc.ProductGroupRepository;
+import com.lakomka.repository.misc.RouteRepository;
+import com.lakomka.repository.product.ProductGroupRepository;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.repository.product.ProductRepository;
@@ -13,6 +15,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Component
@@ -23,6 +26,9 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final JPersonRepository jPersonRepository;
     private final ProductGroupRepository productGroupRepository;
     private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private RouteRepository routeRepository;
+
 
 
     @Autowired
@@ -58,7 +64,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         group3 = productGroupRepository.save(group3);
         group4 = productGroupRepository.save(group4);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
 
             Product product1 = new Product();
             product1.setName("Laptop" + i);
@@ -78,6 +84,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             Product product4 = new Product();
             product4.setName("Headphones" + i);
             product4.setArticle("HP00" + i);
+            product4.setPriceKons(new BigDecimal("1000"));
             product4.setGroup(group4);
 
             productRepository.save(product1);
@@ -85,6 +92,12 @@ public class DatabaseInitializer implements CommandLineRunner {
             productRepository.save(product3);
             productRepository.save(product4);
         }
+
+        Route route = new Route();
+        route.setNameRoute("route");
+        route.setRouteDays("1234567");
+        routeRepository.save(route);
+
         BasePerson person = new BasePerson();
         person.setLogin("my user");
         person.setPassword(passwordEncoder.encode("password"));
@@ -109,6 +122,9 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson.setPhone("phone");
         jPerson.setMapDelivery("mapDelivery");
         jPerson.setPost("post");
+        jPerson.setRest(new BigDecimal("0"));
+        jPerson.setRestTime(new BigDecimal("0"));
+        jPerson.setRoute(route);
 
         jPersonRepository.save(jPerson);
         person.setjPerson(jPerson);

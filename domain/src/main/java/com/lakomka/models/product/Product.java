@@ -1,9 +1,11 @@
 package com.lakomka.models.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lakomka.models.misc.Discount;
 import com.lakomka.models.order.OrderItem;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +27,10 @@ public class Product {
 
     @OneToOne(mappedBy = "product")
     private OrderItem orderItem;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "product")
+    private Set<Discount> discounts = new HashSet<>();
 
     /**
      * Наименование товара
@@ -64,6 +70,21 @@ public class Product {
     private Integer packag;
 
     /**
+     *  priceOpt1, priceOpt2, priceNal, priceKons варианты цен
+     */
+    @Column(name = "price_opt_1")
+    private BigDecimal priceOpt1;
+
+    @Column(name = "price_opt_2")
+    private BigDecimal priceOpt2;
+
+    @Column(name = "price_nal")
+    private BigDecimal priceNal;
+
+    @Column(name = "price_kons")
+    private BigDecimal priceKons;
+
+    /**
      * Вес товара в граммах/милилитрах
      */
     @Column(name = "weight", length = 12)
@@ -78,16 +99,15 @@ public class Product {
     /**
      * Значимость товара – одна или две цифры
      */
-    @Column(name = "zn", length = 2)
+    @Column(name = "zn")
     private Integer zn;
 
-    //todo какой дефолт?
     /**
      * Признак маркируемых товаров – 0 – товар не моркируемый, 1- маркируемый товар
      */
     @JsonIgnore
     @Column(name = "mark")
-    private boolean mark;
+    private boolean mark = false;
 
     /**
      * Название группы СКЮ или торговой марки
@@ -101,7 +121,6 @@ public class Product {
     @Column(name = "worker", length = 80)
     private String worker;
 
-    //todo 15 или 20?
     /**
      * Штрих код товара (проверить разрядность – может надо больше например, 20)
      */
@@ -142,6 +161,14 @@ public class Product {
 
     public void setOrderItem(OrderItem orderItem) {
         this.orderItem = orderItem;
+    }
+
+    public Set<Discount> getDiscounts() {
+        return discounts;
+    }
+
+    public void setDiscounts(Set<Discount> discounts) {
+        this.discounts = discounts;
     }
 
     public String getName() {
@@ -190,6 +217,38 @@ public class Product {
 
     public void setPackag(Integer packag) {
         this.packag = packag;
+    }
+
+    public BigDecimal getPriceOpt1() {
+        return priceOpt1;
+    }
+
+    public void setPriceOpt1(BigDecimal priceOpt1) {
+        this.priceOpt1 = priceOpt1;
+    }
+
+    public BigDecimal getPriceOpt2() {
+        return priceOpt2;
+    }
+
+    public void setPriceOpt2(BigDecimal priceOpt2) {
+        this.priceOpt2 = priceOpt2;
+    }
+
+    public BigDecimal getPriceNal() {
+        return priceNal;
+    }
+
+    public void setPriceNal(BigDecimal priceNal) {
+        this.priceNal = priceNal;
+    }
+
+    public BigDecimal getPriceKons() {
+        return priceKons;
+    }
+
+    public void setPriceKons(BigDecimal priceKons) {
+        this.priceKons = priceKons;
     }
 
     public Integer getWeight() {

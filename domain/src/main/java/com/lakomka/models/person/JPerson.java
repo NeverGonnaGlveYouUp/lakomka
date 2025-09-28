@@ -1,9 +1,14 @@
 package com.lakomka.models.person;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lakomka.models.misc.Discount;
+import com.lakomka.models.misc.Route;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Сущность ЮЛ Покупателя
@@ -20,6 +25,17 @@ public class JPerson {
     @MapsId
     @JoinColumn(name = "base_person_id")
     private BasePerson basePerson;
+
+    /**
+     * Маршрут
+     */
+    @ManyToOne
+    @JoinColumn(name="route_id", nullable=false)
+    private Route route;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "jPerson")
+    private Set<Discount> discounts = new HashSet<>();
 
     /**
      * Согласие на обработку ПД
@@ -114,75 +130,75 @@ public class JPerson {
     /**
      * Долг за поставленные товары
      */
-    @Column(name = "rest", precision = 12, nullable = false)
-    private BigDecimal rest = new BigDecimal("0");
+    @Column(name = "rest", nullable = false)
+    private BigDecimal rest;
 
     /**
      * Просроченный долг за поставленные товары
      */
-    @Column(name = "rest_time", precision = 12, nullable = false)
-    private BigDecimal restTime = new BigDecimal("0");
+    @Column(name = "rest_time")
+    private BigDecimal restTime;
 
-    //todo какой дефолт?
     /**
      * Вид оплаты (битовое поле) – 0 – нал; 1 – без нал
      */
-    @Column(name = "pay_vid", nullable = false)
-    private boolean payVid;
+    @Column(name = "pay_vid")
+    private boolean payVid = false;
 
-    //todo какой дефолт?
     /**
      * Признак печати предварительного счета (битовое поле) – 0- печать счета не требуется, 1 – печать счета требуется
      */
-    @Column(name = "acc_print", nullable = false)
-    private boolean accPrint;
+    @Column(name = "acc_print")
+    private boolean accPrint = false;
 
-    //todo какой дефолт?
     /**
      * Признак печати перечня сертификатов к поставляемым товаров – 0 – печать не требуется, 1- печать требуется
      */
-    @Column(name = "sertif_print", nullable = false)
-    private boolean sertifPrint;
+    @Column(name = "sertif_print")
+    private boolean sertifPrint = false;
 
-    //todo какой дефолт?
     /**
      * Признак разрешения оформления возвратных документов
      */
-    @Column(name = "vzr_doc", nullable = false)
-    private boolean vzrDoc;
+    @Column(name = "vzr_doc")
+    private boolean vzrDoc = false;
 
-    //todo какой дефолт?
     /**
      * Признак обязательного наличия договора – 0 – договор не обязателен, 1 – договор обязателен
      */
-    @Column(name = "dogovor", nullable = false)
-    private boolean dogovor;
+    @Column(name = "dogovor")
+    private boolean dogovor = false;
 
     /**
      * Атрибуты договора в одной строке – Покупателю для информации
      */
-    @Column(name = "dogovor_alt", nullable = false)
-    private String dogovorAlt = "";
+    @Column(name = "dogovor_alt")
+    private String dogovorAlt;
 
-    //todo какой дефолт?
     /**
      * Признак отправки документов по ЭДО – 0 – отправка документов по эдо не требуется, 1 – требуется отправка документов по эдо
      */
-    @Column(name = "edo", nullable = false)
-    private boolean edo;
+    @Column(name = "edo")
+    private boolean edo = false;
 
     /**
      * Дата начала оформления документов по эдо
      */
-    @Column(name = "edo_date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @Column(name = "edo_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date edoDate;
 
     /**
      * Примечание с нашей стороны
      */
-    @Column(name = "prim", nullable = false)
-    private String prim = "";
+    @Column(name = "prim")
+    private String prim;
+
+    /**
+     * Скидка для всего ассортимента товаров
+     */
+    @Column(name = "global_discount")
+    private Integer globalDiscount = 0;
 
     public Long getId() {
         return id;
@@ -384,7 +400,7 @@ public class JPerson {
         this.dogovorAlt = dogovorAlt;
     }
 
-    public boolean getEdo() {
+    public boolean isEdo() {
         return edo;
     }
 
@@ -408,4 +424,19 @@ public class JPerson {
         this.prim = prim;
     }
 
+    public Route getRoute() {
+        return route;
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
+    }
+
+    public Integer getGlobalDiscount() {
+        return globalDiscount;
+    }
+
+    public void setGlobalDiscount(Integer globalDiscount) {
+        this.globalDiscount = globalDiscount;
+    }
 }

@@ -1,5 +1,44 @@
-const React = require("react");
+const { useLayoutEffect, useEffect, useState, useRef } = React;
 
-function Header(props){ return <h2>{props.text}</h2>;}
+const App = (params) => {
+  const ref = useRef();
+  let [check, setCheck] = useState(true);
+  const sticky = useStickyHeader( 50 );
+  const headerClasses = `header ${(sticky) ? 'sticky' : ''}`
+  const { clientHeight } = ref;
 
-module.exports = Header;
+  const checkChange = (value) => {
+    setCheck(value);
+  };
+
+  return (
+    <div>
+      <header ref={ref} className={ headerClasses }>Header</header>
+    </div>
+  );
+}
+
+const Switch = ({children, defaultValue, onCheck}) => {
+  const [check, setCheck] = useState(defaultValue);
+
+  useEffect(() => {
+    onCheck(check);
+  });
+
+function useStickyHeader(offset = 0) {
+  const [stick, setStick] = useState(false);
+
+  const handleScroll = () => {
+    setStick( window.scrollY > offset );
+  };
+
+  useLayoutEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+
+    return(() => {
+      window.removeEventListener('scroll', handleScroll);
+    });
+  });
+
+  return stick;
+}

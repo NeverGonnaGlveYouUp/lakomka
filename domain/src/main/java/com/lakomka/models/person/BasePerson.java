@@ -26,6 +26,7 @@ public class BasePerson {
     @Transient
     private String repeatPassword;
 
+    @JsonIgnore
     @OneToMany(mappedBy="basePerson")
     private Set<Order> orders = new HashSet<>();
 

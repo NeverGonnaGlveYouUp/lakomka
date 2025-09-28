@@ -1,5 +1,8 @@
 package com.lakomka.models.misc;
 
+import com.lakomka.models.person.JPerson;
+import com.lakomka.models.product.Product;
+import com.lakomka.models.product.ProductGroup;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -9,24 +12,32 @@ import java.util.Date;
 @Entity
 public class Discount {
 
-    /**
-     * уникальный индекс покупателя
-     * наименование группы товаров к которой относится товар
-     * уникальный индекс товара
-     */
-    @EmbeddedId
-    private DiscountId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, precision = 12)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "j_person_id")
+    private JPerson jPerson;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "product_group_id")
+    private ProductGroup productGroup;
 
     /**
      * Признак скидки/наценки – 0 скидка, 1- наценка
      */
     @Column(name = "bit_discount")
-    private boolean bitDiscount;
+    private boolean bitDiscount = false;
 
     /**
      * Величина сктдки/наценки
      */
-
     @Column(name = "rest_time", length = 12, nullable = false)
     private BigDecimal discount = new BigDecimal("0");
 
@@ -40,7 +51,7 @@ public class Discount {
      * Признак запрета отгрузки – 0 разрешен, 1 - запрещен
      */
     @Column(name = "bit_stop")
-    private boolean bitStop;
+    private boolean bitStop = false;
 
     /**
      * Дата начала действия правила
@@ -56,12 +67,36 @@ public class Discount {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateEnd;
 
-    public DiscountId getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(DiscountId id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+    public JPerson getjPerson() {
+        return jPerson;
+    }
+
+    public void setjPerson(JPerson jPerson) {
+        this.jPerson = jPerson;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public ProductGroup getProductGroup() {
+        return productGroup;
+    }
+
+    public void setProductGroup(ProductGroup productGroup) {
+        this.productGroup = productGroup;
     }
 
     public boolean isBitDiscount() {

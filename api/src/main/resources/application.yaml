@@ -28,3 +28,10 @@ spring:
     show-summary: summary
     default-schema: public
     change-log: classpath:/db/changelog/db.changelog-master.xml
+
+s3:
+  endpoint: ${S3_SCHEME}://${S3_HOST}:${S3_PORT}
+  access-key: ${S3_ACCESS}
+  secret-key: ${S3_SECRET}
+  region: us-east-1
+  bucket: ${S3_BUCKET}

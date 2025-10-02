@@ -17,7 +17,7 @@ module.exports = {
     module:{
         rules:[
             {
-                test: /\.css$/i,
+                test: /\.css$/,
                 use: ["style-loader", "css-loader"]
             },
             {
@@ -25,7 +25,7 @@ module.exports = {
                 exclude: /(node_modules)/,
                 loader: "babel-loader",
                 options:{
-                    presets:[ "@babel/preset-react"]
+                    presets:["@babel/preset-react", "@babel/preset-env"]
                 }
             }
         ]

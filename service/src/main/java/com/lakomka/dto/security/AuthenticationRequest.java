@@ -1,4 +1,4 @@
-package com.lakomka.model.security;
+package com.lakomka.dto.security;
 
 public class AuthenticationRequest {
 

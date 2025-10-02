@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Component
-@Profile("dev")
+@Profile({"dev", "jpa-dev"})
 public class DatabaseInitializer implements CommandLineRunner {
 
     private final BasePersonRepository basePersonRepository;

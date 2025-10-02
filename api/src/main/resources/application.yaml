@@ -16,12 +16,10 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
-    show-sql: true
+    show-sql: false
     defer-datasource-initialization: false
     hibernate:
       ddl-auto: none
-#      ddl-auto: create
-#      ddl-auto: create-drop
   liquibase:
     enabled: true
     drop-first: false

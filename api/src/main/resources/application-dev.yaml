@@ -1,4 +1,11 @@
+# конфигурация spring-профиля "dev"
+# переводит liquibase в режим drop-first (очистка БД перед миграцией)
+# проводит миграцию liquibase, включая testdata.xml
+# выполняет бин DatabaseInitializer
+
 spring:
+  jpa:
+    show-sql: true
   liquibase:
     contexts: dev
     drop-first: true

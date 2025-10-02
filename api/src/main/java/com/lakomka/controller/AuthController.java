@@ -1,6 +1,6 @@
 package com.lakomka.controller;
 
-import com.lakomka.model.security.AuthenticationRequest;
+import com.lakomka.dto.security.AuthenticationRequest;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.services.CustomUserDetailsService;

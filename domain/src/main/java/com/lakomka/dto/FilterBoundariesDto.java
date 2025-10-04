@@ -1,27 +1,23 @@
 package com.lakomka.dto;
 
-import com.lakomka.models.product.ProductGroup;
-
-import java.util.Set;
-
 public class FilterBoundariesDto {
 
     private Integer maxPrice;
     private Integer minPrice;
     private Integer maxMass;
     private Integer minMass;
-    private String country;
-    private String worker;
-    private String productGroupSet;
+    private String countries;
+    private String workers;
+    private String productGroups;
 
     public FilterBoundariesDto(Integer maxPrice, Integer minPrice, Integer maxMass, Integer minMass, String worker, String country, String productGroupSet) {
         this.maxPrice = maxPrice;
         this.minPrice = minPrice;
         this.maxMass = maxMass;
         this.minMass = minMass;
-        this.worker = worker;
-        this.country = country;
-        this.productGroupSet = productGroupSet;
+        this.workers = worker;
+        this.countries = country;
+        this.productGroups = productGroupSet;
     }
 
     public Integer getMaxPrice() {
@@ -56,27 +52,27 @@ public class FilterBoundariesDto {
         this.minMass = minMass;
     }
 
-    public String getProductGroupSet() {
-        return productGroupSet;
+    public String getProductGroups() {
+        return productGroups;
     }
 
-    public void setProductGroupSet(String productGroupSet) {
-        this.productGroupSet = productGroupSet;
+    public void setProductGroups(String productGroups) {
+        this.productGroups = productGroups;
     }
 
-    public String getWorker() {
-        return worker;
+    public String getWorkers() {
+        return workers;
     }
 
-    public void setWorker(String worker) {
-        this.worker = worker;
+    public void setWorkers(String workers) {
+        this.workers = workers;
     }
 
-    public String getCountry() {
-        return country;
+    public String getCountries() {
+        return countries;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCountries(String countries) {
+        this.countries = countries;
     }
 }

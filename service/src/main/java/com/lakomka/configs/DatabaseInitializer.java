@@ -71,21 +71,33 @@ public class DatabaseInitializer implements CommandLineRunner {
             Product product1 = new Product();
             product1.setName("Laptop" + i);
             product1.setArticle("LP00" + i);
+            product1.setWorker("worker 1-2");
+            product1.setCountry("country 1-2");
             product1.setGroup(group1);
 
             Product product2 = new Product();
             product2.setName("Smartphone" + i);
             product2.setArticle("SP00" + i);
+            product2.setPriceKons(new BigDecimal("3000"));
+            product2.setWorker("worker 1-2");
+            product2.setCountry("country 1-2");
             product2.setGroup(group2);
 
             Product product3 = new Product();
             product3.setName("Tablet" + i);
             product3.setArticle("TB00" + i);
+            product3.setWeight(100 + i + i);
+            product3.setWorker("worker 3-4");
+            product3.setCountry("country 3-4");
+            product3.setPriceKons(new BigDecimal("2000"));
             product3.setGroup(group3);
 
             Product product4 = new Product();
             product4.setName("Headphones" + i);
             product4.setArticle("HP00" + i);
+            product4.setWeight(100 + i);
+            product4.setWorker("worker 3-4");
+            product4.setCountry("country 3-4");
             product4.setPriceKons(new BigDecimal("1000"));
             product4.setGroup(group4);
 

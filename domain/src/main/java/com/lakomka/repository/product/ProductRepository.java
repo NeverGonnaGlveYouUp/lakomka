@@ -22,6 +22,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "     JOIN public.product p ON pg.id = p.product_group_id) AS distinct_product_group_names\n" +
             "FROM \n" +
             "    public.product;")
-    FilterBoundariesDto getProductStatistics();
+    FilterBoundariesDto getFilterBoundaries();
 
 }

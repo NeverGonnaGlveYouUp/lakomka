@@ -46,3 +46,11 @@
    - выполняется миграция БД контекста dev (файл db/changelog/testdata.xml)
    - выполняется бин генерации тест-данных DatabaseInitializer
    - при останове приложения БД очищается, поэтому liquibase diff делать во время запущенного приложения
+
+### Запуск фронта
+
+1. Установка зависимостей:
+   - установить node.js 22
+   - в resources\static модуля api выполнить `npm install`, должна быть создана папка node_modules и package-lock.json
+2. Запуск:
+   - запуск в dev режиме: выполнить в resources\static `npm run watch`, должен быть создан bundle.js

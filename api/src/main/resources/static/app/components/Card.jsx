@@ -1,36 +1,85 @@
 import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  IconButton,
+  styled,
+  Box
+} from '@mui/material';
+import { IoBagAddOutline } from "react-icons/io5";
 
-export default function Card(props) {
-    let newClassName = `color_bg ${props.alt}`
-    let bg_img = `url(${props.images})`
-    let { title, price } = props
-    return (
-        <div className="card">
-            <div className="wrapper">
-                <div className={newClassName}></div>
-                <div className="card_img" style={{ "backgroundImage": bg_img }}></div>
-{/*                 <div className="heart"> */}
-{/*                     <svg xmlns="<http://www.w3.org/2000/svg>" viewBox="0 0 64 64"> */}
-{/*                         <path d="M47 5c-6.5 0-12.9 4.2-15 10-2.1-5.8-8.5-10-15-10A15 15 0 0 0 2 20c0 13 11 26 30 39 19-13 30-26 30-39A15 15 0 0 0 47 5z"> */}
-{/*                         </path> */}
-{/*                     </svg> */}
-{/*                 </div> */}
-                <div className="cardInfo">
-                    <h1>{title}</h1>
-                    <div className="action">
-                        <div className="priceGroup">
-                            <p className="price newPrice">{price} РУБ.</p>
-                        </div>
-                        <div className="cart">
-                            <svg className="outCart" xmlns="<http://www.w3.org/2000/svg>" viewBox="0 0 64 64">
-                                <path d="M2 6h10l10 40h32l8-24H16"></path>
-                                <circle cx="23" cy="54" r="4"></circle>
-                                <circle cx="49" cy="54" r="4"></circle>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
+const StyledCard = styled(Card)({
+  maxWidth: '100%',
+  transition: '0.3s',
+  '&:hover': {
+    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.2)',
+  },
+});
+
+const StyledCardMedia = styled(CardMedia)({
+  width: '93%',
+  height: '100%',
+  'object-fit': 'cover',
+  'object-position': 'center',
+  'border-radius': '3%',
+  margin: '10px',
+  '&:hover': {
+       top: '-10px',
+  },
+});
+
+const ProductCard = ({ image, name, price }) => {
+  return (
+    <StyledCard>
+      <StyledCardMedia
+        component="img"
+        image={image}
+        alt={name}
+      />
+      <CardContent>
+        <Box display="flex"
+             flexDirection="column"
+             alignItems="flex-start">
+          <Box display="flex" alignItems="center">
+            <Typography
+              variant="body1"
+              style={{
+                fontWeight: 400,
+                color: 'rgba(0, 0, 0, 0.6)',
+                marginRight: '8px',
+              }}>
+                Цена:
+            </Typography>
+            <Typography
+                variant="body1"
+                style={{
+                    fontWeight: 700,
+                }}>
+                {price} ₽
+            </Typography>
+          </Box>
+          <Box display="flex"
+               flexDirection="row"
+               alignItems="flex-start"
+               justifyContent="space-between"
+               width="-webkit-fill-available">
+            <Typography
+                variant="body1"
+                style={{
+                    fontWeight: 500,
+                }}>
+                {name}
+            </Typography>
+            <IconButton  aria-label="to-cart" color="primary">
+                <IoBagAddOutline />
+            </IconButton >
+          </Box>
+        </Box>
+      </CardContent>
+    </StyledCard>
+  );
+};
+
+export default ProductCard;

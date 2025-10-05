@@ -1,6 +1,7 @@
 package com.lakomka.models.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.lakomka.models.misc.Discount;
 import jakarta.persistence.*;
 
@@ -23,6 +24,7 @@ public class ProductGroup {
     @Column(name = "product_group_name", length = 50)
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "group")
     private Set<Product> products;
 

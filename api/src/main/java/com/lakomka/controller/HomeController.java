@@ -14,11 +14,4 @@ public class HomeController {
 		return "index";
 	}
 
-	@GetMapping(value = "/")
-	public String getFilterData() {
-		return "index";
-	}
-
-
-
 }

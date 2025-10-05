@@ -22,14 +22,15 @@ public class Product {
     private Long id;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     private Set<PersonCartItem> personCartItems = new HashSet<>();
 
-    @OneToOne(mappedBy = "product")
+    @JsonIgnore
+    @OneToOne(mappedBy = "product", fetch = FetchType.EAGER)
     private OrderItem orderItem;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     private Set<Discount> discounts = new HashSet<>();
 
     /**
@@ -41,7 +42,7 @@ public class Product {
     /**
      * Наименование группы товаров к которой относится товар
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="product_group_id", nullable=false)
     private ProductGroup group;
 

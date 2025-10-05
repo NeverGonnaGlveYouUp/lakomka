@@ -19,7 +19,7 @@ const StyledCard = styled(Card)({
 });
 
 const StyledCardMedia = styled(CardMedia)({
-  width: '93%',
+  width: '90.5%',
   height: '100%',
   'object-fit': 'cover',
   'object-position': 'center',

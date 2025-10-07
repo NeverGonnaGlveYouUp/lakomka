@@ -33,3 +33,14 @@ s3:
   secret-key: ${S3_SECRET}
   region: us-east-1
   bucket: ${S3_BUCKET}
+
+server:
+  servlet:
+    session:
+      persistent: true
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: true
+        max-age: 1800
+        same-site: strict

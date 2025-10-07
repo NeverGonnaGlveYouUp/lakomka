@@ -1,0 +1,13 @@
+# конфигурация spring-профиля "jpa-dev"
+# отключает liquibase
+# включает миграцию через jpa, создаст таблицы бд, которые можно будет забрать по liquibase diff
+# выполняет бин DatabaseInitializer
+
+spring:
+  jpa:
+    show-sql: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+  liquibase:
+    enabled: false

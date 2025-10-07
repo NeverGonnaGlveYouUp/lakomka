@@ -4,18 +4,32 @@ spring:
       base-path: /
   datasource:
     hikari:
+      pool-name: PostgresHikari
       maximum-pool-size: 10
-      minimum-idle: 5
+      minimum-idle: 1
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-    url: jdbc:postgresql://localhost:5432/lakomka
-    username: postgres
-    password: 123
+    url: jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
-    show-sql: true
-    defer-datasource-initialization: true
+    open-in-view: false
+    show-sql: false
+    defer-datasource-initialization: false
     hibernate:
-#      ddl-auto: create
-      ddl-auto: create-drop
+      ddl-auto: none
+  liquibase:
+    enabled: true
+    drop-first: false
+    show-summary: summary
+    default-schema: public
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
+s3:
+  endpoint: ${S3_SCHEME}://${S3_HOST}:${S3_PORT}
+  access-key: ${S3_ACCESS}
+  secret-key: ${S3_SECRET}
+  region: us-east-1
+  bucket: ${S3_BUCKET}

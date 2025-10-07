@@ -1,0 +1,13 @@
+
+logging:
+  level:
+    root: INFO
+    org.apache.http: DEBUG
+    #org.springframework: DEBUG
+    #org.springframework.web: DEBUG
+    org.springframework.data.rest: DEBUG
+    org.springframework.web.servlet.mvc: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.servlet.HandlerMapping.Mappings: DEBUG
+    #
+    org.springframework.security.core.session: DEBUG

@@ -34,10 +34,12 @@ public class BasePerson {
     @OneToMany(mappedBy = "basePerson")
     private Set<PersonCartItem> cart = new HashSet<>();
 
+    @JsonIgnore
     @PrimaryKeyJoinColumn
     @OneToOne(mappedBy = "basePerson", cascade = CascadeType.ALL)
     private JPerson jPerson;
 
+    @JsonIgnore
     @PrimaryKeyJoinColumn
     @OneToOne(mappedBy = "basePerson", cascade = CascadeType.ALL)
     private Person person;

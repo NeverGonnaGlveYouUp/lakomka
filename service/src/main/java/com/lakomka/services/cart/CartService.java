@@ -12,7 +12,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class CartService {
@@ -27,8 +26,7 @@ public class CartService {
                           HttpServletRequest request, Integer quantity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (user == null || authentication instanceof AnonymousAuthenticationToken) {
-            String sessionId = getCurrentSessionId(request)==null ? createSession(request) : getCurrentSessionId(request);
-            guestCartService.addToCart(sessionId, cartItem, quantity);
+            guestCartService.addToCart(getCurrentSessionId(request), cartItem, quantity);
         } else {
             userCartService.addToCart(user.getId(), cartItem, quantity);
         }
@@ -37,15 +35,10 @@ public class CartService {
     public Set<PersonCartItem> getCart(BasePerson user, HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (user == null || authentication instanceof AnonymousAuthenticationToken) {
-            String sessionId = getCurrentSessionId(request)==null ? createSession(request) : getCurrentSessionId(request);
-            return guestCartService.getCart(sessionId);
+            return guestCartService.getCart(getCurrentSessionId(request));
         } else {
             return userCartService.getCart(user.getId());
         }
-    }
-
-    private String generateSessionId() {
-        return UUID.randomUUID().toString();
     }
 
     private String getCurrentSessionId(HttpServletRequest request) {
@@ -62,13 +55,5 @@ public class CartService {
             }
         }
         return null;
-    }
-
-    private String createSession(HttpServletRequest request) {
-        String sessionId = generateSessionId();
-        Cookie newCookie = new Cookie("sessionId", sessionId);
-        newCookie.setMaxAge(24 * 60 * 60); // Set expiry time (e.g., one day)
-        request.setAttribute("sessionId", sessionId);
-        return sessionId;
     }
 }

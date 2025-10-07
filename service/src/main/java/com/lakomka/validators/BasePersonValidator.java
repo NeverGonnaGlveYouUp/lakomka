@@ -27,7 +27,7 @@ public class BasePersonValidator implements Validator {
 
         BasePerson person = (BasePerson) target;
         if (person.getLogin().length() < minLoginLength) {
-            errors.rejectValue("login", MessageFormat.format("Логин должен быть не менее ${0} символов.", minLoginLength));
+            errors.rejectValue("login", MessageFormat.format("Логин должен быть не менее {0} символов.", minLoginLength));
         }
         if (person.getPassword().length() < minPasswordLength) {
             errors.rejectValue("password", MessageFormat.format("Пароль должен быть не менее {0} символов.", minPasswordLength));

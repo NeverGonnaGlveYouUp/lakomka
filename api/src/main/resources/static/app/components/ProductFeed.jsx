@@ -42,23 +42,23 @@ const ProductFeed = () => {
 
     const sortOptions = [
       {
-        value: 'new',
+        value: 'zn==1',
         label: 'Новинки',
       },
       {
-        value: 'cost-less',
+        value: 'price_kons; asc',
         label: 'Дешевле',
       },
       {
-        value: 'cost-more',
+        value: 'price_kons; desc',
         label: 'Дороже',
       },
       {
-        value: 'name-asc',
+        value: 'name; asc',
         label: 'А → Я',
       },
       {
-        value: 'name-desc',
+        value: 'name; desc',
         label: 'Я → А',
       },
     ];

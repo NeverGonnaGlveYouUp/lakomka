@@ -11,3 +11,8 @@ spring:
       ddl-auto: create-drop
   liquibase:
     enabled: false
+
+app:
+  scheduling:
+    cron: 0 */1 * * * *
+    enabled: true

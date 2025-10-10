@@ -16,12 +16,12 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
                     "    MIN(LEAST(price_kons, price_nal, price_opt_1, price_opt_2))::INTEGER AS min_price,\n" +
                     "    MAX(weight) AS max_weight,\n" +
                     "    MIN(weight) AS min_weight,\n" +
-                    "    (SELECT STRING_AGG(DISTINCT country, ', ') FROM public.product)::VARCHAR AS distinct_countries,\n" +
-                    "    (SELECT STRING_AGG(DISTINCT worker, ', ') FROM public.product)::VARCHAR AS distinct_worker,\n" +
-                    "    (SELECT STRING_AGG(DISTINCT pg.product_group_name, ', ')::VARCHAR FROM public.product_group pg \n" +
-                    "     JOIN public.product p ON pg.id = p.product_group_id) AS distinct_product_group_names\n" +
+                    "    (SELECT STRING_AGG(DISTINCT worker, ', ') FROM product)::VARCHAR AS distinct_worker,\n" +
+                    "    (SELECT STRING_AGG(DISTINCT country, ', ') FROM product)::VARCHAR AS distinct_countries,\n" +
+                    "    (SELECT STRING_AGG(DISTINCT pg.product_group_name, ', ')::VARCHAR FROM product_group pg \n" +
+                    "     JOIN product p ON pg.id = p.product_group_id) AS distinct_product_group_names\n" +
                     "FROM \n" +
-                    "    public.product;")
+                    "    product;")
     FilterBoundariesDto getFilterBoundaries();
 
 }

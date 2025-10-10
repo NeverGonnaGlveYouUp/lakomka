@@ -5,12 +5,16 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Setter
+@Getter
 public class GenericRsqlSpecification<T> implements Specification<T> {
 
     private String property;
@@ -22,10 +26,13 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
         List<Object> args = castArguments(root);
         Object argument = args.get(0);
         switch (Objects.requireNonNull(RsqlSearchOperation.getSimpleOperator(operator))) {
-
         case EQUAL: {
             if (argument instanceof String) {
-                return builder.like(root.get(property), argument.toString().replace('*', '%'));
+                if (Objects.equals(property, "group")){
+                    return builder.like(root.get(property).get("name"), argument.toString().replace('*', '%'));
+                } else {
+                    return builder.like(root.get(property), argument.toString().replace('*', '%'));
+                }
             } else if (argument == null) {
                 return builder.isNull(root.get(property));
             } else {
@@ -85,27 +92,4 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
         this.arguments = arguments;
     }
 
-    public String getProperty() {
-        return property;
-    }
-
-    public void setProperty(String property) {
-        this.property = property;
-    }
-
-    public ComparisonOperator getOperator() {
-        return operator;
-    }
-
-    public void setOperator(ComparisonOperator operator) {
-        this.operator = operator;
-    }
-
-    public List<String> getArguments() {
-        return arguments;
-    }
-
-    public void setArguments(List<String> arguments) {
-        this.arguments = arguments;
-    }
 }

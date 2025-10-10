@@ -141,6 +141,15 @@ public class Product {
     @Column(name = "description")
     private String description;
 
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", priceKons=" + priceKons +
+                '}';
+    }
+
     public Long getId() {
         return id;
     }

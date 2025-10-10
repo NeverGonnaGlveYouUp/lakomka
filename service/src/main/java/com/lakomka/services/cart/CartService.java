@@ -42,14 +42,10 @@ public class CartService {
     }
 
     private String getCurrentSessionId(HttpServletRequest request) {
-        if (request == null){
-            return null;
-        }
-
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("sessionId".equals(cookie.getName())) {
+                if ("JSESSIONID".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

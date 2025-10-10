@@ -18,19 +18,19 @@ import { FaFilter } from "react-icons/fa";
 const ProductFeed = () => {
     const sortOptions = [
       {
-        value: '&sort=priceKons%3Basc',
+        value: '&sort=priceKons%2Casc',
         label: 'Дешевле',
       },
       {
-        value: '&sort=priceKons%3Bdesc',
+        value: '&sort=priceKons%2Cdesc',
         label: 'Дороже',
       },
       {
-        value: '&sort=name%3B%20asc',
+        value: '&sort=name%2Casc',
         label: 'А → Я',
       },
       {
-        value: '&sort=name%3B%20desc',
+        value: '&sort=name%2Cdesc',
         label: 'Я → А',
       },
       {
@@ -44,27 +44,35 @@ const ProductFeed = () => {
     const [totalPages, setTotalPages]       = useState();
     const isDesktopResolution               = useMatchMedia('(min-width:992px)', true);
     const [searchParamsGlobal, setSearchParamsGlobal] = useState([]);
-    let   number                            = 0;
-    let   sort                              = sortOptions[0].value;
+    const [number, setNumber]               = useState(0);
+    const [sort, setSort]                   = useState(sortOptions[0].value);
 
     useEffect(() => {
         fetchData();
     }, []);
 
-    const handlePageChange = (event, value) => {
-        window.scrollTo({ top: 0, behavior: "smooth" })
-        number = value - 1;
+    useEffect(() => {
         fetchData();
+    }, [sort]);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" })
+        fetchData();
+    }, [number]);
+
+    const handlePageChange = (event, value) => {
+        setNumber(value - 1);
     };
 
     const handleSortChange = (event) => {
         setSort(event.target.value);
-        fetchData();
     };
 
     const fetchData = async (filterData) => {
         let url = `/products/getByFilter?page=${number}&size=${size}`;
         if(filterData){
+            setNumber(0);
+            url = `/products/getByFilter?page=0&size=${size}`;
             let searchParams = [];
             let priceRange   = filterData.priceRange;
             let massRange    = filterData.massRange;
@@ -87,7 +95,7 @@ const ProductFeed = () => {
                 searchParams.push(`country%3D%3D%22${country}%22`);
             }
             if (productGroup) {
-                searchParams.push(`group%3D%3D%22${productGroup}%22`);
+                searchParams.push(`productGroup%3D%3D%22${productGroup}%22`);
             }
             if (searchParams.length > 0) {
                 url += `&search=${searchParams.join('%3B')}`;
@@ -96,11 +104,11 @@ const ProductFeed = () => {
         } else if (searchParamsGlobal[0]) {
             url += `&search=${searchParamsGlobal.join('%3B')}`;
         }
-//         url += sort;
+        url += sort;
         const response = await axios.get(url);
         setTotalElements(response.data.totalElements);
         setTotalPages(response.data.totalPages);
-        number = response.data.number;
+        setNumber(response.data.number);
         setProducts(response.data.content);
     };
 
@@ -154,6 +162,7 @@ const ProductFeed = () => {
                         'justifyItems': 'center',
                         'margin': '10px 0 20px 0',
                         }}
+                    page={number + 1}
                     count={totalPages}
                     onChange={handlePageChange}
                     color="primary"

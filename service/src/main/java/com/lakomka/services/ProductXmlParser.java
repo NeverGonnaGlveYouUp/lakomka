@@ -1,12 +1,10 @@
 package com.lakomka.services;
 
 import com.lakomka.models.product.Product;
-import com.lakomka.repository.product.ProductRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
@@ -18,6 +16,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,11 +26,10 @@ import static com.lakomka.services.ProductXmlParser.XmlFieldName.*;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ProductXmlParser {
 
-    private final ProductRepository productRepository;
+    private final ProductXmlUpsert productXmlUpsert;
 
     /**
      * Cache of loaded Groups
@@ -43,7 +41,7 @@ public class ProductXmlParser {
     public boolean parse(byte[] fileContent) {
         long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         int recordsRead = 0;
-        int recordsSaved = 0;
+        ProductXmlUpsert.Stat stat = new ProductXmlUpsert.Stat(0, 0, 0, 0);
 
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -62,15 +60,16 @@ public class ProductXmlParser {
 
             // Save to database
             if (!validProducts.isEmpty()) {
-                List<Product> savedProducts = productRepository.saveAll(validProducts);
-                recordsSaved = savedProducts.size();
+                stat = productXmlUpsert.upsert(validProducts);
             }
 
             long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             long memoryUsed = endMemory - startMemory;
 
-            log.info("XML processing completed: {} records read, {} objects saved to database, {} groups loaded",
-                    recordsRead, recordsSaved, groups.size());
+            log.info("XML processing completed: {} records read from file, {} groups loaded, "
+                            + "{} verified objects for save to database, "
+                            + "{} updated objects, {} new objects, {} not changed objects.",
+                    recordsRead, groups.size(), stat.total(), stat.updated(), stat.newRecords(), stat.notTouched());
             log.info("Estimated RAM usage for XML processing: {} bytes ({} MB)",
                     memoryUsed, memoryUsed / (1024 * 1024));
 
@@ -201,7 +200,7 @@ public class ProductXmlParser {
                         }
                     }
                     groups.put(code, concatenatedName);
-                    log.info("Group: {{}, {} -> {}", code, name, concatenatedName);
+                    log.info("Group: {}, {} -> {}", code, name, concatenatedName);
                     return; // Skip processing as product for this record
                 }
 
@@ -254,7 +253,8 @@ public class ProductXmlParser {
                 return null;
             }
             try {
-                return new BigDecimal(value.trim());
+                BigDecimal decimal = new BigDecimal(value.trim());
+                return decimal.setScale(2, RoundingMode.HALF_UP);
             } catch (NumberFormatException e) {
                 log.debug("Invalid decimal value: {}", value);
                 return null;

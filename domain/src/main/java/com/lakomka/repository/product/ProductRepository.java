@@ -5,6 +5,9 @@ import com.lakomka.models.product.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Репозиторий товара
  */
@@ -23,4 +26,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
                     "    product;")
     FilterBoundariesDto getFilterBoundaries();
 
+    List<Product> findByArticleIn(Collection<String> articles);
 }

@@ -1,8 +1,6 @@
 package com.lakomka.services;
 
 import com.lakomka.models.product.Product;
-import com.lakomka.models.product.ProductGroup;
-import com.lakomka.repository.product.ProductGroupRepository;
 import com.lakomka.repository.product.ProductRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +18,12 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.lakomka.services.ProductXmlParser.XmlFieldName.*;
 
 @Slf4j
 @Service
@@ -31,7 +32,13 @@ import java.util.List;
 public class ProductXmlParser {
 
     private final ProductRepository productRepository;
-    private final ProductGroupRepository productGroupRepository;
+
+    /**
+     * Cache of loaded Groups
+     * key = CODE of Group from XML
+     * val = Name of Group. If parent group present - name concatenated with Parent. Example "ЛК/Повидло ТУ"
+     */
+    private final Map<String, String> groups = new HashMap<>();
 
     public boolean parse(byte[] fileContent) {
         long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -62,8 +69,8 @@ public class ProductXmlParser {
             long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             long memoryUsed = endMemory - startMemory;
 
-            log.info("XML processing completed: {} records read, {} objects saved to database",
-                    recordsRead, recordsSaved);
+            log.info("XML processing completed: {} records read, {} objects saved to database, {} groups loaded",
+                    recordsRead, recordsSaved, groups.size());
             log.info("Estimated RAM usage for XML processing: {} bytes ({} MB)",
                     memoryUsed, memoryUsed / (1024 * 1024));
 
@@ -180,23 +187,34 @@ public class ProductXmlParser {
             }
 
             try {
-                // Check if group field equals "0" (skip if not)
-                String groupValue = getFieldValue("group");
-                if (groupValue != null && !"0".equals(groupValue.trim())) {
-                    log.info("Skip: Group{{}, {}}", getFieldValue("code"), getFieldValue("name"));
-                    return; // Skip this record
+                // Check if group field equals not "0" - that Group record
+                String group = getFieldValue(GROUP);
+                if (group != null && !"0".equals(group.trim())) {
+                    String code = getFieldValue(CODE);
+                    String name = getFieldValue(NAME);
+                    String concatenatedName = name;
+                    String parent = getFieldValue(PARENT);
+                    if (parent != null) {
+                        String parentName = groups.get(parent);
+                        if (parentName != null) {
+                            concatenatedName = parentName + " / " + name;
+                        }
+                    }
+                    groups.put(code, concatenatedName);
+                    log.info("Group: {{}, {} -> {}", code, name, concatenatedName);
+                    return; // Skip processing as product for this record
                 }
 
                 Product product = new Product();
 
                 // Map fields based on XML schema order
-                product.setArticle(getFieldValue("code"));
-                product.setName(getFieldValue("name"));
-                product.setUnit(getFieldValue("unit"));
-                product.setUnitVid(getFieldValue("measure_unit"));
+                product.setArticle(getFieldValue(CODE));
+                product.setName(getFieldValue(NAME));
+                product.setUnit(getFieldValue(UNIT));
+                product.setUnitVid(getFieldValue(M_UNIT));
 
                 // Parse numeric fields
-                String packaging = getFieldValue("packaging");
+                String packaging = getFieldValue(PACKAGING);
                 if (packaging != null && !packaging.trim().isEmpty()) {
                     try {
                         product.setPackag(Integer.parseInt(packaging.trim()));
@@ -206,16 +224,12 @@ public class ProductXmlParser {
                 }
 
                 // Parse price fields
-                product.setPriceOpt1(parseBigDecimal(getFieldValue("price_Опт1")));
-                product.setPriceOpt2(parseBigDecimal(getFieldValue("price_Опт2")));
-                product.setPriceNal(parseBigDecimal(getFieldValue("price_Нал")));
-                product.setPriceKons(parseBigDecimal(getFieldValue("price_Конс")));
+                product.setPriceOpt1(parseBigDecimal(getFieldValue(PR_OPT1)));
+                product.setPriceOpt2(parseBigDecimal(getFieldValue(PR_OPT2)));
+                product.setPriceNal(parseBigDecimal(getFieldValue(PR_NAL)));
+                product.setPriceKons(parseBigDecimal(getFieldValue(PR_KONS)));
 
-                // todo
-                // Set default group (you might need to adjust this based on your business logic)
-                ProductGroup defaultGroup = productGroupRepository.findById(1L)
-                        .orElseThrow(() -> new RuntimeException("Default product group not found"));
-                product.setGroup(defaultGroup);
+                product.setGroup(groups.get(getFieldValue(PARENT)));
 
                 log.info("Loaded: {}", productToString(product));
 
@@ -266,7 +280,7 @@ public class ProductXmlParser {
                     formatBigDecimal(product.getPriceOpt2()),
                     formatBigDecimal(product.getPriceNal()),
                     formatBigDecimal(product.getPriceKons()),
-                    product.getGroup() != null ? "ProductGroup(id=" + product.getGroup().getId() + ")" : "null"
+                    product.getGroup() != null ? quote(product.getGroup()) : "null"
             ).replace("\n", "");
         }
 
@@ -279,5 +293,18 @@ public class ProductXmlParser {
         }
     }
 
+    public static class XmlFieldName {
+        public static final String PR_OPT1 = "price_Опт1";
+        public static final String PR_OPT2 = "price_Опт2";
+        public static final String PR_NAL = "price_Нал";
+        public static final String PR_KONS = "price_Конс";
+        public static final String CODE = "code";
+        public static final String NAME = "name";
+        public static final String UNIT = "unit";
+        public static final String M_UNIT = "measure_unit";
+        public static final String PACKAGING = "packaging";
+        public static final String GROUP = "group";
+        public static final String PARENT = "parent";
+    }
 }
 

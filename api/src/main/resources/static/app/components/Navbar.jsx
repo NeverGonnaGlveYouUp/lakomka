@@ -25,7 +25,7 @@ const Navbar = () => {
     const controller = new AbortController();
     const signal = controller.signal;
     previousController.current = controller;
-    const response = await axios.get(`/products/getByFilter?search=name%3D%3D${capitalizeFirstLetter(searchTerm)}%2A&page=0&size=10&sort=name%3B%20asc`);
+    const response = await axios.get(`/products/getByFilter?search=name%3D%3D%22%2A${capitalizeFirstLetter(searchTerm)}%2A%22%2Cname%3D%3D%22%2A${searchTerm}%2A%22&page=0&size=10&sort=name%2Casc`);
     const updatedOptions = response.data.content.map((p) => {
         return { title: p.name };
     });

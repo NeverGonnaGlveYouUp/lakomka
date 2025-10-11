@@ -6,11 +6,14 @@ import { Box,
          Autocomplete,
          TextField,
          Stack,
-         InputAdornment
+         InputAdornment,
+         Button
     } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
+import { FaFilter } from "react-icons/fa";
+import { CiFilter } from "react-icons/ci";
 
-const Filter = ({ onFilterChange }) => {
+const Filter = ({ onFilterApply }) => {
     const [priceRange, setPriceRange]       = useState([]);
     const [minPrice, setMinPrice]           = useState();
     const [maxPrice, setMaxPrice]           = useState();
@@ -18,8 +21,11 @@ const Filter = ({ onFilterChange }) => {
     const [maxMass, setMaxMass]             = useState();
     const [minMass, setMinMass]             = useState();
     const [workers, setWorkers]             = useState([]);
+    const [worker, setWorker]               = useState();
     const [countries, setCountries]         = useState([]);
+    const [country, setCountry]             = useState();
     const [productGroups, setProductGroups] = useState([]);
+    const [productGroup, setProductGroup]   = useState();
 
     useEffect(() => {
         fetchData();
@@ -46,12 +52,20 @@ const Filter = ({ onFilterChange }) => {
       setMassRange(newValue);
     };
 
+    const submitFilter = () => {
+        onFilterApply({ priceRange, massRange, worker, country, productGroup });
+    };
+
     return (
         <Box sx={{ width: "100%", paddingTop: "1rem" }}>
             <Autocomplete
                   disablePortal
                   options={productGroups}
                   sx={{ width: "100%", paddingBottom: "1rem" }}
+                  onChange={(e) => {
+                      setProductGroup(e.target.textContent);
+                      onFilterApply({ priceRange, massRange, worker, country, productGroup: e.target.textContent });
+                  }}
                   renderInput={(params) => <TextField {...params} label="Категория" />}
                 />
             <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -69,6 +83,7 @@ const Filter = ({ onFilterChange }) => {
                       }}
                       onChange={(e) => {
                         setPriceRange([Number(e.target.value), priceRange[1]]);
+                        onFilterApply({ priceRange, massRange, worker, country, productGroup });
                       }}
                     />
                     <Typography sx={{ padding: "1rem" }}>-</Typography>
@@ -86,13 +101,17 @@ const Filter = ({ onFilterChange }) => {
                       }}
                       onChange={(e) => {
                         setPriceRange([priceRange[0], Number(e.target.value)]);
+                        onFilterApply({ priceRange, massRange, worker, country, productGroup });
                       }}
                     />
             </Stack>
             <Slider
                 getAriaLabel={() => "Price range"}
                 value={priceRange}
-                onChange={handlePriceRangeChange}
+                onChangeCommitted={submitFilter}
+                onChange={(e) => {
+                    setPriceRange(e.target.value);
+                }}
                 valueLabelDisplay="auto"
                 min={minPrice}
                 max={maxPrice}
@@ -112,6 +131,7 @@ const Filter = ({ onFilterChange }) => {
                       }}
                       onChange={(e) => {
                         setMassRange([Number(e.target.value), massRange[1]]);
+                        onFilterApply({ priceRange, massRange, worker, country, productGroup });
                       }}
                     />
                     <Typography sx={{ padding: "1rem" }}>-</Typography>
@@ -129,13 +149,17 @@ const Filter = ({ onFilterChange }) => {
                       }}
                       onChange={(e) => {
                         setMassRange([massRange[0], Number(e.target.value)]);
+                        onFilterApply({ priceRange, massRange, worker, country, productGroup });
                       }}
                     />
             </Stack>
             <Slider
                 getAriaLabel={() => "Mass range"}
                 value={massRange}
-                onChange={handleMassRangeChange}
+                onChangeCommitted={submitFilter}
+                onChange={(e) => {
+                    setMassRange(e.target.value);
+                }}
                 valueLabelDisplay="auto"
                 min={minMass}
                 max={maxMass}
@@ -144,12 +168,20 @@ const Filter = ({ onFilterChange }) => {
                   disablePortal
                   options={workers}
                   sx={{ width: "100%", paddingBottom: "1rem" }}
+                  onChange={(e) => {
+                      setWorker(e.target.textContent);
+                      onFilterApply({ priceRange, massRange, worker: e.target.textContent, country, productGroup });
+                  }}
                   renderInput={(params) => <TextField {...params} label="Производитель" />}
                 />
             <Autocomplete
                   disablePortal
                   options={countries}
                   sx={{ width: "100%", paddingBottom: "1rem" }}
+                  onChange={(e) => {
+                      setCountry(e.target.textContent);
+                      onFilterApply({ priceRange, massRange, worker, country: e.target.textContent, productGroup });
+                  }}
                   renderInput={(params) => <TextField {...params} label="Страна производитель" />}
                 />
         </Box>

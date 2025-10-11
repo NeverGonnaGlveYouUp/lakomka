@@ -42,10 +42,8 @@ public class Product {
     /**
      * Наименование группы товаров к которой относится товар
      */
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name="product_group_id", nullable=false)
-    private ProductGroup group;
+    @Column(name = "product_group")
+    private String productGroup;
 
     /**
      * Артикул товара
@@ -141,6 +139,15 @@ public class Product {
     @Column(name = "description")
     private String description;
 
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", priceKons=" + priceKons +
+                '}';
+    }
+
     public Long getId() {
         return id;
     }
@@ -181,12 +188,12 @@ public class Product {
         this.name = name;
     }
 
-    public ProductGroup getGroup() {
-        return group;
+    public String getGroup() {
+        return productGroup;
     }
 
-    public void setGroup(ProductGroup group) {
-        this.group = group;
+    public void setGroup(String productGroup) {
+        this.productGroup = productGroup;
     }
 
     public String getArticle() {

@@ -2,7 +2,6 @@ package com.lakomka.models.misc;
 
 import com.lakomka.models.person.JPerson;
 import com.lakomka.models.product.Product;
-import com.lakomka.models.product.ProductGroup;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -24,10 +23,6 @@ public class Discount {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
-    @ManyToOne
-    @JoinColumn(name = "product_group_id")
-    private ProductGroup productGroup;
 
     /**
      * Признак скидки/наценки – 0 скидка, 1- наценка
@@ -89,14 +84,6 @@ public class Discount {
 
     public void setProduct(Product product) {
         this.product = product;
-    }
-
-    public ProductGroup getProductGroup() {
-        return productGroup;
-    }
-
-    public void setProductGroup(ProductGroup productGroup) {
-        this.productGroup = productGroup;
     }
 
     public boolean isBitDiscount() {

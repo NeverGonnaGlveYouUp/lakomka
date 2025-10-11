@@ -2,25 +2,20 @@ package com.lakomka.controller;
 
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductFilterRepository;
-import com.lakomka.specifications.CustomRsqlVisitor;
-import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.ast.Node;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import static io.github.perplexhub.rsql.RSQLJPASupport.toSort;
+import static io.github.perplexhub.rsql.RSQLJPASupport.toSpecification;
 
+@Slf4j
 @Controller
 public class ProductController {
 
@@ -30,28 +25,19 @@ public class ProductController {
     @ResponseBody
     @GetMapping("/products/getByFilter")
     public Page<Product> findAllByRsql(
-            @RequestParam(value = "search") String search,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "sort", required = false) String sort,
             @RequestParam(value = "page") Integer page,
-            @RequestParam(value = "size") Integer size,
-            @RequestParam(value = "sort") String sort) {;
-        Node rootNode = new RSQLParser().parse(search);
-        Specification<Product> spec = rootNode.accept(new CustomRsqlVisitor<>());
-        Pattern pattern = Pattern.compile("(\\w+);\\s*(asc|desc)");
-        Matcher matcher = pattern.matcher(sort);
-        Page<Product> products;
-        if (matcher.find()) {
-            String firstGroup = matcher.group(1);
-            String secondGroup = matcher.group(2);
-            if (Objects.equals(secondGroup, "asc")) {
-                products = productRepository.findAll(spec, PageRequest.of(page, size, Sort.by(firstGroup).ascending()));
-            } else if (Objects.equals(secondGroup, "desc")) {
-                products = productRepository.findAll(spec, PageRequest.of(page, size, Sort.by(firstGroup).descending()));
-            } else {
-                products = productRepository.findAll(spec, PageRequest.of(page, size));
-            }
-        } else {
-            products = productRepository.findAll(spec, PageRequest.of(page, size));
-        }
-        return products;
+            @RequestParam(value = "size") Integer size
+    ) {
+        log.info("input findAllByRsql: search:{}, sort:{}, page:{}, size:{}", search, sort, page, size);
+
+        Specification<Product> searchSpecification = toSpecification(search);
+        Specification<Product> searchSpecificationSorted = searchSpecification.and(toSort(sort));
+        Page<Product> all = productRepository.findAll(searchSpecificationSorted, PageRequest.of(page, size));
+
+        log.info("output findAllByRsql: elements: {}, total elements: {}, total pages: {}\n, ",
+                all.getSize(), all.getTotalElements(), all.getTotalPages());
+        return all;
     }
 }

@@ -31,7 +31,7 @@ public class ProductXmlUpsert {
                 .collect(Collectors.toList());
 
         // Находим существующие продукты одним запросом
-        List<Product> existingProducts = productRepository.findByArticleIn(codes);
+        List<Product> existingProducts = productRepository.findByArticleInSafe(codes);
         Map<String, Product> existingProductsMap = existingProducts.stream()
                 .collect(Collectors.toMap(Product::getArticle, Function.identity()));
 

@@ -113,15 +113,6 @@ const ProductFeed = () => {
         setProducts(response.data.content);
     };
 
-  ^\^"id^\^": null,^
-
-  ^\^"login^\^": ^\^"stringstring^\^",^
-
-  ^\^"password^\^": ^\^"stringstring^\^",^
-
-  ^\^"repeatPassword^\^": ^\^"stringstring^\^"^
-
-^}^"
     return (
         <div>
             <Navbar />

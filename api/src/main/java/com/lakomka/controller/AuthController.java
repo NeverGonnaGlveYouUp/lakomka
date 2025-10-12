@@ -7,6 +7,7 @@ import com.lakomka.services.CustomUserDetailsService;
 import com.lakomka.utils.JwtUtil;
 import com.lakomka.validators.BasePersonValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,23 +49,26 @@ public class AuthController {
         user.setId(null);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        return ResponseEntity.ok("Пользователь зарегистрирован");
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/login")
-    public String loginUser(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+    public ResponseEntity<?> loginUser(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+        Errors errors = new BeanPropertyBindingResult(authenticationRequest, "user");
+        basePersonValidator.validate(authenticationRequest, errors);
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(errors.getAllErrors());
+        }
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
+            new UsernamePasswordAuthenticationToken(
+                authenticationRequest.getLogin(),
+                authenticationRequest.getPassword())
         );
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getLogin());
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        return jwt;
-    }
-
-    @GetMapping("/hello")
-    public String hello() {
-        return "Hello, World!";
+        return ResponseEntity.status(HttpStatus.OK).body(jwt);
     }
 }

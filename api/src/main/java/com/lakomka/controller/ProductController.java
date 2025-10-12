@@ -36,7 +36,7 @@ public class ProductController {
         Specification<Product> searchSpecificationSorted = searchSpecification.and(toSort(sort));
         Page<Product> all = productRepository.findAll(searchSpecificationSorted, PageRequest.of(page, size));
 
-        log.info("output findAllByRsql: elements: {}, total elements: {}, total pages: {}\n, ",
+        log.info("output findAllByRsql: elements: {}, total elements: {}, total pages: {} ",
                 all.getSize(), all.getTotalElements(), all.getTotalPages());
         return all;
     }

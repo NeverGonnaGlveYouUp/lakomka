@@ -1,21 +1,25 @@
 import axios from 'axios';
 import React, { useState, useRef } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import { FaUserCircle } from 'react-icons/fa';
+import { FaRegUserCircle } from 'react-icons/fa';
 import { createTheme } from '@mui/material/styles';
 import { IoBagOutline } from "react-icons/io5";
 import {
     AppBar,
     Toolbar,
     Typography,
-    Button,
+    IconButton,
     Autocomplete,
-    TextField
+    TextField,
+    Stack,
+    Container,
+    CircularProgress
      } from '@mui/material';
 
 
 const Navbar = () => {
   const [options, setOptions] = useState([]);
+  const [loading, setLoading] = React.useState(false);
   const previousController = useRef();
 
   const fetchData = async (searchTerm) => {
@@ -25,7 +29,9 @@ const Navbar = () => {
     const controller = new AbortController();
     const signal = controller.signal;
     previousController.current = controller;
+    setLoading(true);
     const response = await axios.get(`/products/getByFilter?search=name%3D%3D%22%2A${capitalizeFirstLetter(searchTerm)}%2A%22%2Cname%3D%3D%22%2A${searchTerm}%2A%22&page=0&size=10&sort=name%2Casc`);
+    setLoading(false);
     const updatedOptions = response.data.content.map((p) => {
         return { title: p.name };
     });
@@ -63,24 +69,37 @@ const Navbar = () => {
     <ThemeProvider theme={theme}>
       <AppBar position="sticky">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            My Logo
-          </Typography>
-          <Autocomplete
-            variant="outlined"
-            label="Что-то ищите? "
-            options={options}
-            onInputChange={onInputChange}
-            getOptionLabel={(option) => option.title}
-            style={{ width: 300 }}
-            renderInput={(params) => (
-              <TextField {...params} variant="outlined" />
-            )}
-          />
-          <Button color="inherit" startIcon={<FaUserCircle />}>
-          </Button>
-          <Button color="inherit" startIcon={<IoBagOutline />}>
-          </Button>
+          <Container maxWidth="lg" sx={{ mt: 3,  display: "flex", justifyContent: "space-between", marginTop: "0px"}}>
+              <Typography variant="h6" component="div" sx={{ alignSelf: "center" }}>
+                My Logo
+              </Typography>
+              <Autocomplete
+                options={options}
+                onInputChange={onInputChange}
+                getOptionLabel={(option) => option.title}
+                style={{ width: 400 }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Поиск"
+                  slotProps={{input: {
+                    ...params.InputProps,
+                    endAdornment: (
+                        <React.Fragment>
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                        </React.Fragment>
+                        )
+                      }}}/>
+              )}
+            />
+            <Stack direction="row" spacing={2}>
+              <IconButton  color="inherit" href="/login">
+                  <FaRegUserCircle  />
+              </IconButton >
+              <IconButton  color="inherit">
+                  <IoBagOutline />
+              </IconButton >
+            </Stack>
+          </Container>
         </Toolbar>
       </AppBar>
     </ThemeProvider>

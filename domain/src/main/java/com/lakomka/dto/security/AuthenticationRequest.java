@@ -1,24 +1,35 @@
 package com.lakomka.dto.security;
 
+import com.lakomka.models.person.BasePerson;
+
 public class AuthenticationRequest {
 
-    private String username;
+    private String login;
     private String password;
 
     public AuthenticationRequest() {
     }
 
     public AuthenticationRequest(String username, String password) {
-        this.username = username;
+        this.login = username;
         this.password = password;
     }
 
-    public String getUsername() {
-        return username;
+    public BasePerson createBasePerson() {
+        BasePerson basePerson = new BasePerson();
+
+        basePerson.setLogin(this.login);
+        basePerson.setPassword(this.password);
+
+        return basePerson;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public String getPassword() {

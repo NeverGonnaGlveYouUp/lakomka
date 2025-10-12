@@ -9,7 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @CrossOrigin("http://localhost:8080")
 public class HomeController {
 
-	@RequestMapping(value = "/")
+
+	@RequestMapping(value = "/login")
+	public String login() {
+		return "index";
+	}
+
+	@RequestMapping(value = "/home")
 	public String index() {
 		return "index";
 	}

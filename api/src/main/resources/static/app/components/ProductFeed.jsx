@@ -13,7 +13,8 @@ import {
     } from "@mui/material";
 import useMatchMedia from './hooks/useMatchMedia.jsx'
 import { FaFilter } from "react-icons/fa";
-
+import Navbar from './Navbar.jsx';
+import Footer from './Footer.jsx';
 
 const ProductFeed = () => {
     const sortOptions = [
@@ -112,63 +113,78 @@ const ProductFeed = () => {
         setProducts(response.data.content);
     };
 
+  ^\^"id^\^": null,^
+
+  ^\^"login^\^": ^\^"stringstring^\^",^
+
+  ^\^"password^\^": ^\^"stringstring^\^",^
+
+  ^\^"repeatPassword^\^": ^\^"stringstring^\^"^
+
+^}^"
     return (
-        <Container maxWidth="lg" sx={{ mt: 3,  display: "flex", gap: "2rem" }}>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-                {isDesktopResolution && (<Filter onFilterApply={(e) =>{
-                        isDesktopResolution && setSearchParamsGlobal([]);
-                        isDesktopResolution && fetchData(e);
-                    }}/>)}
-            </Box>
-            <div>
-                <Box component="section" sx={{ p: 2 }}>
-                    {!isDesktopResolution && ( <Filter onFilterApply={(e) =>{
-                        !isDesktopResolution && setSearchParamsGlobal([]);
-                        !isDesktopResolution && fetchData(e);
-                        }}/> )}
-                    <Box sx={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
-                        <TextField
-                          id="outlined-select-sort-native"
-                          select
-                          label="Сортировка"
-                          defaultValue="new"
-                          onChange={handleSortChange}
-                          slotProps={{
-                            select: {
-                              native: true,
-                            },
-                          }}>
-                          {sortOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </TextField>
-                    </Box>
+        <div>
+            <Navbar />
+            <Container maxWidth="lg" sx={{ mt: 3,  display: "flex", gap: "2rem" }}>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    {isDesktopResolution && (<Filter onFilterApply={(e) =>{
+                            isDesktopResolution && setSearchParamsGlobal([]);
+                            isDesktopResolution && fetchData(e);
+                        }}/>)}
                 </Box>
-                <Grid container spacing={1.5} columns={{ xs: 4, md: 8, lg: 16 }}>
-                    {products.map((item, index) => (
-                      <Grid key={index} size={{ xs: 4, md: 4, lg: 4 }}>
-                        <ProductCard
-                              image="/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
-                              name={item.name}
-                              price={item.priceKons}
-                            />
-                      </Grid>
-                    ))}
-                </Grid>
-                <Pagination
-                    style={{
-                        'justifyItems': 'center',
-                        'margin': '10px 0 20px 0',
-                        }}
-                    page={number + 1}
-                    count={totalPages}
-                    onChange={handlePageChange}
-                    color="primary"
-                    shape="rounded"/>
-            </div>
-        </Container>
+                <div>
+                    <Box component="section" sx={{ p: 2 }}>
+                        {!isDesktopResolution && ( <Filter onFilterApply={(e) =>{
+                            !isDesktopResolution && setSearchParamsGlobal([]);
+                            !isDesktopResolution && fetchData(e);
+                            }}/> )}
+                        <Box sx={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+                            <TextField
+                              id="outlined-select-sort-native"
+                              select
+                              label="Сортировка"
+                              defaultValue="new"
+                              onChange={handleSortChange}
+                              slotProps={{
+                                select: {
+                                  native: true,
+                                },
+                              }}>
+                              {sortOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </TextField>
+                        </Box>
+                    </Box>
+                    <Grid container spacing={1.5} columns={{ xs: 4, md: 8, lg: 16 }}>
+                        {products.map((item, index) => (
+                          <Grid key={index} size={{ xs: 4, md: 4, lg: 4 }}>
+                            <ProductCard
+                                  image="/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
+                                  name={item.name}
+                                  price={item.priceKons}
+                                />
+                          </Grid>
+                        ))}
+                    </Grid>
+                    <Pagination
+                        style={{
+                            'justifyItems': 'center',
+                            'margin': '20px 0 40px 0',
+                            }}
+                        page={number + 1}
+                        siblingCount={2}
+                        boundaryCount={2}
+                        count={totalPages}
+                        onChange={handlePageChange}
+                        color="primary"
+                        shape="rounded"/>
+                </div>
+            </Container>
+            <Footer />
+        </div>
     );
 };
 

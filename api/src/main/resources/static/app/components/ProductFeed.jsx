@@ -112,6 +112,22 @@ const ProductFeed = () => {
         setNumber(response.data.number);
         setProducts(response.data.content);
     };
+curl ^"http://localhost:8080/api/register^" ^
+  -H ^"Accept-Language: ru,en;q=0.9^" ^
+  -H ^"Connection: keep-alive^" ^
+  -H ^"Content-Type: application/json^" ^
+  -b ^"JSESSIONID=FF6A608E83ABE44B9B37BD4479A3C17D^" ^
+  -H ^"Origin: http://localhost:8080^" ^
+  -H ^"Referer: http://localhost:8080/swagger-ui/index.html^" ^
+  -H ^"Sec-Fetch-Dest: empty^" ^
+  -H ^"Sec-Fetch-Mode: cors^" ^
+  -H ^"Sec-Fetch-Site: same-origin^" ^
+  -H ^"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 YaBrowser/25.8.0.0 Safari/537.36^" ^
+  -H ^"accept: application/hal+json^" ^
+  -H ^"sec-ch-ua: ^\^"Not)A;Brand^\^";v=^\^"8^\^", ^\^"Chromium^\^";v=^\^"138^\^", ^\^"YaBrowser^\^";v=^\^"25.8^\^", ^\^"Yowser^\^";v=^\^"2.5^\^"^" ^
+  -H ^"sec-ch-ua-mobile: ?0^" ^
+  -H ^"sec-ch-ua-platform: ^\^"Windows^\^"^" ^
+  --data-raw ^"^{^
 
   ^\^"id^\^": null,^
 

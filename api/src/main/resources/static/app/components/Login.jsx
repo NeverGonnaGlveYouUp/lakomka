@@ -1,134 +1,240 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Button,
     TextField,
-    Paper,
     Box,
     Typography,
     Container,
     Link,
     Snackbar,
     Alert
-    } from "@mui/material";
-import { CiLogout } from "react-icons/ci";
-import { css, keyframes } from "@emotion/react";
+} from "@mui/material";
 import { styled } from '@mui/material/styles';
+import { keyframes } from "@emotion/react";
 import axios from 'axios';
 
 const shakeAnimation = keyframes`
-      0% { transform: translate(0); }
-      25% { transform: translate(-5px); }
-      50% { transform: translate(5px); }
-      75% { transform: translate(-5px); }
-      100% { transform: translate(0); }
-    `;
+    0% { transform: translate(0); }
+    25% { transform: translate(-5px); }
+    50% { transform: translate(5px); }
+    75% { transform: translate(-5px); }
+    100% { transform: translate(0); }
+`;
 
-const ShakeText = styled(Typography)`
-      color: red;
-      animation: ${props => (props.shake ? `${shakeAnimation} 0.5s` : 'none')};
-    `;
+const ShakeText = styled(Typography)(({ shake }) => ({
+    color: 'red',
+    animation: shake ? `${shakeAnimation} 0.5s` : 'none',
+}));
 
 const Login = () => {
-    const [login, setLogin]               = useState();
-    const [password, setPassword]         = useState();
-    const [error, setError]               = useState(false);
+    const navigate = useNavigate();
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async () => {
-        const body = {
-          login,
-          password,
-        };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-        const headers = {
-          'Content-Type': 'application/json',
-        };
+        if (!login || !password) {
+            setError(true);
+            return;
+        }
 
-        const response = await axios.post(
-            '/api/login',
-                body,
-                headers
-                );
-        localStorage.setItem('jwtToken', response.data);
-        setSnackbarOpen(true);
-        navigate('/home');
+        setIsSubmitting(true);
+        setError(false);
 
+        try {
+            const body = {
+                login,
+                password,
+            };
+
+            const response = await axios.post('/api/login', body, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                // Добавляем обработку разных типов ответов
+                transformResponse: [function (data) {
+                    try {
+                        // Пытаемся распарсить JSON
+                        return JSON.parse(data);
+                    } catch (e) {
+                        // Если не JSON, возвращаем как есть (строку с токеном)
+                        return data;
+                    }
+                }]
+            });
+
+// Временно логгинг. В handleSubmit после response:
+console.log('Response status:', response.status);
+console.log('Response headers:', response.headers);
+console.log('Response data type:', typeof response.data);
+console.log('Response data:', response.data);
+
+            // Обрабатываем разные форматы ответа
+            let token;
+            if (typeof response.data === 'string') {
+                // Если ответ - строка с токеном
+                token = response.data;
+            } else if (response.data.token) {
+                // Если ответ - JSON объект с полем token
+                token = response.data.token;
+            } else {
+                // Если ответ - другой объект, используем весь data
+                token = response.data;
+            }
+
+            if (token) {
+                localStorage.setItem('jwtToken', token);
+                setSnackbarOpen(true);
+
+                setTimeout(() => {
+                    navigate('/home');
+                }, 1000);
+            } else {
+                throw new Error('No token received');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            setError(true);
+
+            // Более детальная обработка ошибок
+            if (error.response) {
+                // Сервер ответил с статусом ошибки
+                console.error('Response error:', error.response.status, error.response.data);
+            } else if (error.request) {
+                // Запрос был сделан, но ответ не получен
+                console.error('No response received:', error.request);
+            } else {
+                // Что-то пошло не так при настройке запроса
+                console.error('Request setup error:', error.message);
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-  return (
-  <Container maxWidth="lg" sx={{ mt: 3,  display: "flex", gap: "2rem",  justifyContent: "center" }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          mt: 8,
-          p: 3,
-          borderRadius: 1,
-          boxShadow: 3,
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          Вход в личный кабинет
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Логин"
-            onChange={(e) => setLogin(e.target.value)}
-            autoFocus
-            autoComplete="login"
-            value={login}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Пароль"
-            type="password"
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            value={password}
-          />
-          {error && <ShakeText shake>Неправильный логин или пароль. </ShakeText>}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Войти
-          </Button>
-          <Button
-            fullWidth
-            variant="text"
-            sx={{ mb: 2 }}
-            onClick={() => window.location.href = '/home'}
-          >
-            Назад
-          </Button>
-          <Typography variant="body2" align="center">
-            {"У вас нет учетной записи? "}
-            <Link href="/signup" variant="body2">
-              Зарегистрироваться
-            </Link>
-          </Typography>
-        </Box>
-      </Box>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-      >
-        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
-          Вход успешен
-        </Alert>
-      </Snackbar>
-  </Container>
-  );
+    const handleBackClick = () => {
+        navigate('/home');
+    };
+
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackbarOpen(false);
+    };
+
+    const handleAlertClose = () => {
+        setSnackbarOpen(false);
+    };
+
+    return (
+        <Container
+            maxWidth="lg"
+            sx={{
+                mt: 3,
+                display: "flex",
+                gap: "2rem",
+                justifyContent: "center"
+            }}
+        >
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    mt: 8,
+                    p: 3,
+                    borderRadius: 1,
+                    boxShadow: 3,
+                    maxWidth: 400,
+                    width: '100%'
+                }}
+            >
+                <Typography component="h1" variant="h5">
+                    Вход в личный кабинет
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{ mt: 1, width: '100%' }}
+                >
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="Логин"
+                        onChange={(e) => setLogin(e.target.value)}
+                        autoFocus
+                        autoComplete="username"
+                        value={login}
+                        error={error}
+                        disabled={isSubmitting}
+                    />
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="Пароль"
+                        type="password"
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoComplete="current-password"
+                        value={password}
+                        error={error}
+                        disabled={isSubmitting}
+                    />
+                    {error && (
+                        <ShakeText shake variant="body2" sx={{ mt: 1 }}>
+                            Неправильный логин или пароль.
+                        </ShakeText>
+                    )}
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        sx={{ mt: 3, mb: 2 }}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Вход...' : 'Войти'}
+                    </Button>
+                    <Button
+                        fullWidth
+                        variant="text"
+                        sx={{ mb: 2 }}
+                        onClick={handleBackClick}
+                        disabled={isSubmitting}
+                    >
+                        Назад
+                    </Button>
+                    <Typography variant="body2" align="center">
+                        {"У вас нет учетной записи? "}
+                        <Link href="/signup" variant="body2">
+                            Зарегистрироваться
+                        </Link>
+                    </Typography>
+                </Box>
+            </Box>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleAlertClose}
+                    severity="success"
+                    sx={{ width: '100%' }}
+                >
+                    Вход успешен
+                </Alert>
+            </Snackbar>
+        </Container>
+    );
 }
 
 export default Login;

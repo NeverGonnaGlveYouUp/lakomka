@@ -69,6 +69,10 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getLogin());
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        return ResponseEntity.status(HttpStatus.OK).body(jwt);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Connection", "close")
+                .body(new Token(jwt, "Bearer"));
     }
+
+    private record Token(String token, String type) {}
 }

@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Slf4j
 @Service
 public class FileProcessingScheduledService {
@@ -76,12 +79,23 @@ public class FileProcessingScheduledService {
     }
 
     private void handleProcessingError() {
-        log.info("Attempting to rename file to: {}", ERROR_FILE_NAME);
-        if (s3Service.renameFile(FILE_NAME, ERROR_FILE_NAME)) {
-            log.info("File successfully renamed to: {}", ERROR_FILE_NAME);
+        String errFileName = dateTimedFileName();
+        log.info("Attempting to rename file to: {}", errFileName);
+        if (s3Service.renameFile(FILE_NAME, errFileName)) {
+            log.info("File successfully renamed to: {}", errFileName);
         } else {
-            log.error("Failed to rename file to: {}", ERROR_FILE_NAME);
+            log.error("Failed to rename file to: {}", errFileName);
         }
+    }
+
+    private String dateTimedFileName() {
+        int lastDotIndex = ERROR_FILE_NAME.lastIndexOf('.');
+        String baseName = ERROR_FILE_NAME.substring(0, lastDotIndex);
+        String fileExtension = ERROR_FILE_NAME.substring(lastDotIndex);
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
+        String formattedDateTime = now.format(formatter);
+        return baseName + "_" + formattedDateTime + fileExtension;
     }
 
 }

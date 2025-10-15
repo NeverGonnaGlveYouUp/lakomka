@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Controller
+@RequestMapping("/api")
 public class ImageController {
 
     @Autowired

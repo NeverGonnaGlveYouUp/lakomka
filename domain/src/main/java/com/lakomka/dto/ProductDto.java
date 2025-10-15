@@ -10,10 +10,7 @@ public class ProductDto {
     private String unit;
     private String unitVid;
     private Integer packag;
-    private BigDecimal priceOpt1;
-    private BigDecimal priceOpt2;
-    private BigDecimal priceNal;
-    private BigDecimal priceKons;
+    private BigDecimal price;
     private Integer weight;
     private Integer quantity;
     private Integer zn;
@@ -23,17 +20,14 @@ public class ProductDto {
     private String country;
     private String description;
 
-    public ProductDto(Long id, String name, String article, String unit, String unitVid, Integer packag, BigDecimal priceOpt1, BigDecimal priceOpt2, BigDecimal priceNal, BigDecimal priceKons, Integer weight, Integer quantity, Integer zn, String sku, String worker, String stroke, String country, String description) {
+    public ProductDto(Long id, String name, String article, String unit, String unitVid, Integer packag, BigDecimal priceKons, Integer weight, Integer quantity, Integer zn, String sku, String worker, String stroke, String country, String description) {
         this.id = id;
         this.name = name;
         this.article = article;
         this.unit = unit;
         this.unitVid = unitVid;
         this.packag = packag;
-        this.priceOpt1 = priceOpt1;
-        this.priceOpt2 = priceOpt2;
-        this.priceNal = priceNal;
-        this.priceKons = priceKons;
+        this.price = priceKons;
         this.weight = weight;
         this.quantity = quantity;
         this.zn = zn;
@@ -92,36 +86,12 @@ public class ProductDto {
         this.packag = packag;
     }
 
-    public BigDecimal getPriceOpt1() {
-        return priceOpt1;
+    public BigDecimal getPrice() {
+        return price;
     }
 
-    public void setPriceOpt1(BigDecimal priceOpt1) {
-        this.priceOpt1 = priceOpt1;
-    }
-
-    public BigDecimal getPriceOpt2() {
-        return priceOpt2;
-    }
-
-    public void setPriceOpt2(BigDecimal priceOpt2) {
-        this.priceOpt2 = priceOpt2;
-    }
-
-    public BigDecimal getPriceNal() {
-        return priceNal;
-    }
-
-    public void setPriceNal(BigDecimal priceNal) {
-        this.priceNal = priceNal;
-    }
-
-    public BigDecimal getPriceKons() {
-        return priceKons;
-    }
-
-    public void setPriceKons(BigDecimal priceKons) {
-        this.priceKons = priceKons;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public Integer getWeight() {

@@ -29,6 +29,9 @@ public class DatabaseInitializer implements CommandLineRunner {
     @Autowired
     private RouteRepository routeRepository;
 
+    private final String contentText = "Integer iaculis sem sit amet dui rutrum, et porttitor ligula tempus. Donec congue quam sed finibus aliquam. Morbi volutpat nunc ut libero lobortis rutrum eu sed arcu. Quisque pretium, arcu vitae placerat viverra, tellus velit facilisis eros, quis posuere.";
+    private final String descText = "Donec sit amet diam risus. Sed vulputate malesuada nibh, sed blandit nisl porttitor et. Mauris ut ante purus. Pellentesque dapibus mauris non odio ultrices, ac volutpat purus ornare. Sed euismod risus sit amet metus lobortis, eget viverra nibh porta ante.";
+
     @Autowired
     public DatabaseInitializer(BasePersonRepository basePersonRepository,
                                ProductRepository productRepository,
@@ -54,6 +57,8 @@ public class DatabaseInitializer implements CommandLineRunner {
             product1.setWeight(random.nextInt(1000));
             product1.setCountry("country 1-2");
             product1.setGroup("Electronics");
+            product1.setDescription(descText);
+            product1.setContent(contentText);
 
             Product product2 = new Product();
             product2.setName("Smartphone" + i);
@@ -63,6 +68,8 @@ public class DatabaseInitializer implements CommandLineRunner {
             product2.setWorker("worker 1-2");
             product2.setCountry("country 1-2");
             product2.setGroup("Mobile Phones");
+            product2.setDescription(descText);
+            product2.setContent(contentText);
 
             Product product3 = new Product();
             product3.setName("Tablet" + i);
@@ -72,6 +79,8 @@ public class DatabaseInitializer implements CommandLineRunner {
             product3.setCountry("country 3-4");
             product3.setPriceKons(new BigDecimal(random.nextInt(10000)));
             product3.setGroup("Tablet");
+            product3.setDescription(descText);
+            product3.setContent(contentText);
 
             Product product4 = new Product();
             product4.setName("Headphones" + i);
@@ -81,6 +90,8 @@ public class DatabaseInitializer implements CommandLineRunner {
             product4.setCountry("country 3-4");
             product4.setPriceKons(new BigDecimal(random.nextInt(10000)));
             product4.setGroup("Audio Accessories");
+            product4.setDescription(descText);
+            product4.setContent(contentText);
 
             productRepository.save(product1);
             productRepository.save(product2);
@@ -94,8 +105,8 @@ public class DatabaseInitializer implements CommandLineRunner {
         routeRepository.save(route);
 
         BasePerson person = new BasePerson();
-        person.setLogin("my user");
-        person.setPassword(passwordEncoder.encode("password"));
+        person.setLogin("stringstring");
+        person.setPassword(passwordEncoder.encode("stringstring"));
 
         JPerson jPerson = new JPerson();
         jPerson.setName("My Admin User");

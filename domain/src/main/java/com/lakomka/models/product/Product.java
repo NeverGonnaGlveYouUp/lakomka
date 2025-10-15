@@ -139,6 +139,12 @@ public class Product {
     @Column(name = "description")
     private String description;
 
+    /**
+     * Состав
+     */
+    @Column(name = "content")
+    private String content;
+
     @Override
     public String toString() {
         return "Product{" +
@@ -330,5 +336,13 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

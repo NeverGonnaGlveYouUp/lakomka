@@ -2,7 +2,7 @@
 <project version="4">
   <component name="AmplicodePersistenceUnitSettings">
     <persistence-units>
-      <persistence-unit moduleName="api" name="Default">
+      <persistence-unit moduleName="api" name="Default" defaultIncludeChangeLogFile="api/src/main/resources/db/changelog/db.changelog-master.xml">
         <packages>
           <package value="com.lakomka" />
         </packages>

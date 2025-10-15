@@ -6,10 +6,15 @@ import { createTheme } from '@mui/material/styles';
 const Footer = () => {
   return (
     <BottomNavigation
-        height="100%"
-        marginTop="48px">
+        height="100%">
       <Toolbar>
-        <Grid container spacing={3} justifyContent="space-between">
+        <Grid
+        paddingTop="24rem"
+        paddingBottom="24rem"
+        height="-webkit-fill-available"
+        container
+        spacing={3}
+        justifyContent="space-between">
           <Grid>
             <Typography variant="h6">Contact Us</Typography>
             <Typography variant="body1">Email: contact@example.com</Typography>
@@ -19,8 +24,8 @@ const Footer = () => {
           <Grid>
             <Typography variant="h6">Useful Links</Typography>
             <Box>
-              <Link href="#" color="inherit" underline="hover" style={{ display: 'block' }}>
-                Home
+              <Link href="/" color="inherit" underline="hover" style={{ display: 'block' }}>
+                Главная
               </Link>
               <Link href="#" color="inherit" underline="hover" style={{ display: 'block' }}>
                 About Us

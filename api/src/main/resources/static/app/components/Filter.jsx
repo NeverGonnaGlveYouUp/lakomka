@@ -32,7 +32,7 @@ const Filter = ({ onFilterApply }) => {
     }, []);
 
     const fetchData = async () => {
-        const response = await axios.get(`/products/search/getFilterBoundaries`);
+        const response = await axios.get(`/api/products/search/getFilterBoundaries`);
         setPriceRange([response.data.minPrice, response.data.maxPrice]);
         setMinPrice(response.data.minPrice);
         setMaxPrice(response.data.maxPrice);

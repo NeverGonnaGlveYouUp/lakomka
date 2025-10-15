@@ -9,9 +9,8 @@ import {
     Stack,
     Pagination,
     TextField,
-    Button
+    useMediaQuery
     } from "@mui/material";
-import useMatchMedia from './hooks/useMatchMedia.jsx'
 import { FaFilter } from "react-icons/fa";
 import Navbar from './Navbar.jsx';
 import Footer from './Footer.jsx';
@@ -43,7 +42,7 @@ const ProductFeed = () => {
     const [size, setSize]                   = useState(36);
     const [totalElements, setTotalElements] = useState();
     const [totalPages, setTotalPages]       = useState();
-    const isDesktopResolution               = useMatchMedia('(min-width:992px)', true);
+    const isDesktopResolution               = useMediaQuery('(min-width:992px)');
     const [searchParamsGlobal, setSearchParamsGlobal] = useState([]);
     const [number, setNumber]               = useState(0);
     const [sort, setSort]                   = useState(sortOptions[0].value);
@@ -70,10 +69,10 @@ const ProductFeed = () => {
     };
 
     const fetchData = async (filterData) => {
-        let url = `/products/getByFilter?page=${number}&size=${size}`;
+        let url = `/api/products/getByFilter?page=${number}&size=${size}`;
         if(filterData){
             setNumber(0);
-            url = `/products/getByFilter?page=0&size=${size}`;
+            url = `/api/products/getByFilter?page=0&size=${size}`;
             let searchParams = [];
             let priceRange   = filterData.priceRange;
             let massRange    = filterData.massRange;
@@ -153,7 +152,8 @@ const ProductFeed = () => {
                         {products.map((item, index) => (
                           <Grid key={index} size={{ xs: 4, md: 4, lg: 4 }}>
                             <ProductCard
-                                  image="/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
+                                  id={item.id}
+                                  image="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
                                   name={item.name}
                                   price={item.priceKons}
                                 />

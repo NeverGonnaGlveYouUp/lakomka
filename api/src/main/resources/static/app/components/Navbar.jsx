@@ -30,12 +30,20 @@ const Navbar = () => {
     const signal = controller.signal;
     previousController.current = controller;
     setLoading(true);
-    const response = await axios.get(`/products/getByFilter?search=name%3D%3D%22%2A${capitalizeFirstLetter(searchTerm)}%2A%22%2Cname%3D%3D%22%2A${searchTerm}%2A%22&page=0&size=10&sort=name%2Casc`);
+    const response = await axios.get(`/api/products/getByFilter?search=name%3D%3D%22%2A${capitalizeFirstLetter(searchTerm)}%2A%22%2Cname%3D%3D%22%2A${searchTerm}%2A%22&page=0&size=10&sort=name%2Casc`);
     setLoading(false);
     const updatedOptions = response.data.content.map((p) => {
-        return { title: p.name };
+        return {
+            id: p.id,
+            title: p.name,
+        };
     });
     setOptions(updatedOptions);
+  }
+
+  function findIdByTitle(title) {
+      const item = options.find(option => option.title === title);
+      return item ? item.id : null;
   }
 
   const onInputChange = (event, value, reason) => {
@@ -76,10 +84,14 @@ const Navbar = () => {
               <Autocomplete
                 options={options}
                 onInputChange={onInputChange}
+                onChange={(option) => window.location.href = "/product/" + findIdByTitle(option.target.textContent)}
                 getOptionLabel={(option) => option.title}
                 style={{ width: 400 }}
+                noOptionsText="Введите название"
                 renderInput={(params) => (
-                  <TextField {...params} label="Поиск"
+                  <TextField
+                  {...params}
+                  label="Поиск"
                   slotProps={{input: {
                     ...params.InputProps,
                     endAdornment: (

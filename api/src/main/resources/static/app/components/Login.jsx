@@ -56,43 +56,29 @@ const Login = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                // Добавляем обработку разных типов ответов
                 transformResponse: [function (data) {
                     try {
-                        // Пытаемся распарсить JSON
                         return JSON.parse(data);
                     } catch (e) {
-                        // Если не JSON, возвращаем как есть (строку с токеном)
                         return data;
                     }
                 }]
             });
 
-// Временно логгинг. В handleSubmit после response:
-console.log('Response status:', response.status);
-console.log('Response headers:', response.headers);
-console.log('Response data type:', typeof response.data);
-console.log('Response data:', response.data);
-
-            // Обрабатываем разные форматы ответа
             let token;
             if (typeof response.data === 'string') {
-                // Если ответ - строка с токеном
                 token = response.data;
             } else if (response.data.token) {
-                // Если ответ - JSON объект с полем token
                 token = response.data.token;
             } else {
-                // Если ответ - другой объект, используем весь data
                 token = response.data;
             }
 
             if (token) {
                 localStorage.setItem('jwtToken', token);
                 setSnackbarOpen(true);
-
                 setTimeout(() => {
-                    navigate('/home');
+                    navigate('/');
                 }, 1000);
             } else {
                 throw new Error('No token received');
@@ -101,15 +87,11 @@ console.log('Response data:', response.data);
             console.error('Login error:', error);
             setError(true);
 
-            // Более детальная обработка ошибок
             if (error.response) {
-                // Сервер ответил с статусом ошибки
                 console.error('Response error:', error.response.status, error.response.data);
             } else if (error.request) {
-                // Запрос был сделан, но ответ не получен
                 console.error('No response received:', error.request);
             } else {
-                // Что-то пошло не так при настройке запроса
                 console.error('Request setup error:', error.message);
             }
         } finally {
@@ -118,7 +100,7 @@ console.log('Response data:', response.data);
     };
 
     const handleBackClick = () => {
-        navigate('/home');
+        navigate('/');
     };
 
     const handleSnackbarClose = (event, reason) => {

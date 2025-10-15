@@ -44,3 +44,8 @@ server:
         secure: true
         max-age: 1800
         same-site: strict
+
+app:
+  scheduling:
+    cron: 0 */5 * * * *
+    enabled: true

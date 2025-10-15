@@ -54,3 +54,12 @@
    - в resources\static модуля api выполнить `npm install`, должна быть создана папка node_modules и package-lock.json
 2. Запуск:
    - запуск в dev режиме: выполнить в resources\static `npm run watch`, должен быть создан bundle.js
+
+### Сборка и запуск бека+фронта из fat-jar
+
+1. Собрать jar `mvn clean package`
+2. Открыть терминал bash в корне проекта
+3. Установить переменные окружения в ENV `source ./load_dev_env.sh`
+4. Удостовериться что миграции актуальны. Если нет, то сделать дифференциальный changeset.
+5. Если приложение запускалось через спринг-профиль 'jpa-dev', то БД пустая, нужно очистить таблицу databasechangelog. `delete from databasechangelog; commit;`
+6. Запуск `java -jar api/target/lakomka.jar`

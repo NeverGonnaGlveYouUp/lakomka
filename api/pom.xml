@@ -58,10 +58,73 @@
     </dependencies>
 
     <build>
+
+        <finalName>lakomka</finalName>
+
         <plugins>
+
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.6</version>
+                <configuration>
+                    <workingDirectory>${basedir}/src/main/resources/static</workingDirectory>
+                </configuration>
+                <executions>
+                    <!-- Install node and npm -->
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <nodeVersion>v20.11.1</nodeVersion>
+                            <npmVersion>10.7.0</npmVersion>
+                        </configuration>
+                    </execution>
+
+                    <!-- Run npm install -->
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- Build frontend with webpack -->
+                    <execution>
+                        <id>webpack build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <executable>true</executable>
+                </configuration>
+                <executions>
+                    <!-- Rebuild the jar after frontend build -->
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <resources>
@@ -69,6 +132,12 @@
                 <directory>src/main/resources</directory>
                 <excludes>
                     <exclude>static/node_modules/**/*.*</exclude>
+                    <exclude>static/node_modules/**/*</exclude>
+                    <exclude>static/package*json</exclude>
+                    <exclude>webpack.config.js</exclude>
+                    <exclude>application-debug.yaml</exclude>
+                    <exclude>application-dev.yaml</exclude>
+                    <exclude>application-jpa-dev.yaml</exclude>
                 </excludes>
             </resource>
         </resources>

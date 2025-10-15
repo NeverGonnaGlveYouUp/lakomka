@@ -9,3 +9,8 @@ spring:
   liquibase:
     contexts: dev
     drop-first: true
+
+  app:
+    scheduling:
+      cron: 0 */1 * * * *
+      enabled: true

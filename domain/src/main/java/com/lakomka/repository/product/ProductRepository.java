@@ -8,6 +8,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
  * Репозиторий товара
  */
@@ -24,6 +30,27 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     "(SELECT STRING_AGG(DISTINCT product_group, ', ') FROM product)::VARCHAR AS distinct_product_groups \n" +
                     "FROM product;")
     FilterBoundariesDto getFilterBoundaries();
+
+    List<Product> findByArticleIn(Collection<String> articles);
+
+    default List<Product> findByArticleInSafe(Collection<String> articles) {
+        List<Product> result = new ArrayList<>();
+
+        final int BATCH_SIZE = 500;
+        List<List<String>> batches = partition(new ArrayList<>(articles), BATCH_SIZE);
+
+        for (List<String> batch : batches) {
+            result.addAll(findByArticleIn(batch));
+        }
+        return result;
+    }
+
+    static <T> List<List<T>> partition(List<T> list, int size) {
+        return IntStream.range(0, (list.size() + size - 1) / size)
+                .mapToObj(i -> list.subList(i * size, Math.min((i + 1) * size, list.size())))
+                .collect(Collectors.toList());
+    }
+
 
     @Query(nativeQuery = true,
             value = "SELECT * FROM product\n" +

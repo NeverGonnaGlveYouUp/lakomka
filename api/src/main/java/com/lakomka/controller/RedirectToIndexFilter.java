@@ -5,9 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class RedirectToIndexFilter implements Filter {
+
+    private static final List<String> TO_FILTER = List.of("/api", "/bundle", "/swagger-ui", "/v3/api-docs");
 
     @Override
     public void doFilter(ServletRequest request,
@@ -17,20 +20,12 @@ public class RedirectToIndexFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         String requestURI = req.getRequestURI();
 
-        if (requestURI.startsWith("/api")) {
+        if (TO_FILTER.stream().anyMatch(requestURI::startsWith)) {
             chain.doFilter(request, response);
-            return;
-        }
-        if (requestURI.startsWith("/bundle")) {
-            chain.doFilter(request, response);
-            return;
-        }
-        if (requestURI.startsWith("/swagger-ui")) {
-            chain.doFilter(request, response);
-            return;
+        } else {
+            request.getRequestDispatcher("/").forward(request, response);
         }
 
-        request.getRequestDispatcher("/").forward(request, response);
     }
 
 }

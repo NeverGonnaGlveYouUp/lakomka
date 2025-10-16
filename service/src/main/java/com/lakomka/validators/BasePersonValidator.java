@@ -14,8 +14,8 @@ import java.text.MessageFormat;
 @Component("beforeCreateBasePersonValidator")
 public class BasePersonValidator implements Validator {
 
-    private Integer minLoginLength = 8;
-    private Integer minPasswordLength = 8;
+    private final static Integer minLoginLength = 8;
+    private final static Integer minPasswordLength = 8;
 
     @Autowired
     private BasePersonRepository basePersonRepository;

@@ -134,15 +134,15 @@ const Signup = () => {
     const [repeatPassword, setRepeatPassword]   = useState('');
 
 //     в дто
-    const [inn, setInn]                         = useState('');
-    const [kpp, setKpp]                         = useState('');
-    const [ogrn, setOgrn]                       = useState('');
-    const [deliveryAddress, setDeliveryAddress] = useState('');
-    const [jurAddress, setJurAddress]           = useState('');
-    const [name, setName]                       = useState('');
-    const [nameFull, setNameFull]               = useState('');
-    const [contact, setContact]                 = useState('');
-    const [phone, setPhone]                     = useState('');
+    const [inn,              setInn]                         = useState('');
+    const [kpp,              setKpp]                         = useState('');
+    const [ogrn,             setOgrn]                       = useState('');
+    const [deliveryAddress,  setDeliveryAddress] = useState('');
+    const [jurAddress,          setJurAddress]           = useState('');
+    const [name,            setName]                       = useState('');
+    const [nameFull,        setNameFull]               = useState('');
+    const [contact,         setContact]                 = useState('');
+    const [phone,           setPhone]                     = useState('');
 
     const [error, setError]                     = useState(false);
     const [snackbarOpen, setSnackbarOpen]       = useState(false);

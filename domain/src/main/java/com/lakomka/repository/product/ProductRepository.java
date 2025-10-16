@@ -57,7 +57,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     "WHERE product_group = " +
                     "(SELECT product_group \n" +
                     "FROM product " +
-                    "WHERE id = :id) AND id <> :product_id\n" +
+                    "WHERE id = :id) AND id <> :id\n" +
                     "ORDER BY RANDOM() LIMIT :quantity")
     List<Product> findRandomByProductGroup(@Param("id") Long productId,
                                            @Param("quantity") Integer quantity);

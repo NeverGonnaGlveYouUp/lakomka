@@ -5,6 +5,7 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ProductFeed from './components/ProductFeed.jsx';
 import Login from './components/Login.jsx';
+import Signup from './components/Signup.jsx';
 import ProductPage from './components/ProductPage.jsx';
 
 const theme = createTheme({
@@ -41,7 +42,7 @@ ReactDOM.createRoot(
             <BrowserRouter>
                 <Routes>
                     <Route path="/login" element={<Login />} />
-                    {/* <Route path="/signup" element={<SignUp />} /> */}
+                    <Route path="/signup" element={<Signup />} />
                     <Route path="/" element={<ProductFeed />} />
                     <Route path="/product/:id" element={<ProductPage />} />
                 </Routes>

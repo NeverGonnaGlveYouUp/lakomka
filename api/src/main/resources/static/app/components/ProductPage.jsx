@@ -134,7 +134,7 @@ const ProductPage = () => {
                                     alignItems: "center"
                                     }}>
                                 <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{price} ₽</Typography>
-                                <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{name} ₽</Typography>
+                                <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{name}</Typography>
                                 <Button
                                     sx={{fontWeight: 700, fontSize: '18px'}}
                                     variant="contained"

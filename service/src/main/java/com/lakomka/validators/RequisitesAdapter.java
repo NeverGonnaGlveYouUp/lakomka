@@ -5,7 +5,6 @@ import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.validators.RequisitesValidator.CompanyRequisites;
 import com.lakomka.validators.RequisitesValidator.IndividualRequisites;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RequisitesAdapter {
 
-    @Autowired
     private final RegistrationDtoAssembler registrationDtoAssembler;
 
     /**

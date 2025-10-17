@@ -55,20 +55,23 @@ public class AuthController {
     @Autowired
     private RegistrationDtoAssembler registrationDtoAssembler;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(
+    @PostMapping("/signup")
+    public ResponseEntity<?> signupUser(
             @Valid @RequestBody RegistrationDto user
     ) {
         Errors errors = new BeanPropertyBindingResult(user, "user");
+        user.setInn(user.getInn().replaceAll("-", ""));
         basePersonValidator.validate(user, errors);
         registrationValidator.validateRequisitesOnly(user, errors);
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
         }
+
         Object personType = registrationDtoAssembler.toEntity(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        BasePerson basePerson = new BasePerson(user);
         if(personType instanceof JPerson jPerson){
-            BasePerson basePerson = new BasePerson(user);
             basePerson.setjPerson(jPerson);
             jPerson.setBasePerson(basePerson);
             basePerson = basePersonRepository.save(basePerson);
@@ -78,7 +81,12 @@ public class AuthController {
             ///todo: сейчас поддержки ФЛ нет
         } else throw new RuntimeException("Неопознанный тип пользователя");
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(basePerson.getLogin());
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("Connection", "close")
+                .body(new Token(jwt, "Bearer"));
     }
 
     @PostMapping("/login")

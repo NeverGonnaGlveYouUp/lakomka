@@ -55,7 +55,24 @@
             <artifactId>hibernate-validator</artifactId>
             <version>8.0.1.Final</version>
         </dependency>
+        <!--        хз зачем пока что com.google.cloud нужен здесь-->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-recaptchaenterprise</artifactId>
+        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>26.70.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
 

@@ -33,15 +33,15 @@ public class BasePersonValidator implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "login", "Логин обязателен.");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "Пароль обязателен.");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "login", "login.invalid.empty", "Логин обязателен.");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "password.invalid.empty", "Пароль обязателен.");
 
         BasePerson person;
         if (target instanceof RegistrationDto registrationDto) {
             /// Случай регистрации
             person = new BasePerson(registrationDto);
             if (basePersonRepository.findByLogin(registrationDto.getLogin()).isPresent()) {
-                errors.rejectValue("login", "Этот логин занят другим пользователем.");
+                errors.rejectValue("login", "login.invalid.taken", "Этот логин занят другим пользователем.");
             }
         } else if (target instanceof AuthenticationRequest authenticationRequest) {
             /// Случай авторизации
@@ -49,13 +49,13 @@ public class BasePersonValidator implements Validator {
         } else throw new RuntimeException("Ошибка при определении регистрации/авторизации в BasePersonValidator");
 
         if (person.getLogin().length() < minLoginLength) {
-            errors.rejectValue("login", MessageFormat.format("Логин должен быть не менее {0} символов.", minLoginLength));
+            errors.rejectValue("login", "login.invalid.short", MessageFormat.format("Логин должен быть не менее {0} символов.", minLoginLength));
         }
         if (person.getPassword().length() < minPasswordLength) {
-            errors.rejectValue("password", MessageFormat.format("Пароль должен быть не менее {0} символов.", minPasswordLength));
+            errors.rejectValue("password", "password.invalid.short", MessageFormat.format("Пароль должен быть не менее {0} символов.", minPasswordLength));
         }
         if (!person.getPassword().equals(person.getRepeatPassword()) && person.getRepeatPassword() != null) {
-            errors.rejectValue("repeatPassword", "Пароли должны совпадать.");
+            errors.rejectValue("repeatPassword", "password.repeatPassword.not_same", "Пароли должны совпадать.");
         }
     }
 }

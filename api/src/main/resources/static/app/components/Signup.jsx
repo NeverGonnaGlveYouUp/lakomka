@@ -18,19 +18,6 @@ import axios from 'axios';
 import InputMask from 'react-input-mask'
 import PropTypes from 'prop-types';
 
-const shakeAnimation = keyframes`
-    0% { transform: translate(0); }
-    25% { transform: translate(-5px); }
-    50% { transform: translate(5px); }
-    75% { transform: translate(-5px); }
-    100% { transform: translate(0); }
-`;
-
-const ShakeText = styled(Typography)(({ shake }) => ({
-    color: 'red',
-    animation: shake ? `${shakeAnimation} 0.5s` : 'none',
-}));
-
 const PhoneMask = React.forwardRef(function PhoneMask(props, ref) {
     const { onChange, ...other } = props
     return (
@@ -127,13 +114,25 @@ OgrnMask.propTypes = {
     onChange: PropTypes.func.isRequired,
 }
 
+const shakeAnimation = keyframes`
+    0% { transform: translate(0); }
+    25% { transform: translate(-5px); }
+    50% { transform: translate(5px); }
+    75% { transform: translate(-5px); }
+    100% { transform: translate(0); }
+`;
+
+const ShakeText = styled(Typography)(({ shake }) => ({
+    color: 'red',
+    animation: shake ? `${shakeAnimation} 0.5s` : 'none',
+}));
+
 const Signup = () => {
     const navigate                              = useNavigate();
     const [login, setLogin]                     = useState('');
     const [password, setPassword]               = useState('');
     const [repeatPassword, setRepeatPassword]   = useState('');
 
-//     в дто
     const [inn, setInn]                         = useState('');
     const [kpp, setKpp]                         = useState('');
     const [ogrn, setOgrn]                       = useState('');
@@ -143,12 +142,115 @@ const Signup = () => {
     const [nameFull, setNameFull]               = useState('');
     const [contact, setContact]                 = useState('');
     const [phone, setPhone]                     = useState('');
+    const [dpAgreement, setDpAgreement]         = useState(false);
 
-    const [error, setError]                     = useState(false);
     const [snackbarOpen, setSnackbarOpen]       = useState(false);
     const [isSubmitting, setIsSubmitting]       = useState(false);
 
+    const [errors, setErrors]                   = useState({});
+    const [reCaptchaError, setReCaptchaError]   = useState(false);
 
+    async function postReCaptcha(e) {
+        e.preventDefault();
+        return new Promise((resolve, reject) => {
+            grecaptcha.enterprise.ready(async () => {
+                try {
+                    const token = await grecaptcha.enterprise.execute('6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94', {action: 'LOGIN'});
+                    resolve(token);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        const token = await postReCaptcha(e);
+
+        const event = {
+            token,
+            "expectedAction": "SIGNUP",
+            "siteKey": "6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94",
+        }
+
+        const reCaptchaResponse = await axios.post('https://recaptchaenterprise.googleapis.com/v1/projects/lakomka-shop-1760149753543/assessments?key=AQ.Ab8RN6LTuLQES3bhtwWsNNo3FME85x-DXRnF2xqxlFphIcW9kw', event)
+        if (reCaptchaResponse.data.success &&
+            reCaptchaResponse.data.action === "SIGNUP" &&
+            reCaptchaResponse.data.score > 0.5
+        ) {
+            setReCaptchaError(false);
+            return;
+        } else {
+            setReCaptchaError(true);
+        }
+
+        const body = {
+            login,
+            password,
+            repeatPassword,
+            inn,
+            kpp,
+            ogrn,
+            deliveryAddress,
+            jurAddress,
+            name,
+            nameFull,
+            contact,
+            phone,
+            dpAgreement,
+        }
+        try {
+            const response = await axios.post('/api/signup', body, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                transformResponse: [function (data) {
+                    try {
+                        return JSON.parse(data);
+                    } catch (e) {
+                        return data;
+                    }
+                }]
+            });
+
+            let token;
+            if (typeof response.data === 'string') {
+                token = response.data;
+            } else if (response.data.token) {
+                token = response.data.token;
+            } else {
+                token = response.data;
+            }
+
+            if (token) {
+                localStorage.setItem('jwtToken', token);
+                setSnackbarOpen(true);
+                setTimeout(() => {
+                    navigate('/');
+                }, 1000);
+            } else {
+                throw new Error('No token received');
+            }
+
+        } catch (error) {
+            if (error.response && error.response.status === 400) {
+                const validationErrors = error.response.data;
+
+                const formattedErrors = validationErrors.reduce((acc, error) => {
+                    acc[error.field] = error.defaultMessage;
+                    return acc;
+                }, {});
+
+                setErrors(formattedErrors);
+                setIsSubmitting(false);
+            } else {
+                console.error("An unexpected error occurred:", error);
+            }
+        }
+    }
 
     const handleBackClick = () => {
         navigate('/');
@@ -193,6 +295,7 @@ const Signup = () => {
                 </Typography>
                 <Box
                     component="form"
+                    onSubmit={handleSubmit}
                     sx={{ mt: 1, width: '100%' }}
                 >
                     <TextField
@@ -204,7 +307,8 @@ const Signup = () => {
                         autoFocus
                         autoComplete="username"
                         value={login}
-                        error={error}
+                        error={!!errors.login}
+                        helperText={errors.login}
                         disabled={isSubmitting}
                     />
                     <TextField
@@ -216,7 +320,8 @@ const Signup = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete="current-password"
                         value={password}
-                        error={error}
+                        error={!!errors.password}
+                        helperText={errors.password}
                         disabled={isSubmitting}
                     />
                     <TextField
@@ -228,14 +333,10 @@ const Signup = () => {
                         onChange={(e) => setRepeatPassword(e.target.value)}
                         autoComplete="current-password"
                         value={repeatPassword}
-                        error={error}
+                        error={!!errors.repeatPassword}
+                        helperText={errors.repeatPassword}
                         disabled={isSubmitting}
                     />
-                    {error && (
-                        <ShakeText shake variant="body2" sx={{ mt: 1 }}>
-                            Неправильный логин или пароль.
-                        </ShakeText>
-                    )}
                     <Box>
                         <Stack
                             spacing={{ xs: 1, sm: 2 }}
@@ -250,7 +351,8 @@ const Signup = () => {
                                 label="ИНН"
                                 onChange={(e) => setInn(e.target.value)}
                                 value={inn}
-                                error={error}
+                                error={!!errors.inn}
+                                helperText={errors.inn}
                                 disabled={isSubmitting}
                                 InputProps={{
                                         inputComponent: InnMask,
@@ -263,7 +365,8 @@ const Signup = () => {
                                 label="ОГРН"
                                 onChange={(e) => setOgrn(e.target.value)}
                                 value={ogrn}
-                                error={error}
+                                error={!!errors.ogrn}
+                                helperText={errors.ogrn}
                                 disabled={isSubmitting}
                                 InputProps={{
                                         inputComponent: OgrnMask,
@@ -276,7 +379,8 @@ const Signup = () => {
                                 label="КПП"
                                 onChange={(e) => setKpp(e.target.value)}
                                 value={kpp}
-                                error={error}
+                                error={!!errors.kpp}
+                                helperText={errors.kpp}
                                 disabled={isSubmitting}
                                 InputProps={{
                                         inputComponent: KppMask,
@@ -287,10 +391,33 @@ const Signup = () => {
                             margin="normal"
                             required
                             fullWidth
+                            label="Краткое название"
+                            onChange={(e) => setName(e.target.value)}
+                            value={name}
+                            error={!!errors.name}
+                            helperText={errors.name}
+                            disabled={isSubmitting}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            label="Полное название"
+                            onChange={(e) => setNameFull(e.target.value)}
+                            value={nameFull}
+                            error={!!errors.nameFull}
+                            helperText={errors.nameFull}
+                            disabled={isSubmitting}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
                             label="ФИО контактного лица"
                             onChange={(e) => setContact(e.target.value)}
                             value={contact}
-                            error={error}
+                            error={!!errors.contact}
+                            helperText={errors.contact}
                             disabled={isSubmitting}
                         />
                         <TextField
@@ -300,7 +427,8 @@ const Signup = () => {
                             label="Телефон контактного лица"
                             onChange={(e) => setPhone(e.target.value)}
                             value={phone}
-                            error={error}
+                            error={!!errors.phone}
+                            helperText={errors.phone}
                             disabled={isSubmitting}
                             InputProps={{
                                     inputComponent: PhoneMask,
@@ -313,7 +441,8 @@ const Signup = () => {
                             label="Адрес доставки"
                             onChange={(e) => setDeliveryAddress(e.target.value)}
                             value={deliveryAddress}
-                            error={error}
+                            error={!!errors.deliveryAddress}
+                            helperText={errors.deliveryAddress}
                             disabled={isSubmitting}
                         />
                         <TextField
@@ -323,10 +452,16 @@ const Signup = () => {
                             label="Юридический адрес"
                             onChange={(e) => setJurAddress(e.target.value)}
                             value={jurAddress}
-                            error={error}
+                            error={!!errors.jurAddress}
+                            helperText={errors.jurAddress}
                             disabled={isSubmitting}
                         />
                     </Box>
+                    {reCaptchaError && (
+                        <ShakeText shake variant="body2" sx={{ mt: 1 }}>
+                            Ошибка reCaptcha v3.
+                        </ShakeText>
+                    )}
                     <Button
                         type="submit"
                         fullWidth

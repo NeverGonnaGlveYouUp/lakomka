@@ -1,21 +1,28 @@
 package com.lakomka.validators;
 
 import com.lakomka.dto.RegistrationDto;
+import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.validators.RequisitesValidator.CompanyRequisites;
 import com.lakomka.validators.RequisitesValidator.IndividualRequisites;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Адаптер для преобразования RegistrationDto в объекты реквизитов
  */
+@Component
 public class RequisitesAdapter {
+
+    @Autowired
+    private RegistrationDtoAssembler registrationDtoAssembler;
 
     /**
      * Создает объект реквизитов на основе DTO
      */
-    public static Object createRequisites(RegistrationDto dto) {
-        if (dto.isJuridical()) {
+    public Object createRequisites(RegistrationDto dto) {
+        if (registrationDtoAssembler.isJuridical(dto)) {
             return createCompanyRequisites(dto);
-        } else if (dto.isIndividual()) {
+        } else if (registrationDtoAssembler.isIndividual(dto)) {
             return createIndividualRequisites(dto);
         } else {
             throw new IllegalArgumentException("Неизвестный тип организации. ИНН должен содержать 10 или 12 цифр");
@@ -25,8 +32,8 @@ public class RequisitesAdapter {
     /**
      * Создает реквизиты для юридического лица
      */
-    public static CompanyRequisites createCompanyRequisites(RegistrationDto dto) {
-        if (!dto.isJuridical()) {
+    public CompanyRequisites createCompanyRequisites(RegistrationDto dto) {
+        if (!registrationDtoAssembler.isJuridical(dto)) {
             throw new IllegalArgumentException("DTO не содержит данные юридического лица");
         }
 
@@ -40,8 +47,8 @@ public class RequisitesAdapter {
     /**
      * Создает реквизиты для ИП/физлица
      */
-    public static IndividualRequisites createIndividualRequisites(RegistrationDto dto) {
-        if (!dto.isIndividual()) {
+    public IndividualRequisites createIndividualRequisites(RegistrationDto dto) {
+        if (!registrationDtoAssembler.isIndividual(dto)) {
             throw new IllegalArgumentException("DTO не содержит данные ИП/физлица");
         }
 
@@ -54,7 +61,7 @@ public class RequisitesAdapter {
     /**
      * Проверяет, валиден ли тип организации в DTO
      */
-    public static boolean invalidOrganizationType(RegistrationDto dto) {
-        return !dto.isJuridical() && !dto.isIndividual();
+    public boolean invalidOrganizationType(RegistrationDto dto) {
+        return !registrationDtoAssembler.isJuridical(dto) && !registrationDtoAssembler.isIndividual(dto);
     }
 }

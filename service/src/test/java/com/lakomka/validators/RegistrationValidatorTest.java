@@ -1,6 +1,8 @@
 package com.lakomka.validators;
 
+import com.lakomka.dto.OrganizationType;
 import com.lakomka.dto.RegistrationDto;
+import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
@@ -24,11 +27,14 @@ class RegistrationValidatorTest {
     @Mock
     private RequisitesValidator requisitesValidator;
 
+    private RegistrationDtoAssembler registrationDtoAssembler;
+
     private RegistrationValidator validator;
 
     @BeforeEach
     void setUp() {
         validator = new RegistrationValidator(requisitesValidator);
+        registrationDtoAssembler = new RegistrationDtoAssembler();
     }
 
     // =============================================
@@ -484,7 +490,7 @@ class RegistrationValidatorTest {
     })
     @DisplayName("Параметризованный тест разных типов организаций")
     void validate_parameterizedDifferentOrganizationTypes_shouldWorkCorrectly(
-            String inn, String ogrn, String kpp, RegistrationDto.OrganizationType expectedType) {
+            String inn, String ogrn, String kpp, OrganizationType expectedType) {
         // Arrange
         RegistrationDto dto = new RegistrationDto();
         dto.setInn(inn);
@@ -496,7 +502,7 @@ class RegistrationValidatorTest {
         Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
 
         // Мокируем успешную валидацию в зависимости от типа
-        if (expectedType == RegistrationDto.OrganizationType.JURIDICAL) {
+        if (expectedType == OrganizationType.JURIDICAL) {
             doNothing().when(requisitesValidator).validateInnJuridical(anyString(), anyString(), any(Errors.class));
             doNothing().when(requisitesValidator).validateOgrn(anyString(), anyString(), any(Errors.class));
             doNothing().when(requisitesValidator).validateKpp(anyString(), anyString(), any(Errors.class));
@@ -509,7 +515,7 @@ class RegistrationValidatorTest {
         validator.validate(dto, errors);
 
         // Assert
-        assertEquals(expectedType, dto.getOrganizationType(),
+        assertEquals(expectedType, registrationDtoAssembler.getOrganizationType(dto),
                 String.format("Тип организации должен определяться корректно для ИНН %s", inn));
     }
 
@@ -519,6 +525,9 @@ class RegistrationValidatorTest {
 
     private RegistrationDto createValidJuridicalDto() {
         return new RegistrationDto(
+                "Яндекс",               // Логин
+                "password-password",         // Пароль
+                "password-password",         // Повтор пароля
                 "7725088527",           // ИНН Яндекс (10 цифр)
                 "770501001",            // КПП Яндекс
                 "1027700229193",        // ОГРН Яндекс (13 цифр)
@@ -527,12 +536,16 @@ class RegistrationValidatorTest {
                 "Яндекс",               // Краткое название
                 "ООО \"Яндекс\"",       // Полное название
                 "Иванов Иван Иванович", // Контактное лицо
-                "+7(495)739-70-00"      // Телефон
+                "+7(495)739-70-00",     // Телефон
+                true                    // Согласие на ПД
         );
     }
 
     private RegistrationDto createValidIndividualDto() {
         return new RegistrationDto(
+                "неЯндекс",               // Логин
+                "assword-assword",         // Пароль
+                "assword-assword",         // Повтор пароля
                 "500100796259",         // ИНН ИП (12 цифр)
                 null,                   // КПП для ИП должен быть null
                 "304500116000157",      // ОГРНИП (15 цифр)
@@ -541,7 +554,8 @@ class RegistrationValidatorTest {
                 "Петров П.П.",          // Краткое название
                 "ИП Петров Петр Петрович", // Полное название
                 "Петров Петр",          // Контактное лицо
-                "+7(495)123-45-67"      // Телефон
+                "+7(495)123-45-67",     // Телефон
+                true                    // Согласие на ПД
         );
     }
 }

@@ -1,11 +1,18 @@
 package com.lakomka.controller;
 
-import com.lakomka.dto.security.AuthenticationRequest;
+import com.lakomka.dto.RegistrationDto;
+import com.lakomka.dto.AuthenticationRequest;
+import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.models.person.BasePerson;
+import com.lakomka.models.person.JPerson;
+import com.lakomka.models.person.Person;
 import com.lakomka.repository.person.BasePersonRepository;
+import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.CustomUserDetailsService;
 import com.lakomka.utils.JwtUtil;
 import com.lakomka.validators.BasePersonValidator;
+import com.lakomka.validators.RegistrationValidator;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +35,10 @@ public class AuthController {
     private CustomUserDetailsService userDetailsService;
 
     @Autowired
-    private BasePersonRepository userRepository;
+    private BasePersonRepository basePersonRepository;
+
+    @Autowired
+    private JPersonRepository jPersonRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -39,21 +49,42 @@ public class AuthController {
     @Autowired
     private BasePersonValidator basePersonValidator;
 
+    @Autowired
+    private RegistrationValidator registrationValidator;
+
+    @Autowired
+    private RegistrationDtoAssembler registrationDtoAssembler;
+
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody BasePerson user) {
+    public ResponseEntity<?> registerUser(
+            @Valid @RequestBody RegistrationDto user
+    ) {
         Errors errors = new BeanPropertyBindingResult(user, "user");
         basePersonValidator.validate(user, errors);
+        registrationValidator.validateRequisitesOnly(user, errors);
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
         }
-        user.setId(null);
+        Object personType = registrationDtoAssembler.toEntity(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        if(personType instanceof JPerson jPerson){
+            BasePerson basePerson = new BasePerson(user);
+            basePerson.setjPerson(jPerson);
+            jPerson.setBasePerson(basePerson);
+            basePerson = basePersonRepository.save(basePerson);
+            jPerson.setBasePerson(basePerson);
+            jPersonRepository.save(jPerson);
+        } else if (personType instanceof Person person) {
+            ///todo: сейчас поддержки ФЛ нет
+        } else throw new RuntimeException("Неопознанный тип пользователя");
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+    public ResponseEntity<?> loginUser(
+            @RequestBody AuthenticationRequest authenticationRequest
+    ) throws Exception {
         Errors errors = new BeanPropertyBindingResult(authenticationRequest, "user");
         basePersonValidator.validate(authenticationRequest, errors);
         if (errors.hasErrors()) {

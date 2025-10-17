@@ -1,6 +1,6 @@
 package com.lakomka.repository.product;
 
-import com.lakomka.dto.filter.FilterBoundariesDto;
+import com.lakomka.dto.FilterBoundariesDto;
 import com.lakomka.models.product.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +10,6 @@ import java.util.List;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 

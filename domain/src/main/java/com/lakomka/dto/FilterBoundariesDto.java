@@ -1,4 +1,4 @@
-package com.lakomka.dto.filter;
+package com.lakomka.dto;
 
 public class FilterBoundariesDto {
 

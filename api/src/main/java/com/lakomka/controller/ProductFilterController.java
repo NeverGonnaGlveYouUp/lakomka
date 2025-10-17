@@ -1,6 +1,6 @@
 package com.lakomka.controller;
 
-import com.lakomka.dto.filter.FilterBoundariesDto;
+import com.lakomka.dto.FilterBoundariesDto;
 import com.lakomka.repository.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,9 +1,12 @@
 package com.lakomka.models.person;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lakomka.dto.RegistrationDto;
 import com.lakomka.models.misc.Discount;
 import com.lakomka.models.misc.Route;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -15,7 +18,28 @@ import java.util.Set;
  */
 @Table
 @Entity
+@Getter
+@Setter
 public class JPerson {
+
+    public JPerson() {
+    }
+
+    public JPerson(RegistrationDto registrationDto) {
+        this.phone = registrationDto.getPhone();
+        this.KPP = registrationDto.getKpp();
+        this.INN = registrationDto.getInn();
+        this.OGRN = registrationDto.getOgrn();
+        this.address = registrationDto.getJurAddress();
+        this.addressDelivery = registrationDto.getDeliveryAddress();
+        this.nameFull = registrationDto.getNameFull();
+        this.name = registrationDto.getName();
+        this.dpAgreement = registrationDto.isDpAgreement();
+        this.contact = registrationDto.getContact();
+        this.rest = new BigDecimal("0");
+        this.restTime = new BigDecimal("0");
+        this.basePrice = "Конс";
+    }
 
     @Id
     @Column(name = "base_person_id")
@@ -30,7 +54,7 @@ public class JPerson {
      * Маршрут
      */
     @ManyToOne
-    @JoinColumn(name="route_id", nullable=false)
+    @JoinColumn(name = "route_id")
     private Route route;
 
     @JsonIgnore
@@ -88,7 +112,7 @@ public class JPerson {
     /**
      * Электронная почта
      */
-    @Column(name = "email", length = 50, nullable = false)
+    @Column(name = "email", length = 50)
     private String email;
 
     /**
@@ -100,7 +124,7 @@ public class JPerson {
     /**
      * Должность контактного лица
      */
-    @Column(name = "post", length = 50, nullable = false)
+    @Column(name = "post", length = 50)
     private String post;
 
     /**
@@ -112,7 +136,7 @@ public class JPerson {
     /**
      * Описание – карта доставки – особые метки или описания чтобы определить местоположение Покупателя
      */
-    @Column(name = "map_delivery", nullable = false)
+    @Column(name = "map_delivery")
     private String mapDelivery;
 
     /**
@@ -124,7 +148,7 @@ public class JPerson {
     /**
      * Количество дней отсрочки за поставленный товар, если 0 (ноль), то расчет за наличные в момент передачи товара
      */
-    @Column(name = "shipping_delay_days", precision = 2, nullable = false)
+    @Column(name = "shipping_delay_days", precision = 2)
     private Integer day;
 
     /**
@@ -200,243 +224,4 @@ public class JPerson {
     @Column(name = "global_discount")
     private Integer globalDiscount = 0;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public BasePerson getBasePerson() {
-        return basePerson;
-    }
-
-    public void setBasePerson(BasePerson basePerson) {
-        this.basePerson = basePerson;
-    }
-
-    public boolean isDpAgreement() {
-        return dpAgreement;
-    }
-
-    public void setDpAgreement(boolean dpAgreement) {
-        this.dpAgreement = dpAgreement;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getNameFull() {
-        return nameFull;
-    }
-
-    public void setNameFull(String nameFull) {
-        this.nameFull = nameFull;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getOGRN() {
-        return OGRN;
-    }
-
-    public void setOGRN(String OGRN) {
-        this.OGRN = OGRN;
-    }
-
-    public String getINN() {
-        return INN;
-    }
-
-    public void setINN(String INN) {
-        this.INN = INN;
-    }
-
-    public String getKPP() {
-        return KPP;
-    }
-
-    public void setKPP(String KPP) {
-        this.KPP = KPP;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getContact() {
-        return contact;
-    }
-
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
-
-    public String getPost() {
-        return post;
-    }
-
-    public void setPost(String post) {
-        this.post = post;
-    }
-
-    public String getAddressDelivery() {
-        return addressDelivery;
-    }
-
-    public void setAddressDelivery(String addressDelivery) {
-        this.addressDelivery = addressDelivery;
-    }
-
-    public String getMapDelivery() {
-        return mapDelivery;
-    }
-
-    public void setMapDelivery(String mapDelivery) {
-        this.mapDelivery = mapDelivery;
-    }
-
-    public String getBasePrice() {
-        return basePrice;
-    }
-
-    public void setBasePrice(String basePrice) {
-        this.basePrice = basePrice;
-    }
-
-    public Integer getDay() {
-        return day;
-    }
-
-    public void setDay(Integer day) {
-        this.day = day;
-    }
-
-    public BigDecimal getRest() {
-        return rest;
-    }
-
-    public void setRest(BigDecimal rest) {
-        this.rest = rest;
-    }
-
-    public BigDecimal getRestTime() {
-        return restTime;
-    }
-
-    public void setRestTime(BigDecimal restTime) {
-        this.restTime = restTime;
-    }
-
-    public boolean isPayVid() {
-        return payVid;
-    }
-
-    public void setPayVid(boolean payVid) {
-        this.payVid = payVid;
-    }
-
-    public boolean isAccPrint() {
-        return accPrint;
-    }
-
-    public void setAccPrint(boolean accPrint) {
-        this.accPrint = accPrint;
-    }
-
-    public boolean isSertifPrint() {
-        return sertifPrint;
-    }
-
-    public void setSertifPrint(boolean sertifPrint) {
-        this.sertifPrint = sertifPrint;
-    }
-
-    public boolean isVzrDoc() {
-        return vzrDoc;
-    }
-
-    public void setVzrDoc(boolean vzrDoc) {
-        this.vzrDoc = vzrDoc;
-    }
-
-    public boolean isDogovor() {
-        return dogovor;
-    }
-
-    public void setDogovor(boolean dogovor) {
-        this.dogovor = dogovor;
-    }
-
-    public String getDogovorAlt() {
-        return dogovorAlt;
-    }
-
-    public void setDogovorAlt(String dogovorAlt) {
-        this.dogovorAlt = dogovorAlt;
-    }
-
-    public boolean isEdo() {
-        return edo;
-    }
-
-    public void setEdo(boolean edo) {
-        this.edo = edo;
-    }
-
-    public Date getEdoDate() {
-        return edoDate;
-    }
-
-    public void setEdoDate(Date edoDate) {
-        this.edoDate = edoDate;
-    }
-
-    public String getPrim() {
-        return prim;
-    }
-
-    public void setPrim(String prim) {
-        this.prim = prim;
-    }
-
-    public Route getRoute() {
-        return route;
-    }
-
-    public void setRoute(Route route) {
-        this.route = route;
-    }
-
-    public Integer getGlobalDiscount() {
-        return globalDiscount;
-    }
-
-    public void setGlobalDiscount(Integer globalDiscount) {
-        this.globalDiscount = globalDiscount;
-    }
 }

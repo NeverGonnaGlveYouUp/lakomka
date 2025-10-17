@@ -1,19 +1,24 @@
 package com.lakomka.validators;
 
 import com.lakomka.dto.RegistrationDto;
+import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.validators.RequisitesValidator.CompanyRequisites;
 import com.lakomka.validators.RequisitesValidator.IndividualRequisites;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import static com.lakomka.validators.RequisitesAdapter.createCompanyRequisites;
-import static com.lakomka.validators.RequisitesAdapter.createIndividualRequisites;
-
 @Component("validatorRegistrationDto")
 @RequiredArgsConstructor
 public class RegistrationValidator implements Validator {
+
+    @Autowired
+    RequisitesAdapter createCompanyRequisites;
+
+    @Autowired
+    private RegistrationDtoAssembler registrationDtoAssembler;
 
     private final RequisitesValidator requisitesValidator;
 
@@ -35,7 +40,7 @@ public class RegistrationValidator implements Validator {
         }
 
         // Проверяем тип организации по ИНН
-        if (RequisitesAdapter.invalidOrganizationType(dto)) {
+        if (createCompanyRequisites.invalidOrganizationType(dto)) {
             errors.rejectValue("inn", "inn.invalid.length",
                     "ИНН должен содержать 10 цифр (для юрлица) или 12 цифр (для ИП)");
             return;
@@ -43,9 +48,9 @@ public class RegistrationValidator implements Validator {
 
         // Валидируем реквизиты в зависимости от типа организации
         try {
-            if (dto.isJuridical()) {
+            if (registrationDtoAssembler.isJuridical(dto)) {
                 validateJuridicalRequisites(dto, errors);
-            } else if (dto.isIndividual()) {
+            } else if (registrationDtoAssembler.isIndividual(dto)) {
                 validateIndividualRequisites(dto, errors);
             }
         } catch (IllegalArgumentException e) {
@@ -70,13 +75,13 @@ public class RegistrationValidator implements Validator {
         }
 
         // Для юрлиц КПП обязателен
-        if (dto.isJuridical() && (dto.getKpp() == null || dto.getKpp().trim().isEmpty())) {
+        if (registrationDtoAssembler.isJuridical(dto) && (dto.getKpp() == null || dto.getKpp().trim().isEmpty())) {
             errors.rejectValue("kpp", "kpp.required", "КПП является обязательным для юридических лиц");
         }
     }
 
     private void validateJuridicalRequisites(RegistrationDto dto, Errors errors) {
-        CompanyRequisites requisites = createCompanyRequisites(dto);
+        CompanyRequisites requisites = createCompanyRequisites.createCompanyRequisites(dto);
 
         // Валидируем ИНН юрлица
         requisitesValidator.validateInnJuridical(requisites.getInn(), "inn", errors);
@@ -97,7 +102,7 @@ public class RegistrationValidator implements Validator {
     }
 
     private void validateIndividualRequisites(RegistrationDto dto, Errors errors) {
-        IndividualRequisites requisites = createIndividualRequisites(dto);
+        IndividualRequisites requisites = createCompanyRequisites.createIndividualRequisites(dto);
 
         // Валидируем ИНН физлица
         requisitesValidator.validateInnIndividual(requisites.getInn(), "inn", errors);
@@ -128,7 +133,7 @@ public class RegistrationValidator implements Validator {
         }
 
         // Проверка, что юридический адрес заполнен для юрлиц
-        if (dto.isJuridical() &&
+        if (registrationDtoAssembler.isJuridical(dto) &&
                 (dto.getJurAddress() == null || dto.getJurAddress().trim().isEmpty())) {
             errors.rejectValue("jurAddress", "jurAddress.required",
                     "Юридический адрес обязателен для юридических лиц");
@@ -144,16 +149,16 @@ public class RegistrationValidator implements Validator {
      * Валидация только реквизитов (ИНН, ОГРН, КПП)
      */
     public void validateRequisitesOnly(RegistrationDto dto, Errors errors) {
-        if (RequisitesAdapter.invalidOrganizationType(dto)) {
+        if (createCompanyRequisites.invalidOrganizationType(dto)) {
             errors.rejectValue("inn", "inn.invalid.length",
                     "ИНН должен содержать 10 цифр (для юрлица) или 12 цифр (для ИП)");
             return;
         }
 
         try {
-            if (dto.isJuridical()) {
+            if (registrationDtoAssembler.isJuridical(dto)) {
                 validateJuridicalRequisites(dto, errors);
-            } else if (dto.isIndividual()) {
+            } else if (registrationDtoAssembler.isIndividual(dto)) {
                 validateIndividualRequisites(dto, errors);
             }
         } catch (IllegalArgumentException e) {

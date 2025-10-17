@@ -1,4 +1,4 @@
-package com.lakomka.dto.security;
+package com.lakomka.dto;
 
 import com.lakomka.models.person.BasePerson;
 

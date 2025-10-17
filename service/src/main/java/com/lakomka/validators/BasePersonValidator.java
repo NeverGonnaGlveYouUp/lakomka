@@ -1,7 +1,10 @@
 package com.lakomka.validators;
 
-import com.lakomka.dto.security.AuthenticationRequest;
+import com.lakomka.dto.AuthenticationRequest;
+import com.lakomka.dto.RegistrationDto;
+import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.models.person.BasePerson;
+import com.lakomka.models.person.JPerson;
 import com.lakomka.repository.person.BasePersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,7 +14,7 @@ import org.springframework.validation.Validator;
 
 import java.text.MessageFormat;
 
-@Component("beforeCreateBasePersonValidator")
+@Component
 public class BasePersonValidator implements Validator {
 
     private final static Integer minLoginLength = 8;
@@ -20,9 +23,12 @@ public class BasePersonValidator implements Validator {
     @Autowired
     private BasePersonRepository basePersonRepository;
 
+    @Autowired
+    private RegistrationDtoAssembler registrationDtoAssembler;
+
     @Override
     public boolean supports(Class<?> clazz) {
-        return BasePerson.class.equals(clazz);
+        return RegistrationDto.class.equals(clazz) || AuthenticationRequest.class.equals(clazz);
     }
 
     @Override
@@ -31,16 +37,16 @@ public class BasePersonValidator implements Validator {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "Пароль обязателен.");
 
         BasePerson person;
-        if (target instanceof BasePerson){
+        if (target instanceof RegistrationDto registrationDto) {
             /// Случай регистрации
-            person = (BasePerson) target;
-            if(basePersonRepository.findByLogin(person.getLogin()).isPresent()){
+            person = new BasePerson(registrationDto);
+            if (basePersonRepository.findByLogin(registrationDto.getLogin()).isPresent()) {
                 errors.rejectValue("login", "Этот логин занят другим пользователем.");
             }
-        } else if (target instanceof AuthenticationRequest) {
+        } else if (target instanceof AuthenticationRequest authenticationRequest) {
             /// Случай авторизации
-            person = ((AuthenticationRequest) target).createBasePerson();
-        } else throw new RuntimeException();
+            person = authenticationRequest.createBasePerson();
+        } else throw new RuntimeException("Ошибка при определении регистрации/авторизации в BasePersonValidator");
 
         if (person.getLogin().length() < minLoginLength) {
             errors.rejectValue("login", MessageFormat.format("Логин должен быть не менее {0} символов.", minLoginLength));
@@ -48,7 +54,7 @@ public class BasePersonValidator implements Validator {
         if (person.getPassword().length() < minPasswordLength) {
             errors.rejectValue("password", MessageFormat.format("Пароль должен быть не менее {0} символов.", minPasswordLength));
         }
-        if (!person.getPassword().equals(person.getRepeatPassword()) && person.getRepeatPassword() != null){
+        if (!person.getPassword().equals(person.getRepeatPassword()) && person.getRepeatPassword() != null) {
             errors.rejectValue("repeatPassword", "Пароли должны совпадать.");
         }
     }

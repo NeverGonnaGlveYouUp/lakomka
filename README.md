@@ -57,7 +57,7 @@
 
 ### Сборка и запуск бека+фронта из fat-jar
 
-1. Собрать jar `mvn clean package`
+1. Собрать jar `mvn clean package`, для прода `mvn clean package -Pprod` (не копируются dev yamlы)
 2. Открыть терминал bash в корне проекта
 3. Установить переменные окружения в ENV `source ./load_dev_env.sh`
 4. Удостовериться что миграции актуальны. Если нет, то сделать дифференциальный changeset.

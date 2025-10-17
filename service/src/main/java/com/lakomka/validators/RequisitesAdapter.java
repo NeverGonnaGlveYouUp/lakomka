@@ -4,6 +4,7 @@ import com.lakomka.dto.RegistrationDto;
 import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.validators.RequisitesValidator.CompanyRequisites;
 import com.lakomka.validators.RequisitesValidator.IndividualRequisites;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,10 +12,11 @@ import org.springframework.stereotype.Component;
  * Адаптер для преобразования RegistrationDto в объекты реквизитов
  */
 @Component
+@RequiredArgsConstructor
 public class RequisitesAdapter {
 
     @Autowired
-    private RegistrationDtoAssembler registrationDtoAssembler;
+    private final RegistrationDtoAssembler registrationDtoAssembler;
 
     /**
      * Создает объект реквизитов на основе DTO

@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
@@ -31,10 +30,17 @@ class RegistrationValidatorTest {
 
     private RegistrationValidator validator;
 
+    private RequisitesAdapter requisitesAdapter;
+
     @BeforeEach
     void setUp() {
-        validator = new RegistrationValidator(requisitesValidator);
         registrationDtoAssembler = new RegistrationDtoAssembler();
+        requisitesAdapter = new RequisitesAdapter(registrationDtoAssembler);
+        validator = new RegistrationValidator(
+                requisitesAdapter,
+                registrationDtoAssembler,
+                requisitesValidator
+                );
     }
 
     // =============================================

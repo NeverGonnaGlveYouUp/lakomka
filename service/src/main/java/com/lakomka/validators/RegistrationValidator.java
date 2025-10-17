@@ -5,7 +5,6 @@ import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.validators.RequisitesValidator.CompanyRequisites;
 import com.lakomka.validators.RequisitesValidator.IndividualRequisites;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -14,11 +13,9 @@ import org.springframework.validation.Validator;
 @RequiredArgsConstructor
 public class RegistrationValidator implements Validator {
 
-    @Autowired
-    RequisitesAdapter createCompanyRequisites;
+    private final RequisitesAdapter createCompanyRequisites;
 
-    @Autowired
-    private RegistrationDtoAssembler registrationDtoAssembler;
+    private final RegistrationDtoAssembler registrationDtoAssembler;
 
     private final RequisitesValidator requisitesValidator;
 

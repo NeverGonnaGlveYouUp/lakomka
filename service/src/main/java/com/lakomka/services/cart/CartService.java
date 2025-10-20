@@ -1,17 +1,11 @@
 package com.lakomka.services.cart;
 
 import com.lakomka.models.person.BasePerson;
-import com.lakomka.models.product.PersonCartItem;
-import com.lakomka.models.product.Product;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.Set;
 
 @Service
 public class CartService {
@@ -22,22 +16,27 @@ public class CartService {
     @Autowired
     private UserCartService userCartService;
 
-    public void addToCart(BasePerson user, Product cartItem,
-                          HttpServletRequest request, Integer quantity) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (user == null || authentication instanceof AnonymousAuthenticationToken) {
-            guestCartService.addToCart(getCurrentSessionId(request), cartItem, quantity);
+    public ResponseEntity<?> addToCart(
+            BasePerson user,
+            Long productId,
+            HttpServletRequest request,
+            Integer quantity
+    ) {
+        if (user == null) {
+            return guestCartService.addToCart(getCurrentSessionId(request), productId, quantity);
         } else {
-            userCartService.addToCart(user.getId(), cartItem, quantity);
+            return userCartService.addToCart(user, productId, quantity);
         }
     }
 
-    public Set<PersonCartItem> getCart(BasePerson user, HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (user == null || authentication instanceof AnonymousAuthenticationToken) {
+    public ResponseEntity<?> getCart(
+            BasePerson user,
+            HttpServletRequest request
+    ) {
+        if (user == null) {
             return guestCartService.getCart(getCurrentSessionId(request));
         } else {
-            return userCartService.getCart(user.getId());
+            return userCartService.getCart(user);
         }
     }
 

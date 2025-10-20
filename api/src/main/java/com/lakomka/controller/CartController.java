@@ -1,17 +1,17 @@
 package com.lakomka.controller;
 
 import com.lakomka.models.person.BasePerson;
-import com.lakomka.models.product.PersonCartItem;
-import com.lakomka.models.product.Product;
 import com.lakomka.services.cart.CartService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
@@ -19,23 +19,23 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    @PostMapping("/add")
-    public ResponseEntity<String> addToCart(
+    @PutMapping("/add")
+    public ResponseEntity<?> addToCart(
             @AuthenticationPrincipal BasePerson user,
-            @RequestBody Product cartItem,
             HttpServletRequest request,
-            @RequestParam(value = "quantity", defaultValue = "1") Integer quantity) {
-        
-        cartService.addToCart(user, cartItem, request, quantity);
-        return ResponseEntity.ok("Item added to cart");
+            @RequestParam(value = "id") Long productId,
+            @RequestParam(value = "quantity") Integer quantity
+    ) {
+        log.info("addToCart: user: {}, product: {}, quantity: {}", Optional.ofNullable(user).map(BasePerson::getId).orElse(null), productId, quantity);
+        return cartService.addToCart(user, productId, request, quantity);
     }
 
     @GetMapping("/items")
-    public ResponseEntity<Set<PersonCartItem>> getCartItems(
+    public ResponseEntity<?> getCartItems(
             @AuthenticationPrincipal BasePerson user,
-            HttpServletRequest request) {
-        
-        Set<PersonCartItem> cartItems = cartService.getCart(user, request);
-        return ResponseEntity.ok(cartItems);
+            HttpServletRequest request
+    ) {
+        log.info("getCartItems: user: {}", Optional.ofNullable(user).map(BasePerson::getId).orElse(null));
+        return cartService.getCart(user, request);
     }
 }

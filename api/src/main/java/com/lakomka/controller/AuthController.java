@@ -10,6 +10,7 @@ import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.CustomUserDetailsService;
 import com.lakomka.utils.JwtUtil;
+import com.lakomka.utils.ReCaptchaV3Util;
 import com.lakomka.validators.BasePersonValidator;
 import com.lakomka.validators.RegistrationValidator;
 import jakarta.validation.Valid;
@@ -23,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
@@ -58,13 +61,19 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(
             @Valid @RequestBody RegistrationDto user
-    ) {
+    ) throws IOException {
+
         Errors errors = new BeanPropertyBindingResult(user, "user");
         user.setInn(user.getInn().replaceAll("-", ""));
         basePersonValidator.validate(user, errors);
         registrationValidator.validateRequisitesOnly(user, errors);
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
+        }
+
+        ResponseEntity<String> recaptcha_validation_failed = ReCaptchaV3Util.validate(user);
+        if (recaptcha_validation_failed != null) {
+            return recaptcha_validation_failed;
         }
 
         Object personType = registrationDtoAssembler.toEntity(user);

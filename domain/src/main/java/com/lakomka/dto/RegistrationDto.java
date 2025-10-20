@@ -23,4 +23,7 @@ public class RegistrationDto {
     private String contact;
     private String phone;
     private boolean dpAgreement;
+    private String token;
+    private String expectedAction;
+    private String siteKey;
 }

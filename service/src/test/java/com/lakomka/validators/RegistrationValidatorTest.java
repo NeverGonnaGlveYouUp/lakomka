@@ -40,7 +40,7 @@ class RegistrationValidatorTest {
                 requisitesAdapter,
                 registrationDtoAssembler,
                 requisitesValidator
-                );
+        );
     }
 
     // =============================================
@@ -543,7 +543,10 @@ class RegistrationValidatorTest {
                 "ООО \"Яндекс\"",       // Полное название
                 "Иванов Иван Иванович", // Контактное лицо
                 "+7(495)739-70-00",     // Телефон
-                true                    // Согласие на ПД
+                true,                    // Согласие на ПД
+                "",                     // для recaptcha
+                "",                     // для recaptcha
+                ""                      // для recaptcha
         );
     }
 
@@ -561,7 +564,10 @@ class RegistrationValidatorTest {
                 "ИП Петров Петр Петрович", // Полное название
                 "Петров Петр",          // Контактное лицо
                 "+7(495)123-45-67",     // Телефон
-                true                    // Согласие на ПД
+                true,                    // Согласие на ПД
+                "",                     // для recaptcha
+                "",                     // для recaptcha
+                ""                      // для recaptcha
         );
     }
 }

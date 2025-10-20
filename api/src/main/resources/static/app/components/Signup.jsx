@@ -155,7 +155,7 @@ const Signup = () => {
         return new Promise((resolve, reject) => {
             grecaptcha.enterprise.ready(async () => {
                 try {
-                    const token = await grecaptcha.enterprise.execute('6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94', {action: 'LOGIN'});
+                    const token = await grecaptcha.enterprise.execute('6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94', {action: 'SIGNUP'});
                     resolve(token);
                 } catch (error) {
                     reject(error);
@@ -167,25 +167,8 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-
+how so that there was so many empty resup pods when i joined, and pumping was even started even
         const token = await postReCaptcha(e);
-
-        const event = {
-            token,
-            "expectedAction": "SIGNUP",
-            "siteKey": "6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94",
-        }
-
-        const reCaptchaResponse = await axios.post('https://recaptchaenterprise.googleapis.com/v1/projects/lakomka-shop-1760149753543/assessments?key=AQ.Ab8RN6LTuLQES3bhtwWsNNo3FME85x-DXRnF2xqxlFphIcW9kw', event)
-        if (reCaptchaResponse.data.success &&
-            reCaptchaResponse.data.action === "SIGNUP" &&
-            reCaptchaResponse.data.score > 0.5
-        ) {
-            setReCaptchaError(false);
-            return;
-        } else {
-            setReCaptchaError(true);
-        }
 
         const body = {
             login,
@@ -201,6 +184,9 @@ const Signup = () => {
             contact,
             phone,
             dpAgreement,
+            token,
+            "expectedAction": "SIGNUP",
+            "siteKey": "6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94",
         }
         try {
             const response = await axios.post('/api/signup', body, {

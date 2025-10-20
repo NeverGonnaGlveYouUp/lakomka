@@ -1,14 +1,23 @@
 package com.lakomka.models.product;
 
+import com.lakomka.dto.CartItemDto;
 import com.lakomka.models.person.BasePerson;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.Objects;
+import java.util.Optional;
+
+@Setter
+@Getter
 @Table
 @Entity
 public class PersonCartItem {
 
     @Id
-    Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "base_person_id")
@@ -29,35 +38,28 @@ public class PersonCartItem {
         this.quantity = quantity;
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public CartItemDto toCartItemDto(){
+        return new CartItemDto(
+            product.getId(),
+            product.getName(),
+            product.getPriceKons().toPlainString(),
+            quantity
+        );
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PersonCartItem cartItem = (PersonCartItem) o;
+        return Objects.equals(getId(), cartItem.getId()) &&
+               Objects.equals(
+                       Optional.ofNullable(getBasePerson()).map(BasePerson::getId).orElse(null),
+                       Optional.ofNullable(cartItem.getBasePerson()).map(BasePerson::getId).orElse(null)) &&
+               Objects.equals(getProduct().getId(), cartItem.getProduct().getId());
     }
 
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public BasePerson getBasePerson() {
-        return basePerson;
-    }
-
-    public void setBasePerson(BasePerson basePerson) {
-        this.basePerson = basePerson;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), Optional.ofNullable(getBasePerson()).map(BasePerson::getId).orElse(null), getProduct().getId());
     }
 }

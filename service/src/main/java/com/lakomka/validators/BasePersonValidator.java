@@ -4,7 +4,6 @@ import com.lakomka.dto.AuthenticationRequest;
 import com.lakomka.dto.RegistrationDto;
 import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.models.person.BasePerson;
-import com.lakomka.models.person.JPerson;
 import com.lakomka.repository.person.BasePersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

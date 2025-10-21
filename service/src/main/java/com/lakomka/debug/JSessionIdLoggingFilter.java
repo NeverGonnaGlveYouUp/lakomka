@@ -3,26 +3,26 @@ package com.lakomka.debug;
 import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 @Slf4j
 @Component
 @Profile("debug")
-public class JSessionIdLoggingFilter implements Filter {
+public class JSessionIdLoggingFilter extends OncePerRequestFilter {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String jsessionId = extractJSessionId(httpRequest);
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String jsessionId = extractJSessionId(request);
         if (jsessionId != null && !jsessionId.isEmpty()) {
             log.info("JSESSIONID: {}", jsessionId);
         }
-        chain.doFilter(request, response); // Продолжение обработки запроса
+        filterChain.doFilter(request, response); // Продолжение обработки запроса
     }
 
     private String extractJSessionId(HttpServletRequest request) {

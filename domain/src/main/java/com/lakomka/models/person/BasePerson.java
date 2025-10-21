@@ -1,5 +1,6 @@
 package com.lakomka.models.person;
 
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,6 +20,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@ToString(exclude = {"password","person","jPerson","cart","orders"})
 public class BasePerson implements UserDetails {
 
     @Id

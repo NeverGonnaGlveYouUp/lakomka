@@ -2,7 +2,7 @@
 logging:
   level:
     root: DEBUG
-    org.apache.http: DEBUG
+    #org.apache.http: DEBUG
     #org.springframework: DEBUG
     #org.springframework.web: DEBUG
     org.springframework.data.rest: DEBUG
@@ -11,3 +11,10 @@ logging:
     org.springframework.web.servlet.HandlerMapping.Mappings: DEBUG
     #
     org.springframework.security.core.session: DEBUG
+    org.springframework.security: DEBUG
+    #
+    com.zaxxer.hikari.pool.HikariPool: info
+    org.hibernate: info
+    org.postgresql: info
+    org.springframework.orm.jpa.JpaTransactionManager: info
+    org.apache.http: info

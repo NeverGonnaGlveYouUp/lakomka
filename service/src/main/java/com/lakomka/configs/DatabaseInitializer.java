@@ -136,6 +136,38 @@ public class DatabaseInitializer implements CommandLineRunner {
         person.setjPerson(jPerson);
         basePersonRepository.save(person);
 
+        BasePerson person2 = new BasePerson();
+        person2.setLogin("integerinteger");
+        person2.setPassword(passwordEncoder.encode("integerinteger"));
+
+        JPerson jPerson2 = new JPerson();
+        jPerson2.setName("My Admin User 2");
+        jPerson2.setNameFull("name full 2");
+        jPerson2.setBasePerson(person2);
+        jPerson2.setAddress("address 2");
+        jPerson2.setContact("contact 2");
+        jPerson2.setDay(0);
+        jPerson2.setAccPrint(false);
+        jPerson2.setDogovor(false);
+        jPerson2.setEdo(false);
+        jPerson2.setINN("INNINNINNIN2");
+        jPerson2.setBasePrice("base");
+        jPerson2.setKPP("kppkppkp2");
+        jPerson2.setOGRN("OGRNOGRNOGRNOG2");
+        jPerson2.setEdoDate(new Date());
+        jPerson2.setAddressDelivery("asdasd 2");
+        jPerson2.setEmail("email2");
+        jPerson2.setPhone("phone2");
+        jPerson2.setMapDelivery("mapDelivery2");
+        jPerson2.setPost("post2");
+        jPerson2.setRest(new BigDecimal("0"));
+        jPerson2.setRestTime(new BigDecimal("0"));
+        jPerson2.setRoute(route);
+
+        jPersonRepository.save(jPerson2);
+        person2.setjPerson(jPerson2);
+        basePersonRepository.save(person2);
+
 
     }
 }

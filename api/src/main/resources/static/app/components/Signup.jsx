@@ -167,7 +167,7 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-how so that there was so many empty resup pods when i joined, and pumping was even started even
+
         const token = await postReCaptcha(e);
 
         const body = {

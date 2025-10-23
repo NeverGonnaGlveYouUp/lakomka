@@ -101,8 +101,8 @@ public class ProductXmlUpsert {
         if (!Objects.equals(existing.getPackag(), newProduct.getPackag())) {
             existing.setPackag(newProduct.getPackag());
         }
-        if (!Objects.equals(existing.getGroup(), newProduct.getGroup())) {
-            existing.setGroup(newProduct.getGroup());
+        if (!Objects.equals(existing.getProductGroup(), newProduct.getProductGroup())) {
+            existing.setProductGroup(newProduct.getProductGroup());
         }
 
     }
@@ -159,10 +159,10 @@ public class ProductXmlUpsert {
                     existing.getPackag(), newProduct.getPackag()));
         }
 
-        if (!Objects.equals(existing.getGroup(), newProduct.getGroup())) {
+        if (!Objects.equals(existing.getProductGroup(), newProduct.getProductGroup())) {
             allFieldsEqual = false;
             changedFields.add(String.format("group: '%s' -> '%s'",
-                    existing.getGroup(), newProduct.getGroup()));
+                    existing.getProductGroup(), newProduct.getProductGroup()));
         }
 
         // Логируем изменения, если они есть и если это режим обновления

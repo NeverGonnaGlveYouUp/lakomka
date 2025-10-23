@@ -1,11 +1,18 @@
 package com.lakomka.dto;
 
 import com.lakomka.models.person.BasePerson;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public class AuthenticationRequest {
 
     private String login;
     private String password;
+    private String siteKey;
+    private String token;
+    private String expectedAction;
 
     public AuthenticationRequest() {
     }
@@ -24,19 +31,4 @@ public class AuthenticationRequest {
         return basePerson;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

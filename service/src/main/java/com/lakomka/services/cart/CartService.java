@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+
 @Service
 public class CartService {
 
@@ -28,6 +30,18 @@ public class CartService {
             return userCartService.addToCart(user, productId, quantity);
         }
     }
+
+    public HashMap<Long, Integer> getCartIdQuantityHashMap(
+            BasePerson user,
+            HttpServletRequest request
+    ) {
+        if (user == null) {
+            return guestCartService.getCartIdQuantityHashMap(getCurrentSessionId(request));
+        } else {
+            return userCartService.getCartIdQuantityHashMap(user);
+        }
+    }
+
 
     public ResponseEntity<?> getCart(
             BasePerson user,

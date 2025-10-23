@@ -7,6 +7,10 @@ import ProductFeed from './components/ProductFeed.jsx';
 import Login from './components/Login.jsx';
 import Signup from './components/Signup.jsx';
 import ProductPage from './components/ProductPage.jsx';
+import Navbar from './components/Navbar.jsx';
+import Footer from './components/Footer.jsx';
+import { AppProvider } from './components/AppContext.js';
+import { Outlet } from 'react-router-dom';
 
 const theme = createTheme({
   palette: {
@@ -30,23 +34,50 @@ const theme = createTheme({
 });
 
 
-const SITE_KEY = '6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94';
+const MainLayout = () => {
+  return (
+    <div>
+      <Navbar />
+      <main>
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+};
 
-ReactDOM.createRoot(
-    document.getElementById("app")
-)
-.render(
-    <GoogleReCaptchaProvider
-        reCaptchaKey={SITE_KEY}>
-        <ThemeProvider theme={theme}>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/" element={<ProductFeed />} />
-                    <Route path="/product/:id" element={<ProductPage />} />
-                </Routes>
-            </BrowserRouter>
-        </ThemeProvider>
-    </GoogleReCaptchaProvider>
-);
+const AuthLayout = () => {
+  return (
+    <div>
+      <main>
+        <Outlet />
+      </main>
+    </div>
+  );
+};
+
+function App() {
+    const SITE_KEY = '6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94';
+    return (
+        <GoogleReCaptchaProvider
+            reCaptchaKey={SITE_KEY}>
+            <AppProvider>
+                <ThemeProvider theme={theme}>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/auth" element={<AuthLayout />}>
+                                <Route path="/auth/login" element={<Login />} />
+                                <Route path="/auth/signup" element={<Signup />} />
+                            </Route>
+                            <Route path="/main" element={<MainLayout />}>
+                                <Route index element={<ProductFeed />} />
+                                <Route path="/main/product/:id" element={<ProductPage />} />
+                            </Route>
+                        </Routes>
+                    </BrowserRouter>
+                </ThemeProvider>
+            </AppProvider>
+        </GoogleReCaptchaProvider>
+    );
+}
+ReactDOM.createRoot(document.getElementById("app")).render(<App />);

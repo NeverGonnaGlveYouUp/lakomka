@@ -9,8 +9,6 @@ const Footer = () => {
         height="100%">
       <Toolbar>
         <Grid
-        paddingTop="24rem"
-        paddingBottom="24rem"
         height="-webkit-fill-available"
         container
         spacing={3}

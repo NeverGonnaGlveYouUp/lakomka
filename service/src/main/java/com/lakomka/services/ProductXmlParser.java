@@ -228,7 +228,7 @@ public class ProductXmlParser {
                 product.setPriceNal(parseBigDecimal(getFieldValue(PR_NAL)));
                 product.setPriceKons(parseBigDecimal(getFieldValue(PR_KONS)));
 
-                product.setGroup(groups.get(getFieldValue(PARENT)));
+                product.setProductGroup(groups.get(getFieldValue(PARENT)));
 
                 log.info("Loaded: {}", productToString(product));
 
@@ -280,7 +280,7 @@ public class ProductXmlParser {
                     formatBigDecimal(product.getPriceOpt2()),
                     formatBigDecimal(product.getPriceNal()),
                     formatBigDecimal(product.getPriceKons()),
-                    product.getGroup() != null ? quote(product.getGroup()) : "null"
+                    product.getProductGroup() != null ? quote(product.getProductGroup()) : "null"
             ).replace("\n", "");
         }
 

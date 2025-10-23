@@ -1,9 +1,13 @@
 package com.lakomka.models.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lakomka.dto.ProductDto;
+import com.lakomka.dto.ProductFeedDto;
 import com.lakomka.models.misc.Discount;
 import com.lakomka.models.order.OrderItem;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -12,6 +16,8 @@ import java.util.Set;
 /**
  * Сущность товара
  */
+@Getter
+@Setter
 @Table
 @Entity
 public class Product {
@@ -154,195 +160,34 @@ public class Product {
                 '}';
     }
 
-    public Long getId() {
-        return id;
+    public ProductFeedDto toProductFeedDto(){
+        return new ProductFeedDto(
+                id,
+                name,
+                priceKons,
+                0
+        );
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public ProductDto toProductDto(){
+        return new ProductDto(
+                id,
+                name,
+                article,
+                unit,
+                unitVid,
+                packag,
+                priceKons,
+                weight,
+                quantity,
+                null,
+                zn,
+                sku,
+                worker,
+                stroke,
+                country,
+                description
+        );
     }
 
-    public Set<PersonCartItem> getPersonCartItems() {
-        return personCartItems;
-    }
-
-    public void setPersonCartItems(Set<PersonCartItem> personCartItems) {
-        this.personCartItems = personCartItems;
-    }
-
-    public OrderItem getOrderItem() {
-        return orderItem;
-    }
-
-    public void setOrderItem(OrderItem orderItem) {
-        this.orderItem = orderItem;
-    }
-
-    public Set<Discount> getDiscounts() {
-        return discounts;
-    }
-
-    public void setDiscounts(Set<Discount> discounts) {
-        this.discounts = discounts;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGroup() {
-        return productGroup;
-    }
-
-    public void setGroup(String productGroup) {
-        this.productGroup = productGroup;
-    }
-
-    public String getArticle() {
-        return article;
-    }
-
-    public void setArticle(String article) {
-        this.article = article;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
-    public String getUnitVid() {
-        return unitVid;
-    }
-
-    public void setUnitVid(String unitVid) {
-        this.unitVid = unitVid;
-    }
-
-    public Integer getPackag() {
-        return packag;
-    }
-
-    public void setPackag(Integer packag) {
-        this.packag = packag;
-    }
-
-    public BigDecimal getPriceOpt1() {
-        return priceOpt1;
-    }
-
-    public void setPriceOpt1(BigDecimal priceOpt1) {
-        this.priceOpt1 = priceOpt1;
-    }
-
-    public BigDecimal getPriceOpt2() {
-        return priceOpt2;
-    }
-
-    public void setPriceOpt2(BigDecimal priceOpt2) {
-        this.priceOpt2 = priceOpt2;
-    }
-
-    public BigDecimal getPriceNal() {
-        return priceNal;
-    }
-
-    public void setPriceNal(BigDecimal priceNal) {
-        this.priceNal = priceNal;
-    }
-
-    public BigDecimal getPriceKons() {
-        return priceKons;
-    }
-
-    public void setPriceKons(BigDecimal priceKons) {
-        this.priceKons = priceKons;
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Integer weight) {
-        this.weight = weight;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public Integer getZn() {
-        return zn;
-    }
-
-    public void setZn(Integer zn) {
-        this.zn = zn;
-    }
-
-    public boolean isMark() {
-        return mark;
-    }
-
-    public void setMark(boolean mark) {
-        this.mark = mark;
-    }
-
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-
-    public String getWorker() {
-        return worker;
-    }
-
-    public void setWorker(String worker) {
-        this.worker = worker;
-    }
-
-    public String getStroke() {
-        return stroke;
-    }
-
-    public void setStroke(String stroke) {
-        this.stroke = stroke;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
 }

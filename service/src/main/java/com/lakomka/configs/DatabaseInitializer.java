@@ -56,7 +56,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product1.setPriceKons(new BigDecimal(random.nextInt(10000)));
             product1.setWeight(random.nextInt(1000));
             product1.setCountry("country 1-2");
-            product1.setGroup("Electronics");
+            product1.setProductGroup("Electronics");
             product1.setDescription(descText);
             product1.setContent(contentText);
 
@@ -67,7 +67,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product2.setWeight(random.nextInt(1000));
             product2.setWorker("worker 1-2");
             product2.setCountry("country 1-2");
-            product2.setGroup("Mobile Phones");
+            product2.setProductGroup("Mobile Phones");
             product2.setDescription(descText);
             product2.setContent(contentText);
 
@@ -78,7 +78,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product3.setWorker("worker 3-4");
             product3.setCountry("country 3-4");
             product3.setPriceKons(new BigDecimal(random.nextInt(10000)));
-            product3.setGroup("Tablet");
+            product3.setProductGroup("Tablet");
             product3.setDescription(descText);
             product3.setContent(contentText);
 
@@ -89,7 +89,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product4.setWorker("worker 3-4");
             product4.setCountry("country 3-4");
             product4.setPriceKons(new BigDecimal(random.nextInt(10000)));
-            product4.setGroup("Audio Accessories");
+            product4.setProductGroup("Audio Accessories");
             product4.setDescription(descText);
             product4.setContent(contentText);
 

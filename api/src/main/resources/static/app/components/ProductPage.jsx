@@ -14,10 +14,11 @@ import {
     useMediaQuery,
     AppBar,
     Toolbar,
-    Grid
+    Grid,
+    IconButton
     } from "@mui/material";
-import Navbar from './Navbar.jsx';
-import Footer from './Footer.jsx';
+import { checkJWTExpiration } from './checkJWTExpiration.js';
+import { useAppContext } from './AppContext.js';
 
 const ProductPageImage = styled(Box)({
   width: '45%',
@@ -56,6 +57,7 @@ const ProductPage = () => {
     const [price, setPrice]                 = useState(0.0);
     const [weight, setWeight]               = useState(null);
     const [quantity, setQuantity]           = useState(0);
+    const [cartQuantity, setCartQuantity]   = useState(0);
     const [zn, setZn]                       = useState(null);
     const [sku, setSku]                     = useState('');
     const [worker, setWorker]               = useState('');
@@ -67,26 +69,36 @@ const ProductPage = () => {
 
     const [otherProducts, setOtherProducts] = useState([]);
 
+    const [oldCartQuantity, setOldCartQuantity]= useState(null);
+    const { setContextCount }               = useAppContext();
+
+      useEffect(() => {
+        const editCart = async () => {
+          try {
+            checkJWTExpiration();
+            const response = await axios.put('/api/cart/add?id=' + id + '&quantity=' + (cartQuantity === '' ? 0 : cartQuantity), null,
+            { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
+            if (oldCartQuantity < response.data.quantity) {
+              setContextCount((c) => c + (response.data.quantity - oldCartQuantity));
+            } else {
+              setContextCount((c) => c - (oldCartQuantity - response.data.quantity));
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        };
+        if (oldCartQuantity != null && !isNaN(cartQuantity) && quantity != cartQuantity) {
+          editCart();
+        }
+      }, [cartQuantity]);
+
     useEffect(() => {
-        fetchOtherPProducts();
+        fetchOtherProducts();
         fetchData();
-        const checkElementPresence = () => {
-            const rect = document.getElementById('add-to-cart-button').getBoundingClientRect();
-            setShowToolbar(!(
-                rect.top >= 0 &&
-                rect.left >= 0 &&
-                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-            ));
-        };
-        checkElementPresence();
-        window.addEventListener('scroll', checkElementPresence);
-        return () => {
-            window.removeEventListener('scroll', checkElementPresence);
-        };
+        setCartQuantity(quantity);
     }, [id]);
 
-    const fetchOtherPProducts = async () => {
+    const fetchOtherProducts = async () => {
         const response = await axios.get('/api/randProductsByGroup?id=' + id + '&quantity=8');
         setOtherProducts(response.data);
     };
@@ -99,9 +111,10 @@ const ProductPage = () => {
             setUnit(response.data.unit);
             setUnitVid(response.data.unitVid);
             setPackag(response.data.packag);
-            setPrice(response.data.priceKons);
+            setPrice(response.data.price);
             setWeight(response.data.weight);
             setQuantity(response.data.quantity);
+            setCartQuantity(response.data.cartQuantity);
             setZn(response.data.zn);
             setSku(response.data.sku);
             setWorker(response.data.worker);
@@ -117,35 +130,6 @@ const ProductPage = () => {
 
     return (
         <div>
-            <Navbar />
-                {showToolbar && (
-                    <AppBar
-                        variant="h6"
-                        color="inherit"
-                        elevation={4}
-                        position={'fixed'} sx={{ top: 'auto', bottom: 0 }}>
-                        <Toolbar
-                        sx={{ boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)" }}>
-                            <Container maxWidth="lg"
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    justifyContent: 'space-around',
-                                    alignItems: "center"
-                                    }}>
-                                <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{price} ₽</Typography>
-                                <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{name}</Typography>
-                                <Button
-                                    sx={{fontWeight: 700, fontSize: '18px'}}
-                                    variant="contained"
-                                    size="large"
-                                >
-                                    Добавить в корзину
-                                </Button>
-                            </Container>
-                        </Toolbar>
-                    </AppBar>
-                )}
             <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
                 <Container maxWidth="lg" sx={{ display: "flex", gap: "0.5rem", flexDirection: "row" }}>
                     <ProductPageImage
@@ -157,15 +141,69 @@ const ProductPage = () => {
                         <Typography sx={{ fontSize: '28px', fontWeight: 900 }}>{name}</Typography>
                         <Typography sx={{ fontSize: '14px', fontWeight: 400 }}>Артикул: {article}</Typography>
                         <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{price} ₽</Typography>
-                        <Button
-                            id="add-to-cart-button"
-                            sx={{fontWeight: 700, fontSize: '18px', marginTop: "2rem"}}
-                            fullWidth
-                            variant="contained"
-                            size="large"
-                        >
-                            Добавить в корзину
-                        </Button>
+                        {cartQuantity > 0 ? (
+                            <Container sx={{ display: "flex", gap: "0.5rem", flexDirection: "row", paddingTop: "2rem" }}>
+                                <Button
+                                    color="success"
+                                    fullWidth
+                                    variant="contained"
+                                >
+                                    <Container>
+                                        <Typography variant="h6" >
+                                            В корзине
+                                        </Typography>
+                                        <Typography variant="caption" style={{ marginTop: '4px' }} >
+                                            Перейти
+                                        </Typography>
+                                    </Container>
+                                </Button>
+                                <IconButton onClick={() => {
+                                    setOldCartQuantity(cartQuantity);
+                                    setCartQuantity((c) => c - 1);
+                                    }} color="primary" aria-label="decrement">
+                                    -
+                                </IconButton>
+                                <TextField
+                                    type="number"
+                                    value={cartQuantity}
+                                    onChange={(e) => {
+                                        setOldCartQuantity(cartQuantity);
+                                        setCartQuantity(e.target.value);
+                                    }}
+                                    onKeyPress={(event) => {
+                                        if (event?.key === '-' || event?.key === ',' || event?.key === '.' || event?.key === '0') {
+                                          event.preventDefault();
+                                        }
+                                    }}
+                                    inputProps={{ min: 0, style: { textAlign: 'center' } }}
+                                    label="Кол-во"
+                                    variant="standard"
+                                    size="small"
+                                    fullWidth
+                                    style={{ margin: '0 8px' }}
+                                />
+                                <IconButton onClick={() => {
+                                    setOldCartQuantity(cartQuantity);
+                                    setCartQuantity((c) => c + 1);
+                                    }} color="primary" aria-label="increment">
+                                    +
+                                </IconButton>
+                            </Container>
+                            ) : (
+                                <Button
+                                    id="add-to-cart-button"
+                                    sx={{fontWeight: 700, fontSize: '18px', marginTop: "2rem"}}
+                                    fullWidth
+                                    variant="contained"
+                                    size="large"
+                                    onClick={() => {
+                                        setOldCartQuantity(0);
+                                        setCartQuantity(1);
+                                    }}
+                                >
+                                    Добавить в корзину
+                                </Button>
+                            )}
                     </Container>
                 </Container>
                 <Container maxWidth="lg" sx={{ display: "flex", gap: "2rem", flexDirection: "column" }}>
@@ -236,7 +274,6 @@ const ProductPage = () => {
                     ))}
                 </Grid>
             </Container>
-            <Footer />
         </div>
     );
 };

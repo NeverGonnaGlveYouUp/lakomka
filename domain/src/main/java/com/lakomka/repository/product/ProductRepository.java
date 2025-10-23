@@ -1,6 +1,7 @@
 package com.lakomka.repository.product;
 
 import com.lakomka.dto.FilterBoundariesDto;
+import com.lakomka.dto.ProductFeedDto;
 import com.lakomka.models.product.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -52,13 +53,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     @Query(nativeQuery = true,
-            value = "SELECT * FROM product\n" +
+            value = "SELECT id, name, price_kons FROM product\n" +
                     "WHERE product_group = " +
                     "(SELECT product_group \n" +
                     "FROM product " +
                     "WHERE id = :id) AND id <> :id\n" +
                     "ORDER BY RANDOM() LIMIT :quantity")
-    List<Product> findRandomByProductGroup(@Param("id") Long productId,
-                                           @Param("quantity") Integer quantity);
+    List<ProductFeedDto> findRandomByProductGroup(@Param("id") Long productId,
+                                                  @Param("quantity") Integer quantity);
 
 }

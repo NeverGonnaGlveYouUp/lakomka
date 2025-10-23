@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
@@ -57,6 +54,15 @@ public class GuestCartService {
                     )
             );
         }
+    }
+
+    public HashMap<Long, Integer> getCartIdQuantityHashMap(String sessionId) {
+        return (HashMap<Long, Integer>)
+                sessionCarts.getOrDefault(sessionId, new HashSet<>())
+                        .stream()
+                        .collect(Collectors.toMap(
+                                personCartItem -> personCartItem.getProduct().getId(),
+                                PersonCartItem::getQuantity));
     }
 
     public ResponseEntity<?> getCart(String sessionId) {

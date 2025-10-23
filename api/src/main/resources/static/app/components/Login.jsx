@@ -13,6 +13,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { keyframes } from "@emotion/react";
 import axios from 'axios';
+import { postReCaptcha } from './postReCaptcha.js';
 
 const shakeAnimation = keyframes`
     0% { transform: translate(0); }
@@ -47,9 +48,13 @@ const Login = () => {
         setError(false);
 
         try {
+            const token = await postReCaptcha(e, 'LOGIN');
             const body = {
                 login,
                 password,
+                token,
+                "expectedAction": "LOGIN",
+                "siteKey": "6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94",
             };
 
             const response = await axios.post('/api/login', body, {
@@ -65,20 +70,20 @@ const Login = () => {
                 }]
             });
 
-            let token;
+            let jwtToken;
             if (typeof response.data === 'string') {
-                token = response.data;
+                jwtToken = response.data;
             } else if (response.data.token) {
-                token = response.data.token;
+                jwtToken = response.data.token;
             } else {
-                token = response.data;
+                jwtToken = response.data;
             }
 
-            if (token) {
-                localStorage.setItem('jwtToken', token);
+            if (jwtToken) {
+                localStorage.setItem('jwtToken', jwtToken);
                 setSnackbarOpen(true);
                 setTimeout(() => {
-                    navigate('/');
+                    navigate('/main');
                 }, 1000);
             } else {
                 throw new Error('No token received');
@@ -97,10 +102,6 @@ const Login = () => {
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const handleBackClick = () => {
-        navigate('/');
     };
 
     const handleSnackbarClose = (event, reason) => {
@@ -188,14 +189,14 @@ const Login = () => {
                         fullWidth
                         variant="text"
                         sx={{ mb: 2 }}
-                        onClick={handleBackClick}
+                        onClick={() => navigate("/main")}
                         disabled={isSubmitting}
                     >
                         Назад
                     </Button>
                     <Typography variant="body2" align="center">
                         {"У вас нет учетной записи? "}
-                        <Link href="/signup" variant="body2">
+                        <Link onClick={() => navigate("/auth/signup")} variant="body2">
                             Зарегистрироваться
                         </Link>
                     </Typography>

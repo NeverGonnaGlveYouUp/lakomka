@@ -5,7 +5,6 @@ import com.google.recaptchaenterprise.v1.Assessment;
 import com.google.recaptchaenterprise.v1.CreateAssessmentRequest;
 import com.google.recaptchaenterprise.v1.ProjectName;
 import com.google.recaptchaenterprise.v1.RiskAnalysis;
-import com.lakomka.dto.RegistrationDto;
 import com.google.recaptchaenterprise.v1.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +16,22 @@ public class ReCaptchaV3Util {
 
     private static final String PROJECT_ID = "lakomka-shop-1760149753543";
 
-    public static ResponseEntity<String> validate(
-            RegistrationDto user
-    ) throws IOException {
+    public static ResponseEntity<?> validate(
+            String token,
+            String expectedAction,
+            String siteKey
+    ) {
+
+        if (token == null || token.isBlank() ||
+                siteKey == null || siteKey.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         // Create the reCAPTCHA client.
         try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create()) {
 
             // Set the properties of the event to be tracked.
-            Event event = Event.newBuilder().setSiteKey(user.getSiteKey()).setToken(user.getToken()).build();
+            Event event = Event.newBuilder().setSiteKey(siteKey).setToken(token).build();
 
             // Build the assessment request.
             CreateAssessmentRequest createAssessmentRequest =
@@ -42,13 +49,13 @@ public class ReCaptchaV3Util {
             }
 
             // Check if the expected action was executed.
-            if (!response.getTokenProperties().getAction().equals(user.getExpectedAction())) {
+            if (!response.getTokenProperties().getAction().equals(expectedAction)) {
                 log.info("The action attribute in reCAPTCHA tag is: {}", response.getTokenProperties().getAction());
-                log.info("The action attribute in the reCAPTCHA tag does not match the action ({}) you are expecting to score", user.getExpectedAction());
+                log.info("The action attribute in the reCAPTCHA tag does not match the action ({}) you are expecting to score", expectedAction);
                 return ResponseEntity.status(403).body(
                         "The action attribute in reCAPTCHA tag is: " + response.getTokenProperties().getAction() + "\n" +
                                 "The action attribute in the reCAPTCHA tag does not match the action " +
-                                user.getExpectedAction() +
+                                expectedAction +
                                 " you are expecting to score");
             }
 
@@ -61,6 +68,8 @@ public class ReCaptchaV3Util {
 
             String assessmentName = response.getName();
             log.info("Assessment name: {}", assessmentName.substring(assessmentName.lastIndexOf("/") + 1));
+        } catch (IOException e){
+            return ResponseEntity.badRequest().body(e);
         }
         return null;
     }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,11 +65,21 @@ public class UserCartService {
         ));
     }
 
+    public HashMap<Long, Integer> getCartIdQuantityHashMap(BasePerson user) {
+        return (HashMap<Long, Integer>)
+                personCartItemRepository.findAllByBasePerson(user)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                personCartItem -> personCartItem.getProduct().getId(),
+                                PersonCartItem::getQuantity));
+    }
+
     public ResponseEntity<Set<CartItemDto>> getCart(BasePerson user) {
-        Set<CartItemDto> cartItems = personCartItemRepository.findAllByBasePerson(user)
-                .stream()
-                .map(PersonCartItem::toCartItemDto)
-                .collect(Collectors.toSet());
+        Set<CartItemDto> cartItems =
+                personCartItemRepository.findAllByBasePerson(user)
+                        .stream()
+                        .map(PersonCartItem::toCartItemDto)
+                        .collect(Collectors.toSet());
         return ResponseEntity.ok(cartItems);
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import {
   Card,
@@ -8,13 +8,16 @@ import {
   IconButton,
   styled,
   Box,
-  Link,
   CardActions,
   CardActionArea,
-  TextField
+  TextField,
+  Stack
 } from '@mui/material';
 import { IoBagAddOutline } from "react-icons/io5";
 import useMountedRef from "./useMountedRef.jsx";
+import { checkJWTExpiration } from './checkJWTExpiration.js';
+import { useAppContext } from './AppContext.js';
+import { useNavigate } from "react-router-dom";
 
 const StyledCard = styled(Card)({
   maxWidth: '100%',
@@ -36,24 +39,41 @@ const StyledCardMedia = styled(CardMedia)({
   },
 });
 
-const ProductCard = ({ id, image, name, price, quantity = 0 }) => {
+const ProductCard = ({ id, image, name, price, quantity }) => {
 
-  const mountedRef = useMountedRef();
-  const [count, setCount] = useState(quantity);
+  const mountedRef                    = useMountedRef();
+  const [count, setCount]             = useState(0);
+  const [oldCount, setOldCount]       = useState(0);
+  const { setContextCount }           = useAppContext();
+  const navigate                      = useNavigate();
+
+  useEffect(() => {
+    setCount(quantity);
+  }, [id])
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axios.put('/api/cart/add?id=' + id + '&quantity=' + count, null, { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
-      setCount(response.data.quantity);
+      try {
+        checkJWTExpiration();
+        const response = await axios.put('/api/cart/add?id=' + id + '&quantity=' + (count === '' ? 0 : count), null,
+        { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
+        if (oldCount < response.data.quantity) {
+          setContextCount((c) => c + (response.data.quantity - oldCount));
+        } else {
+          setContextCount((c) => c - (oldCount - response.data.quantity));
+        }
+      } catch (error) {
+        console.error(error);
+      }
     };
-    if (mountedRef.current) {
+    if (mountedRef.current && !isNaN(count) && quantity != count) {
       fetchData();
     }
   }, [count]);
 
   return (
     <StyledCard>
-      <CardActionArea onClick={() => window.location.href = "/product/" + id}>
+      <CardActionArea onClick={() => navigate("/main/product/" + id)}>
         <StyledCardMedia
           component="img"
           image={image}
@@ -99,8 +119,9 @@ const ProductCard = ({ id, image, name, price, quantity = 0 }) => {
       </CardActionArea>
         <CardActions sx={{ justifyContent: "center" }}>
           {count > 0 ? (
-            <>
+            <Stack direction="row" spacing={0}>
               <IconButton onClick={() => {
+                  setOldCount(count);
                   setCount((c) => c - 1);
                   }} color="primary" aria-label="decrement">
                 -
@@ -108,20 +129,33 @@ const ProductCard = ({ id, image, name, price, quantity = 0 }) => {
               <TextField
                 type="number"
                 value={count}
-                inputProps={{ min: 0 }}
-                variant="outlined"
+                onChange={(e) => {
+                    setOldCount(count);
+                    setCount(e.target.value);
+                }}
+                onKeyPress={(event) => {
+                    if (event?.key === '-' || event?.key === ',' || event?.key === '.' || event?.key === '0') {
+                      event.preventDefault();
+                    }
+                }}
+                inputProps={{ min: 0, style: { textAlign: 'center' } }}
+                label="Кол-во"
+                variant="standard"
                 size="small"
-                style={{ width: '50px', margin: '0 8px' }}
+                fullWidth
+                style={{ margin: '0 8px' }}
               />
               <IconButton onClick={() => {
+                  setOldCount(count);
                   setCount((c) => c + 1);
                   }} color="primary" aria-label="increment">
                 +
               </IconButton>
-            </>
+            </Stack>
           ) : (
             <IconButton onClick={() => {
-                setCount((c) => c + 1);
+                setOldCount(0);
+                setCount(1);
             }} aria-label="to-cart" color="primary">
               <IoBagAddOutline />
             </IconButton>

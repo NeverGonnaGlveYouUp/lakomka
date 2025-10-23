@@ -49,8 +49,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(
             @Valid @RequestBody RegistrationDto user
-    ) throws IOException {
-
+    ) {
         Errors errors = new BeanPropertyBindingResult(user, "user");
         user.setInn(user.getInn().replaceAll("-", ""));
         basePersonValidator.validate(user, errors);
@@ -59,7 +58,11 @@ public class AuthController {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
         }
 
-        ResponseEntity<String> recaptcha_validation_failed = ReCaptchaV3Util.validate(user);
+        ResponseEntity<?> recaptcha_validation_failed = ReCaptchaV3Util.validate(
+                user.getToken(),
+                user.getExpectedAction(),
+                user.getSiteKey()
+        );
         if (recaptcha_validation_failed != null) {
             return recaptcha_validation_failed;
         }
@@ -96,6 +99,15 @@ public class AuthController {
         basePersonValidator.validate(authenticationRequest, errors);
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
+        }
+
+        ResponseEntity<?> recaptcha_validation_failed = ReCaptchaV3Util.validate(
+                authenticationRequest.getToken(),
+                authenticationRequest.getExpectedAction(),
+                authenticationRequest.getSiteKey()
+        );
+        if (recaptcha_validation_failed != null) {
+            return recaptcha_validation_failed;
         }
 
         authUser(authenticationRequest.getLogin(), authenticationRequest.getPassword());

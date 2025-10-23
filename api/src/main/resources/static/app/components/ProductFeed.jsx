@@ -12,8 +12,7 @@ import {
     useMediaQuery
     } from "@mui/material";
 import { FaFilter } from "react-icons/fa";
-import Navbar from './Navbar.jsx';
-import Footer from './Footer.jsx';
+import useMountedRef from "./useMountedRef.jsx";
 
 const ProductFeed = () => {
     const sortOptions = [
@@ -46,18 +45,23 @@ const ProductFeed = () => {
     const [searchParamsGlobal, setSearchParamsGlobal] = useState([]);
     const [number, setNumber]               = useState(0);
     const [sort, setSort]                   = useState(sortOptions[0].value);
+    const mountedRef                        = useMountedRef();
 
     useEffect(() => {
         fetchData();
     }, []);
 
     useEffect(() => {
-        fetchData();
+        if (mountedRef.current) {
+            fetchData();
+        }
     }, [sort]);
 
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" })
-        fetchData();
+        if (mountedRef.current) {
+            window.scrollTo({ top: 0, behavior: "smooth" })
+            fetchData();
+        }
     }, [number]);
 
     const handlePageChange = (event, value) => {
@@ -114,7 +118,6 @@ const ProductFeed = () => {
 
     return (
         <div>
-            <Navbar />
             <Container maxWidth="lg" sx={{ mt: 3,  display: "flex", gap: "2rem" }}>
                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                     {isDesktopResolution && (<Filter onFilterApply={(e) =>{
@@ -156,6 +159,7 @@ const ProductFeed = () => {
                                   image="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
                                   name={item.name}
                                   price={item.priceKons}
+                                  quantity={item.cartQuantity}
                                 />
                           </Grid>
                         ))}
@@ -174,7 +178,6 @@ const ProductFeed = () => {
                         shape="rounded"/>
                 </div>
             </Container>
-            <Footer />
         </div>
     );
 };

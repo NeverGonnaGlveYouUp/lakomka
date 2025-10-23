@@ -17,6 +17,7 @@ import { keyframes } from "@emotion/react";
 import axios from 'axios';
 import InputMask from 'react-input-mask'
 import PropTypes from 'prop-types';
+import { postReCaptcha } from './postReCaptcha.js';
 
 const PhoneMask = React.forwardRef(function PhoneMask(props, ref) {
     const { onChange, ...other } = props
@@ -150,26 +151,10 @@ const Signup = () => {
     const [errors, setErrors]                   = useState({});
     const [reCaptchaError, setReCaptchaError]   = useState(false);
 
-    async function postReCaptcha(e) {
-        e.preventDefault();
-        return new Promise((resolve, reject) => {
-            grecaptcha.enterprise.ready(async () => {
-                try {
-                    const token = await grecaptcha.enterprise.execute('6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94', {action: 'SIGNUP'});
-                    resolve(token);
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        });
-    }
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-
-        const token = await postReCaptcha(e);
-
+        const token = await postReCaptcha(e, 'SIGNUP');
         const body = {
             login,
             password,
@@ -237,10 +222,6 @@ const Signup = () => {
             }
         }
     }
-
-    const handleBackClick = () => {
-        navigate('/');
-    };
 
     const handleSnackbarClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -462,14 +443,14 @@ const Signup = () => {
                         fullWidth
                         variant="text"
                         sx={{ mb: 2 }}
-                        onClick={handleBackClick}
+                        onClick={() => navigate("/main")}
                         disabled={isSubmitting}
                     >
                         Назад
                     </Button>
                     <Typography variant="body2" align="center">
                         {"Уже есть аккаунт? "}
-                        <Link href="/login" variant="body2">
+                        <Link onClick={() => navigate("/auth/login")} variant="body2">
                             Вход в аккаунт
                         </Link>
                     </Typography>

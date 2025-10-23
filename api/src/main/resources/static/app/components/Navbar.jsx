@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { FaRegUserCircle } from 'react-icons/fa';
 import { createTheme } from '@mui/material/styles';
@@ -13,14 +13,18 @@ import {
     TextField,
     Stack,
     Container,
-    CircularProgress
-     } from '@mui/material';
-
+    CircularProgress,
+    Badge
+} from '@mui/material';
+import { useAppContext } from './AppContext.js';
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const [options, setOptions] = useState([]);
-  const [loading, setLoading] = React.useState(false);
-  const previousController = useRef();
+  const [options, setOptions]       = useState([]);
+  const [loading, setLoading]       = useState(false);
+  const previousController          = useRef();
+  const { counter }                 = useAppContext();
+  const navigate                    = useNavigate();
 
   const fetchData = async (searchTerm) => {
     if (previousController.current) {
@@ -65,7 +69,7 @@ const Navbar = () => {
         main: '#FFFFFF',
       },
       secondary: {
-        main: '#dc004e',
+        main: '#1976d2',
       },
     },
     typography: {
@@ -84,7 +88,7 @@ const Navbar = () => {
               <Autocomplete
                 options={options}
                 onInputChange={onInputChange}
-                onChange={(option) => window.location.href = "/product/" + findIdByTitle(option.target.textContent)}
+                onChange={(option) => findIdByTitle(option.target.textContent) != null ? navigate("/main/product/" + findIdByTitle(option.target.textContent)) : option.preventDefault()}
                 getOptionLabel={(option) => option.title}
                 style={{ width: 400 }}
                 noOptionsText="Введите название"
@@ -104,11 +108,13 @@ const Navbar = () => {
               )}
             />
             <Stack direction="row" spacing={2}>
-              <IconButton  color="inherit" href="/login">
+              <IconButton color="inherit" onClick={() => navigate("/auth/login")}>
                   <FaRegUserCircle  />
               </IconButton >
               <IconButton  color="inherit">
+                <Badge badgeContent={counter} color="secondary">
                   <IoBagOutline />
+                </Badge>
               </IconButton >
             </Stack>
           </Container>

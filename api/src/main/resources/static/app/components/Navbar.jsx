@@ -107,7 +107,7 @@ const Navbar = () => {
               <IconButton  color="inherit" href="/login">
                   <FaRegUserCircle  />
               </IconButton >
-              <IconButton  color="inherit">
+              <IconButton  color="inherit" href="/cf">
                   <IoBagOutline />
               </IconButton >
             </Stack>

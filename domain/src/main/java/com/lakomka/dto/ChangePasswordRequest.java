@@ -5,12 +5,11 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AuthenticationRequest {
-
-    private String login;
-    private String password;
+public class ChangePasswordRequest {
+    private String currentPassword;
+    private String newPassword;
+    private String newPasswordRepeat;
     private String siteKey;
     private String token;
     private String expectedAction;
-
 }

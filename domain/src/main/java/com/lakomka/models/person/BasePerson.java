@@ -1,5 +1,6 @@
 package com.lakomka.models.person;
 
+import com.lakomka.dto.AuthenticationRequest;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import com.lakomka.models.product.PersonCartItem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,7 +22,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@ToString(exclude = {"password","person","jPerson","cart","orders"})
+@ToString(exclude = {"password","repeatPassword","person","jPerson","cart","orders"})
 public class BasePerson implements UserDetails {
 
     @Id
@@ -58,10 +60,18 @@ public class BasePerson implements UserDetails {
     public BasePerson() {
     }
 
-    public BasePerson(RegistrationDto registrationDto) {
+    public BasePerson(PasswordEncoder passwordEncoder, RegistrationDto registrationDto) {
         this.login = registrationDto.getLogin();
-        this.password = registrationDto.getPassword();
-        this.repeatPassword = registrationDto.getRepeatPassword();
+        String encoded = passwordEncoder.encode(registrationDto.getPassword());
+        this.password = encoded;
+        this.repeatPassword = encoded;
+    }
+
+    public BasePerson(PasswordEncoder passwordEncoder, AuthenticationRequest authenticationRequest) {
+        this.login = authenticationRequest.getLogin();
+        String encoded = passwordEncoder.encode(authenticationRequest.getPassword());
+        this.password = encoded;
+        this.repeatPassword = encoded;
     }
 
     public JPerson getjPerson() {

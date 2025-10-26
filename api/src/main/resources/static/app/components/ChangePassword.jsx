@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Button,
@@ -15,6 +15,7 @@ import { keyframes } from "@emotion/react";
 import axios from 'axios';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { postReCaptcha } from './postReCaptcha.js';
+import { checkJWTExpiration } from './checkJWTExpiration.js';
 
 const shakeAnimation = keyframes`
     0% { transform: translate(0); }
@@ -29,19 +30,40 @@ const ShakeText = styled(Typography)(({ shake }) => ({
     animation: shake ? `${shakeAnimation} 0.5s` : 'none',
 }));
 
-const Login = () => {
+const ChangePassword = () => {
     const navigate = useNavigate();
-    const [login, setLogin] = useState('');
-    const [password, setPassword] = useState('');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [newPasswordRepeat, setNewPasswordRepeat] = useState('');
     const [error, setError] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loggedUsername, setLoggedUsername] = useState('');
+
+    // Fetch username when component mounts
+    useEffect(() => {
+        const fetchUsername = async () => {
+            try {
+                const response = await axios.get('/api/current-user', {
+                    headers: {
+                        'Authorization': localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null
+                    }
+                });
+                if (response.data && response.data.userName) {
+                    setLoggedUsername(response.data.userName);
+                }
+            } catch (error) {
+                console.error('Error fetching username:', error);
+            }
+        };
+        fetchUsername();
+    }, []);
 
     const { executeRecaptcha } = useGoogleReCaptcha();
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!login || !password) {
+        if (!currentPassword || !newPassword || !newPasswordRepeat) {
             setError(true);
             return;
         }
@@ -50,18 +72,21 @@ const Login = () => {
         setError(false);
 
         try {
-            const token = await postReCaptcha(executeRecaptcha, 'LOGIN');
+            const token = await postReCaptcha(executeRecaptcha, 'CHANGEPASSWORD');
             const body = {
-                login,
-                password,
+                currentPassword,
+                newPassword,
+                newPasswordRepeat,
                 token,
-                "expectedAction": "LOGIN",
+                "expectedAction": "CHANGEPASSWORD",
                 "siteKey": "6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y",
             };
 
-            const response = await axios.post('/api/login', body, {
+            checkJWTExpiration();
+            const response = await axios.post('/api/change-password', body, {
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null
                 },
                 transformResponse: [function (data) {
                     try {
@@ -91,7 +116,7 @@ const Login = () => {
                 throw new Error('No token received');
             }
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('ChangePassword error:', error);
             setError(true);
 
             if (error.response) {
@@ -141,7 +166,7 @@ const Login = () => {
                 }}
             >
                 <Typography component="h1" variant="h5">
-                    Вход в личный кабинет
+                    Изменение пароля для "{loggedUsername}"
                 </Typography>
                 <Box
                     component="form"
@@ -152,11 +177,11 @@ const Login = () => {
                         margin="normal"
                         required
                         fullWidth
-                        label="Логин"
-                        onChange={(e) => setLogin(e.target.value)}
-                        autoFocus
-                        autoComplete="username"
-                        value={login}
+                        label="Текущий пароль"
+                        type="password"
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        autoComplete="password"
+                        value={currentPassword}
                         error={error}
                         disabled={isSubmitting}
                     />
@@ -164,17 +189,29 @@ const Login = () => {
                         margin="normal"
                         required
                         fullWidth
-                        label="Пароль"
+                        label="Новый пароль"
                         type="password"
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoComplete="current-password"
-                        value={password}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        autoComplete="password"
+                        value={newPassword}
+                        error={error}
+                        disabled={isSubmitting}
+                    />
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="Повтор нового пароля"
+                        type="password"
+                        onChange={(e) => setNewPasswordRepeat(e.target.value)}
+                        autoComplete="password"
+                        value={newPasswordRepeat}
                         error={error}
                         disabled={isSubmitting}
                     />
                     {error && (
                         <ShakeText shake variant="body2" sx={{ mt: 1 }}>
-                            Неправильный логин или пароль.
+                            Неправильный пароль или Сначала нужно залогиниться или еще что то не так.
                         </ShakeText>
                     )}
                     <Button
@@ -185,7 +222,7 @@ const Login = () => {
                         sx={{ mt: 3, mb: 2 }}
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Вход...' : 'Войти'}
+                        {isSubmitting ? 'Смена пароля...' : 'Сменить пароль'}
                     </Button>
                     <Button
                         fullWidth
@@ -196,12 +233,6 @@ const Login = () => {
                     >
                         Назад
                     </Button>
-                    <Typography variant="body2" align="center">
-                        {"У вас нет учетной записи? "}
-                        <Link onClick={() => navigate("/auth/signup")} variant="body2">
-                            Зарегистрироваться
-                        </Link>
-                    </Typography>
                 </Box>
             </Box>
             <Snackbar
@@ -215,11 +246,11 @@ const Login = () => {
                     severity="success"
                     sx={{ width: '100%' }}
                 >
-                    Вход успешен
+                    Смена пароля успешна
                 </Alert>
             </Snackbar>
         </Container>
     );
 }
 
-export default Login;
+export default ChangePassword;

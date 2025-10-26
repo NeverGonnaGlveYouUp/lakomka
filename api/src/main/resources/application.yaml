@@ -49,3 +49,11 @@ app:
   scheduling:
     cron: 0 */5 * * * *
     enabled: true
+
+recaptcha:
+  default:
+    score: ${RECAPTCHA_DEFAULT_SCORE:0.5}
+  secret:
+    key: ${RECAPTCHA_SECRET_KEY}
+  verify:
+    url: https://www.google.com/recaptcha/api/siteverify

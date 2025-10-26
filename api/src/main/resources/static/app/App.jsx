@@ -6,6 +6,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ProductFeed from './components/ProductFeed.jsx';
 import Login from './components/Login.jsx';
 import Signup from './components/Signup.jsx';
+import ChangePassword from './components/ChangePassword.jsx';
 import ProductPage from './components/ProductPage.jsx';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
@@ -57,7 +58,7 @@ const AuthLayout = () => {
 };
 
 function App() {
-    const SITE_KEY = '6Lf3LuYrAAAAAJqGCS8WfdcmtAl-RsYvSvHEXW94';
+    const SITE_KEY = '6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y';
     return (
         <GoogleReCaptchaProvider
             reCaptchaKey={SITE_KEY}>
@@ -68,6 +69,7 @@ function App() {
                             <Route path="/auth" element={<AuthLayout />}>
                                 <Route path="/auth/login" element={<Login />} />
                                 <Route path="/auth/signup" element={<Signup />} />
+                                <Route path="/auth/change-password" element={<ChangePassword />} />
                             </Route>
                             <Route path="/main" element={<MainLayout />}>
                                 <Route index element={<ProductFeed />} />

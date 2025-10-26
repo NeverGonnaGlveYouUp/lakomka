@@ -43,6 +43,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/change-password").authenticated()
                         .requestMatchers("/**")
                         .permitAll().anyRequest().authenticated())
                 .sessionManagement(session -> session

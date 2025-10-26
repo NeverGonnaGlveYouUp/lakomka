@@ -1,7 +1,7 @@
 import axios from 'axios';
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import { FaRegUserCircle } from 'react-icons/fa';
+import { FaRegUserCircle, FaKey } from 'react-icons/fa';
 import { createTheme } from '@mui/material/styles';
 import { IoBagOutline } from "react-icons/io5";
 import {
@@ -25,6 +25,27 @@ const Navbar = () => {
   const previousController          = useRef();
   const { counter }                 = useAppContext();
   const navigate                    = useNavigate();
+  const [loggedUsername, setLoggedUsername] = useState('');
+
+    // Fetch username when component mounts
+    useEffect(() => {
+        const fetchUsername = async () => {
+            try {
+                const response = await axios.get('/api/current-user', {
+                    headers: {
+                        'Authorization': localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null
+                    }
+                });
+                if (response.data && response.data.userName) {
+                    setLoggedUsername(response.data.userName);
+                }
+            } catch (error) {
+                console.error('Error fetching username:', error);
+            }
+        };
+
+        fetchUsername();
+    }, []);
 
   const fetchData = async (searchTerm) => {
     if (previousController.current) {
@@ -111,11 +132,17 @@ const Navbar = () => {
               <IconButton color="inherit" onClick={() => navigate("/auth/login")}>
                   <FaRegUserCircle  />
               </IconButton >
+              <IconButton color="inherit" onClick={() => navigate("/auth/change-password")}>
+                  <FaKey  />
+              </IconButton >
               <IconButton  color="inherit">
                 <Badge badgeContent={counter} color="secondary">
                   <IoBagOutline />
                 </Badge>
               </IconButton >
+              <Typography variant="h6" component="div" sx={{ alignSelf: "center" }}>
+                  {loggedUsername}
+              </Typography>
             </Stack>
           </Container>
         </Toolbar>

@@ -1,6 +1,8 @@
 package com.lakomka.controller;
 
 import com.lakomka.dto.AuthenticationRequest;
+import com.lakomka.dto.ChangePasswordRequest;
+import com.lakomka.dto.LoggedUser;
 import com.lakomka.dto.RegistrationDto;
 import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
 import com.lakomka.models.person.BasePerson;
@@ -8,8 +10,8 @@ import com.lakomka.models.person.JPerson;
 import com.lakomka.models.person.Person;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
+import com.lakomka.services.RecaptchaService;
 import com.lakomka.utils.JwtUtil;
-import com.lakomka.utils.ReCaptchaV3Util;
 import com.lakomka.validators.BasePersonValidator;
 import com.lakomka.validators.RegistrationValidator;
 import jakarta.validation.Valid;
@@ -20,16 +22,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.util.Optional;
+
+import static java.util.Objects.isNull;
 
 @Slf4j
 @RestController
@@ -45,6 +48,7 @@ public class AuthController {
     private final BasePersonValidator basePersonValidator;
     private final RegistrationValidator registrationValidator;
     private final RegistrationDtoAssembler registrationDtoAssembler;
+    private final RecaptchaService recaptchaService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(
@@ -58,19 +62,13 @@ public class AuthController {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
         }
 
-        ResponseEntity<?> recaptcha_validation_failed = ReCaptchaV3Util.validate(
-                user.getToken(),
-                user.getExpectedAction(),
-                user.getSiteKey()
-        );
-        if (recaptcha_validation_failed != null) {
-            return recaptcha_validation_failed;
+        if (recaptchaService.verifyRecaptcha(user.getToken(), user.getSiteKey())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         Object personType = registrationDtoAssembler.toEntity(user);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        BasePerson basePerson = new BasePerson(user);
+        BasePerson basePerson = new BasePerson(passwordEncoder, user);
         log.debug("Signup: BasePerson: {}", basePerson.getLogin());
         if (personType instanceof JPerson jPerson) {
             basePerson.setjPerson(jPerson);
@@ -84,7 +82,7 @@ public class AuthController {
             throw new UnsupportedOperationException("Поддержка ФЛ не реализована");
         } else throw new RuntimeException("Неопознанный тип пользователя");
 
-        authUser(basePerson.getLogin(), basePerson.getPassword());
+        authUser(user.getLogin(), user.getPassword());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Connection", "close")
@@ -101,13 +99,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
         }
 
-        ResponseEntity<?> recaptcha_validation_failed = ReCaptchaV3Util.validate(
-                authenticationRequest.getToken(),
-                authenticationRequest.getExpectedAction(),
-                authenticationRequest.getSiteKey()
-        );
-        if (recaptcha_validation_failed != null) {
-            return recaptcha_validation_failed;
+        if (recaptchaService.verifyRecaptcha(authenticationRequest.getToken(), authenticationRequest.getSiteKey())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         authUser(authenticationRequest.getLogin(), authenticationRequest.getPassword());
@@ -116,6 +109,77 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK)
                 .header("Connection", "close")
                 .body(new Token(jwtUtil.generateToken(authenticationRequest.getLogin()), "Bearer"));
+    }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal BasePerson user
+    ) {
+        return ResponseEntity.ok()
+                .body(
+                        LoggedUser.builder()
+                                .userName(Optional.ofNullable(user).map(BasePerson::getLogin).orElse("Anonymous"))
+                                .build()
+                );
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal BasePerson user,
+            @RequestBody ChangePasswordRequest changePasswordRequest
+    ) {
+
+        // check authenticated access to this endpoint
+        if (isNull(user)) {
+            log.warn("Attempt UNAUTHORIZED Password change");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        log.info("Begin change password for: {}", user.getUsername());
+
+        if (recaptchaService.verifyRecaptcha(changePasswordRequest.getToken(), changePasswordRequest.getSiteKey())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // Get current authenticated user from context, not from dto!
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Validate request
+        Errors errors = new BeanPropertyBindingResult(changePasswordRequest, "changePasswordRequest");
+        if (!StringUtils.hasLength(changePasswordRequest.getCurrentPassword())) {
+            errors.rejectValue("currentPassword", "currentPassword.empty", "Старый пароль не может быть пустым");
+        }
+        if (!StringUtils.hasLength(changePasswordRequest.getNewPassword())) {
+            errors.rejectValue("newPassword", "newPassword.empty", "Новый пароль не может быть пустым");
+        }
+        if (!StringUtils.hasLength(changePasswordRequest.getNewPasswordRepeat())) {
+            errors.rejectValue("newPasswordRepeat", "newPasswordRepeat.empty", "Повтор нового пароля не может быть пустым");
+        }
+        if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getNewPasswordRepeat())) {
+            errors.rejectValue("newPasswordRepeat", "newPasswordRepeat.equals.newPassword", "Новый пароль не совпадает с повторением нового пароля");
+        }
+        if (changePasswordRequest.getNewPassword().equals(changePasswordRequest.getCurrentPassword())) {
+            errors.rejectValue("newPassword", "newPassword.equals.oldPassword", "Новый пароль не может совпадать со старым");
+        }
+        if (errors.hasErrors()) {
+            log.warn("Attempt invalidated Password change for user {}", currentUsername);
+            return ResponseEntity.badRequest().body(errors.getAllErrors());
+        }
+
+        BasePerson basePerson = basePersonRepository.findByLogin(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Пользователь " + currentUsername + "не найден"));
+
+        // Check if old password is correct
+        if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), basePerson.getPassword())) {
+            return ResponseEntity.badRequest().body("Неверный старый пароль");
+        }
+
+        // Encode and update new password
+        basePerson.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        basePersonRepository.save(basePerson);
+
+        log.debug("Success Password changed for user: {}", currentUsername);
+        return ResponseEntity.ok().body(new Token(jwtUtil.generateToken(basePerson.getUsername()), "Bearer"));
     }
 
     private void authUser(String login, String password) {

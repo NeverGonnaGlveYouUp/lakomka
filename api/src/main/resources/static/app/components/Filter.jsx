@@ -58,6 +58,9 @@ const Filter = ({ onFilterApply }) => {
 
     return (
         <Box sx={{ width: "100%", paddingTop: "1rem" }}>
+            <Typography sx={{ margin: "10px 0 12px", lineHeight: "22px", fontSize: '22px', fontWeight: 400 }}>
+                Фильтр
+            </Typography>
             <Autocomplete
                   disablePortal
                   options={productGroups}

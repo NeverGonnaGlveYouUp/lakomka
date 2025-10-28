@@ -42,6 +42,7 @@ const ChangePassword = () => {
 
     // Fetch username when component mounts
     useEffect(() => {
+        checkJWTExpiration();
         const fetchUsername = async () => {
             try {
                 const response = await axios.get('/api/current-user', {

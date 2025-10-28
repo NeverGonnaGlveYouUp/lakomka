@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Card,
@@ -42,8 +42,8 @@ const StyledCardMedia = styled(CardMedia)({
 const ProductCard = ({ id, image, name, price, quantity }) => {
 
   const mountedRef                    = useMountedRef();
-  const [count, setCount]             = useState(0);
-  const [oldCount, setOldCount]       = useState(0);
+  const [count, setCount]             = useState(null);
+  const [oldCount, setOldCount]       = useState(null);
   const { setContextCount }           = useAppContext();
   const navigate                      = useNavigate();
 
@@ -62,18 +62,22 @@ const ProductCard = ({ id, image, name, price, quantity }) => {
         } else {
           setContextCount((c) => c - (oldCount - response.data.quantity));
         }
+        setOldCount(0);
       } catch (error) {
         console.error(error);
       }
     };
-    if (mountedRef.current && !isNaN(count) && quantity != count) {
+    if (mountedRef.current && !isNaN(count) && ((count != quantity && oldCount != null) || (count == null && oldCount == null))) {
       fetchData();
     }
   }, [count]);
 
   return (
     <StyledCard>
-      <CardActionArea onClick={() => navigate("/main/product/" + id)}>
+      <CardActionArea onClick={() => {
+              navigate("/product/" + id);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+          }}>
         <StyledCardMedia
           component="img"
           image={image}
@@ -131,10 +135,10 @@ const ProductCard = ({ id, image, name, price, quantity }) => {
                 value={count}
                 onChange={(e) => {
                     setOldCount(count);
-                    setCount(e.target.value);
+                    setCount(parseInt(e.target.value, 10));
                 }}
                 onKeyPress={(event) => {
-                    if (event?.key === '-' || event?.key === ',' || event?.key === '.' || event?.key === '0') {
+                    if (event?.key === '-' || event?.key === ',' || event?.key === '.') {
                       event.preventDefault();
                     }
                 }}

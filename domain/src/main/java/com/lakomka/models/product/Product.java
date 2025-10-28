@@ -186,7 +186,8 @@ public class Product {
                 worker,
                 stroke,
                 country,
-                description
+                description,
+                content
         );
     }
 

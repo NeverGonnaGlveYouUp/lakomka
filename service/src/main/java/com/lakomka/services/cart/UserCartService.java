@@ -57,12 +57,7 @@ public class UserCartService {
     }
 
     private ResponseEntity<CartItemDto> createResponseEntity(PersonCartItem cartItem) {
-        return ResponseEntity.ok(new CartItemDto(
-                cartItem.getProduct().getId(),
-                cartItem.getProduct().getName(),
-                cartItem.getProduct().getPriceKons().toPlainString(),
-                cartItem.getQuantity()
-        ));
+        return ResponseEntity.ok(cartItem.toCartItemDto());
     }
 
     public HashMap<Long, Integer> getCartIdQuantityHashMap(BasePerson user) {

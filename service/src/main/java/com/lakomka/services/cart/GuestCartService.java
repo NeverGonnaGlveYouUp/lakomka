@@ -1,6 +1,5 @@
 package com.lakomka.services.cart;
 
-import com.lakomka.dto.CartItemDto;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductRepository;
@@ -45,14 +44,7 @@ public class GuestCartService {
                 cart.add(cartItem);
             }
 
-            return ResponseEntity.ok().body(
-                    new CartItemDto(
-                            product.get().getId(),
-                            product.get().getName(),
-                            product.get().getPriceKons().toPlainString(),
-                            quantity
-                    )
-            );
+            return ResponseEntity.ok().body(cartItem.toCartItemDto());
         }
     }
 

@@ -445,7 +445,7 @@ const Signup = () => {
                         fullWidth
                         variant="text"
                         sx={{ mb: 2 }}
-                        onClick={() => navigate("/main")}
+                        onClick={() => navigate("/")}
                         disabled={isSubmitting}
                     >
                         Назад

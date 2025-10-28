@@ -1,6 +1,6 @@
 const React = require("react");
 const ReactDOM = require("react-dom/client");
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, Outlet } from 'react-router-dom';
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ProductFeed from './components/ProductFeed.jsx';
@@ -9,9 +9,10 @@ import Signup from './components/Signup.jsx';
 import ChangePassword from './components/ChangePassword.jsx';
 import ProductPage from './components/ProductPage.jsx';
 import Navbar from './components/Navbar.jsx';
-import Footer from './components/Footer.jsx';
+import CartPage from './components/CartPage.jsx';
+import ProfilePage from './components/ProfilePage.jsx';
+import { checkJWTExpiration } from './components/checkJWTExpiration.js';
 import { AppProvider } from './components/AppContext.js';
-import { Outlet } from 'react-router-dom';
 
 const theme = createTheme({
   palette: {
@@ -34,27 +35,39 @@ const theme = createTheme({
   },
 });
 
+const isAuthenticated = () => !!localStorage.getItem('jwtToken');
 
-const MainLayout = () => {
+const AuthLayout = () => {
+  if (isAuthenticated()) {
+    return <Navigate to="/private/profile" replace />;
+  }
+
   return (
     <div>
-      <Navbar />
-      <main>
-        <Outlet />
-      </main>
-      <Footer />
+        <main>
+            <Outlet />
+        </main>
     </div>
   );
 };
 
-const AuthLayout = () => {
+const LayoutWithNavbar = () => {
   return (
-    <div>
-      <main>
-        <Outlet />
-      </main>
-    </div>
+      <div>
+          <Navbar />
+          <main>
+              <Outlet />
+          </main>
+      </div>
   );
+};
+
+const ProtectedRoute = () => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  return (LayoutWithNavbar());
 };
 
 function App() {
@@ -69,12 +82,17 @@ function App() {
                             <Route path="/auth" element={<AuthLayout />}>
                                 <Route path="/auth/login" element={<Login />} />
                                 <Route path="/auth/signup" element={<Signup />} />
-                                <Route path="/auth/change-password" element={<ChangePassword />} />
                             </Route>
-                            <Route path="/main" element={<MainLayout />}>
+                            <Route path="/" element={<LayoutWithNavbar />}>
                                 <Route index element={<ProductFeed />} />
-                                <Route path="/main/product/:id" element={<ProductPage />} />
+                                <Route path="/product/:id" element={<ProductPage />} />
+                                <Route path="/cart" element={<CartPage />} />
                             </Route>
+                            <Route path="/private" element={<ProtectedRoute />}>
+                                <Route path="/private/change-password" element={<ChangePassword />} />
+                                <Route path="/private/profile" element={<ProfilePage />} />
+                            </Route>
+                            <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                     </BrowserRouter>
                 </ThemeProvider>

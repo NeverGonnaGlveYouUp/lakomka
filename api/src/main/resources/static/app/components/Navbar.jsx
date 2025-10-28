@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import { useAppContext } from './AppContext.js';
 import { useNavigate } from "react-router-dom";
+import { checkJWTExpiration } from './checkJWTExpiration.js';
 
 const Navbar = () => {
   const [options, setOptions]       = useState([]);
@@ -31,19 +32,21 @@ const Navbar = () => {
     useEffect(() => {
         const fetchUsername = async () => {
             try {
-                const response = await axios.get('/api/current-user', {
-                    headers: {
-                        'Authorization': localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null
+                if (!!localStorage.getItem('jwtToken')){
+                    const response = await axios.get('/api/current-user', {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                        }
+                    });
+                    if (response.data && response.data.userName) {
+                        setLoggedUsername(response.data.userName);
                     }
-                });
-                if (response.data && response.data.userName) {
-                    setLoggedUsername(response.data.userName);
                 }
             } catch (error) {
                 console.error('Error fetching username:', error);
             }
         };
-
+        checkJWTExpiration();
         fetchUsername();
     }, []);
 
@@ -109,7 +112,7 @@ const Navbar = () => {
               <Autocomplete
                 options={options}
                 onInputChange={onInputChange}
-                onChange={(option) => findIdByTitle(option.target.textContent) != null ? navigate("/main/product/" + findIdByTitle(option.target.textContent)) : option.preventDefault()}
+                onChange={(option) => findIdByTitle(option.target.textContent) != null ? navigate("/product/" + findIdByTitle(option.target.textContent)) : option.preventDefault()}
                 getOptionLabel={(option) => option.title}
                 style={{ width: 400 }}
                 noOptionsText="Введите название"
@@ -132,10 +135,10 @@ const Navbar = () => {
               <IconButton color="inherit" onClick={() => navigate("/auth/login")}>
                   <FaRegUserCircle  />
               </IconButton >
-              <IconButton color="inherit" onClick={() => navigate("/auth/change-password")}>
+              <IconButton color="inherit" onClick={() => navigate("/private/change-password")}>
                   <FaKey  />
               </IconButton >
-              <IconButton  color="inherit">
+              <IconButton  color="inherit" onClick={() => navigate("/cart")}>
                 <Badge badgeContent={counter} color="secondary">
                   <IoBagOutline />
                 </Badge>

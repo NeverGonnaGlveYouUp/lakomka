@@ -85,7 +85,7 @@ const Login = () => {
                 localStorage.setItem('jwtToken', jwtToken);
                 setSnackbarOpen(true);
                 setTimeout(() => {
-                    navigate('/main');
+                    navigate('/');
                 }, 1000);
             } else {
                 throw new Error('No token received');
@@ -191,7 +191,7 @@ const Login = () => {
                         fullWidth
                         variant="text"
                         sx={{ mb: 2 }}
-                        onClick={() => navigate("/main")}
+                        onClick={() => navigate("/")}
                         disabled={isSubmitting}
                     >
                         Назад

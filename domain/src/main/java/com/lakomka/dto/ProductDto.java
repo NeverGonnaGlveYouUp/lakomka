@@ -4,8 +4,11 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@Data
 public class ProductDto {
     private Long id;
     private String name;
@@ -23,4 +26,5 @@ public class ProductDto {
     private String stroke;
     private String country;
     private String description;
+    private String content;
 }

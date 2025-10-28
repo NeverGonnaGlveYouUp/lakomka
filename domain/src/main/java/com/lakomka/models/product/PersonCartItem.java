@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -42,8 +43,9 @@ public class PersonCartItem {
         return new CartItemDto(
             product.getId(),
             product.getName(),
-            product.getPriceKons().toPlainString(),
-            quantity
+            product.getPriceKons().multiply(BigDecimal.valueOf(quantity)).toPlainString(),
+            quantity,
+            product.getWeight() * quantity
         );
     }
 

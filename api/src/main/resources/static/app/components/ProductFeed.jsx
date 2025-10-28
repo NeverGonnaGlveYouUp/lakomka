@@ -9,7 +9,8 @@ import {
     Stack,
     Pagination,
     TextField,
-    useMediaQuery
+    useMediaQuery,
+    Typography
     } from "@mui/material";
 import { FaFilter } from "react-icons/fa";
 import useMountedRef from "./useMountedRef.jsx";
@@ -131,6 +132,9 @@ const ProductFeed = () => {
                             !isDesktopResolution && setSearchParamsGlobal([]);
                             !isDesktopResolution && fetchData(e);
                             }}/> )}
+                        <Typography sx={{ margin: "10px 0 12px", lineHeight: "22px", fontSize: '22px', fontWeight: 400 }}>
+                            Каталог, найдено {totalElements} товаров
+                        </Typography>
                         <Box sx={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
                             <TextField
                               id="outlined-select-sort-native"

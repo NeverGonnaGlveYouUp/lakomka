@@ -11,8 +11,8 @@ public class FilterBoundariesDto {
     private Integer minPrice;
     private Integer maxMass;
     private Integer minMass;
-    private String countries;
     private String workers;
+    private String countries;
     private String productGroups;
 
 }

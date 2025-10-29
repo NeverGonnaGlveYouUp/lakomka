@@ -7,13 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 @Service
-public class GuestCartService {
+public class GuestCartService extends Common {
 
     @Autowired
     private ProductRepository productRepository;
@@ -64,5 +65,20 @@ public class GuestCartService {
                         .collect(Collectors.toSet())
         );
     }
+
+    public ResponseEntity<?> getCartSummary(String sessionId) {
+        Set<PersonCartItem> cart = sessionCarts.getOrDefault(sessionId, new HashSet<>());
+        if (cart == null || cart.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(makeSummary(cart));
+    }
+
+    // todo какой уровень цены для товара у Guest/Anonymous ?
+    @Override
+    public BigDecimal getUserPrice(PersonCartItem item) {
+        return item.getProduct().getPriceKons();
+    }
+
 }
 

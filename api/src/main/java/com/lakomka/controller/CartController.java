@@ -38,4 +38,13 @@ public class CartController {
         log.info("getCartItems: user: {}", Optional.ofNullable(user).map(BasePerson::getId).orElse(null));
         return cartService.getCart(user, request);
     }
+
+    @GetMapping("/summary")
+    public ResponseEntity<?> getCartSummary(
+            @AuthenticationPrincipal BasePerson user,
+            HttpServletRequest request
+    ) {
+        log.info("getCartSummary: user: {}", Optional.ofNullable(user).map(BasePerson::getId).orElse(null));
+        return cartService.getCartSummary(user, request);
+    }
 }

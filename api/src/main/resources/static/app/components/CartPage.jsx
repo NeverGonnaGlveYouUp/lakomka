@@ -14,8 +14,11 @@ import {
     CardMedia,
     CardActionArea,
     TextField,
-    IconButton
-    } from '@mui/material';
+    IconButton,
+    List,
+    ListItem,
+    ListItemText
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from './AppContext.js';
 import { checkJWTExpiration } from './checkJWTExpiration.js';
@@ -51,42 +54,70 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) =
     }, [id])
 
     useEffect(() => {
-      const fetchData = async () => {
-        try {
-          checkJWTExpiration();
-          setOldCount(localWeight);
-          setOldLocalPrice(localPrice);
-          const response = await axios.put('/api/cart/add?id=' + id + '&quantity=' + (count === '' ? 0 : count), null,
-          { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
-          if (response.data.quantity == 0) {
-              setVisible(false);
-              setContextCount((c) => c - oldCount);
-              setLocalPrice(0);
-              setLocalWeight(0);
-          } else {
-              if (oldCount < response.data.quantity) {
-                setContextCount((c) => c + (response.data.quantity - oldCount));
-              } else {
-                setContextCount((c) => c - (oldCount - response.data.quantity));
-              }
-              setLocalPrice(response.data.price);
-              setLocalWeight(response.data.weight);
-          }
-          newData({
-              localWeight, oldLocalWeight,
-              localPrice, oldLocalPrice,
-              id, quantity});
-          setOldCount(0);
-        } catch (error) {
-          console.error(error);
+
+        // Prevent API call for invalid counts
+        if (count < 0) {
+            setCount(0);
+            return;
         }
-      };
-      if (mountedRef.current && !isNaN(count) && (count != null && oldCount != null)) {
-        fetchData();
-      }
+
+        const fetchData = async () => {
+            try {
+                checkJWTExpiration();
+                setOldCount(count); // Save current count as old
+
+                // Handle empty string or invalid values
+                const quantityToSend = count === '' || isNaN(count) || count < 0 ? 0 : count;
+
+                const response = await axios.put('/api/cart/add?id=' + id + '&quantity=' + (count === '' ? 0 : count), null,
+                    { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
+
+                if (response.data.quantity == 0) {
+                    setVisible(false);
+                    setContextCount((c) => c - oldCount);
+                    // Call newData with updated values BEFORE setting local state
+                    newData({
+                        localWeight: 0,
+                        oldLocalWeight: localWeight,
+                        localPrice: 0,
+                        oldLocalPrice: localPrice,
+                        id,
+                        quantity: 0
+                    });
+                    setLocalPrice(0);
+                    setLocalWeight(0);
+                } else {
+                    if (oldCount < response.data.quantity) {
+                        setContextCount((c) => c + (response.data.quantity - oldCount));
+                    } else {
+                        setContextCount((c) => c - (oldCount - response.data.quantity));
+                    }
+
+                    // Call newData with updated values BEFORE setting local state
+                    newData({
+                        localWeight: response.data.weight,
+                        oldLocalWeight: localWeight,
+                        localPrice: response.data.price,
+                        oldLocalPrice: localPrice,
+                        id,
+                        quantity: response.data.quantity
+                    });
+
+                    setLocalPrice(response.data.price);
+                    setLocalWeight(response.data.weight);
+                }
+                setOldCount(0);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        if (mountedRef.current && !isNaN(count) && (count != null && oldCount != null) && count >= 0) {
+            fetchData();
+        }
     }, [count]);
 
-    return(
+    return (
         <div>
             {visible && (
                 <Card sx={{ display: 'flex' }}>
@@ -120,18 +151,32 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) =
                         </Stack>
                         <Container sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                             <Stack direction="row" spacing={0}>
-                                <IconButton onClick={() => {
-                                    setOldCount(count);
-                                    setCount((c) => c - 1);
-                                    }} color="primary" aria-label="decrement">
-                                        -
+                                <IconButton
+                                    onClick={() => {
+                                        if (count > 0) { // Only decrement if count is greater than 0
+                                            setOldCount(count);
+                                            setCount((c) => c - 1);
+                                        }
+                                    }}
+                                    color="primary"
+                                    aria-label="decrement"
+                                    disabled={count <= 0} // disable button when at 0
+                                >
+                                    -
                                 </IconButton>
                                 <TextField
                                     type="number"
                                     value={count ? count : ''}
                                     onChange={(e) => {
-                                        setOldCount(count);
-                                        setCount(parseInt(e.target.value, 10));
+                                        const newValue = parseInt(e.target.value, 10);
+                                        // Prevent negative values and NaN
+                                        if (!isNaN(newValue) && newValue >= 0) {
+                                            setOldCount(count);
+                                            setCount(newValue);
+                                        } else if (e.target.value === '') {
+                                            setOldCount(count);
+                                            setCount('');
+                                        }
                                     }}
                                     onKeyPress={(event) => {
                                         if (event?.key === '-' || event?.key === ',' || event?.key === '.') {
@@ -174,10 +219,13 @@ const CartPage = () => {
     const { contextCount, setContextCount } = useAppContext();
     const mountedRef                        = useMountedRef();
     const navigate                          = useNavigate();
+    const [cartSummary, setCartSummary]     = useState(null);
 
     const sumByField = (array, field) => {
         return array.reduce((accumulator, current) => {
-            return accumulator + current[field];
+            // Ensure we're adding numbers, not strings
+            const value = parseFloat(current[field]) || 0;
+            return accumulator + value;
         }, 0);
     };
 
@@ -185,11 +233,23 @@ const CartPage = () => {
         const fetchData = async () => {
             checkJWTExpiration();
             const response = await axios.get('/api/cart/items', null,
-            { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
-            setContextCount(sumByField(response.data, 'quantity'));
-            setPrice(sumByField(response.data, 'price'));
-            setWeight(sumByField(response.data, 'weight'));
+                { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
+
             setProducts(response.data);
+
+            // Calculate initial totals from the response data
+            const totalItems = sumByField(response.data, 'quantity');
+            const totalPrice = sumByField(response.data, 'price');
+            const totalWeight = sumByField(response.data, 'weight');
+
+            setContextCount(totalItems);
+            setPrice(totalPrice);
+            setWeight(totalWeight);
+
+            // Fetch cart summary
+            const summaryResponse = await axios.get('/api/cart/summary', null,
+                { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
+            setCartSummary(summaryResponse.data);
         }
         if (!mountedRef.current) {
             fetchData();
@@ -200,66 +260,123 @@ const CartPage = () => {
       setProducts((products) => products.filter(item => item.id !== id));
     };
 
-    return(
-        <Container maxWidth="lg" sx={{ mt: 3,  display: "flex", gap: "2rem", flexDirection: "column" }}>
+    // Function to update cart summary when items change
+    const updateCartSummary = (updatedProducts) => {
+        const totalItems = sumByField(updatedProducts, 'quantity');
+        const totalPrice = sumByField(updatedProducts, 'price');
+        const totalWeight = sumByField(updatedProducts, 'weight');
+
+        setContextCount(totalItems);
+        setPrice(totalPrice);
+        setWeight(totalWeight);
+
+        // Update cart summary with new values
+        setCartSummary({
+            totalItems,
+            totalPrice,
+            totalWeight
+        });
+    };
+
+    return (
+        <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
             <Typography sx={{ margin: "10px 0 12px", lineHeight: "44px", fontSize: '44px', fontWeight: 700 }}>
                 Корзина
             </Typography>
-            <Box sx={{ flexGrow: 1, width: "-webkit - fill - available"}}>
-            { products.length != 0 ? (
-                <Container sx={{ display: "flex", flexDirection: "row", gap: "2rem"}}>
-                    <Grid container spacing={2} sx={{ flexDirection: "column" }}>
-                        {products.map((item, index) => (
-                            <Grid key={index}>
-                                <CartPageCard newData={(e) => {
-                                        setPrice((p) => p - e.oldLocalPrice);
-                                        setPrice((p) => p + e.localWeight);
-                                        setWeight((w) => w - e.oldLocalWeight);
-                                        setWeight((w) => w + e.localWeight);
+            <Box sx={{ flexGrow: 1, width: "-webkit - fill - available" }}>
+                {products.length != 0 ? (
+                    <Container sx={{ display: "flex", flexDirection: "row", gap: "2rem" }}>
+                        <Grid container spacing={2} sx={{ flexDirection: "column" }}>
+                            {products.map((item, index) => (
+                                <Grid key={index}>
+                                    <CartPageCard newData={(e) => {
+                                        const updatedProducts = products.map(product => {
+                                            if (product.productId === e.id) {
+                                                return {
+                                                    ...product,
+                                                    quantity: e.quantity,
+                                                    price: e.localPrice,    // Use the updated price from child
+                                                    weight: e.localWeight   // Use the updated weight from child
+                                                };
+                                            }
+                                            return product;
+                                        });
+
+                                        // Update the products state FIRST
+                                        setProducts(updatedProducts);
+
+                                        // Then update cart summary with the new products array
+                                        updateCartSummary(updatedProducts);
+
+                                        // Remove product if quantity is 0
                                         if (e.quantity == 0) {
                                             removeProductById(e.id);
                                         }
                                     }}
-                                    id={item.productId}
-                                    image="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
-                                    name={item.name}
-                                    price={item.price}
-                                    weight={item.weight}
-                                    quantity={item.quantity}/>
-                            </Grid>
-                        ))}
-                    </Grid>
-                    <Paper sx={{ width: "34%%" }}>
-
-                    </Paper>
-                </Container>
-            ) : (
-                <Container sx={{ justifyContent: "center", padding: "30px 0", textAlign: "center", marginBottom: "25rem" }}>
-                    <Typography sx={{ fontSize: "32px", lineHeight: "32px", fontWeight: 700, marginBottom: "1rem"}}>
-                        {"В Вашей корзине пока нет товаров"}
-                    </Typography>
-                    <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
-                        {"Вы можете их выбрать в "}
-                        <Link onClick={() => navigate("/")}>
-                             каталоге
-                        </Link>
-                        {"."}
-                    </Typography>
-                    {!!!localStorage.getItem('jwtToken') ?
-                        (<div>
-                            <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "0.5rem" }}>
-                                {"Возможно, у вас остались товары в корзине, если Вы уже зарегистрированы на сайте."}
-                            </Typography>
-                            <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
-                                {"Чтобы их увидеть, необходимо "}
-                                <Link onClick={() => navigate("/auth/login")}>
-                                    авторизоваться
-                                </Link>
-                                {"."}
-                            </Typography>
-                        </div>) : (<div></div>)}
-                </Container>
-            )}
+                                        id={item.productId}
+                                        image="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
+                                        name={item.name}
+                                        price={item.price}
+                                        weight={item.weight}
+                                        quantity={item.quantity} />
+                                </Grid>
+                            ))}
+                        </Grid>
+                        <Paper sx={{ width: "34%%" }}>
+                            <Box sx={{ p: 2 }}>
+                                <Typography variant="h6" sx={{ mb: 2 }}>
+                                    Сводка по корзине
+                                </Typography>
+                                <List>
+                                    <ListItem>
+                                        <ListItemText
+                                            primary="Количество товаров"
+                                            secondary={cartSummary?.totalItems || contextCount}
+                                        />
+                                    </ListItem>
+                                    <ListItem>
+                                        <ListItemText
+                                            primary="Общая стоимость"
+                                            secondary={`${cartSummary?.totalPrice || price} ₽`}
+                                        />
+                                    </ListItem>
+                                    <ListItem>
+                                        <ListItemText
+                                            primary="Общий вес"
+                                            secondary={`${cartSummary?.totalWeight || weight} г`}
+                                        />
+                                    </ListItem>
+                                </List>
+                            </Box>
+                        </Paper>
+                    </Container>
+                ) : (
+                    <Container sx={{ justifyContent: "center", padding: "30px 0", textAlign: "center", marginBottom: "25rem" }}>
+                        <Typography sx={{ fontSize: "32px", lineHeight: "32px", fontWeight: 700, marginBottom: "1rem" }}>
+                            {"В Вашей корзине пока нет товаров"}
+                        </Typography>
+                        <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
+                            {"Вы можете их выбрать в "}
+                            <Link onClick={() => navigate("/")}>
+                                каталоге
+                            </Link>
+                            {"."}
+                        </Typography>
+                        {!!!localStorage.getItem('jwtToken') ?
+                            (<div>
+                                <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "0.5rem" }}>
+                                    {"Возможно, у вас остались товары в корзине, если Вы уже зарегистрированы на сайте."}
+                                </Typography>
+                                <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
+                                    {"Чтобы их увидеть, необходимо "}
+                                    <Link onClick={() => navigate("/auth/login")}>
+                                        авторизоваться
+                                    </Link>
+                                    {"."}
+                                </Typography>
+                            </div>) : (<div></div>)}
+                    </Container>
+                )}
             </Box>
         </Container>
     );

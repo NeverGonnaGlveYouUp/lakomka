@@ -54,6 +54,17 @@ public class CartService {
         }
     }
 
+    public ResponseEntity<?> getCartSummary(
+            BasePerson user,
+            HttpServletRequest request
+    ) {
+        if (user == null) {
+            return guestCartService.getCartSummary(getCurrentSessionId(request));
+        } else {
+            return userCartService.getCartSummary(user);
+        }
+    }
+
     private String getCurrentSessionId(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {

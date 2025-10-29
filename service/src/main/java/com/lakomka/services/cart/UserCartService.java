@@ -8,15 +8,18 @@ import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.product.PersonCartItemRepository;
 import com.lakomka.repository.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserCartService {
+public class UserCartService extends Common {
 
     @Autowired
     private BasePersonRepository userRepository;
@@ -76,5 +79,23 @@ public class UserCartService {
                         .map(PersonCartItem::toCartItemDto)
                         .collect(Collectors.toSet());
         return ResponseEntity.ok(cartItems);
+    }
+
+    public ResponseEntity<?> getCartSummary(BasePerson user) {
+        try {
+            List<PersonCartItem> cart = personCartItemRepository.findAllByBasePerson(user);
+            if (cart == null || cart.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(makeSummary(cart));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // todo выбирать уровень цены для товара в зависимости от установок у пользователя
+    @Override
+    public BigDecimal getUserPrice(PersonCartItem item) {
+        return item.getProduct().getPriceKons();
     }
 }

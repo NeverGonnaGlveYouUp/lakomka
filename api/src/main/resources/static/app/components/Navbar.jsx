@@ -22,14 +22,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { checkJWTExpiration } from './checkJWTExpiration.js';
 
 const Navbar = () => {
-  const [options, setOptions]       = useState([]);
-  const [loading, setLoading]       = useState(false);
-  const previousController          = useRef();
-  const { counter }                 = useAppContext();
-  const navigate                    = useNavigate();
-  const location                    = useLocation();
+  const [options, setOptions]               = useState([]);
+  const [loading, setLoading]               = useState(false);
+  const previousController                  = useRef();
+  const { counter, setContextCount }        = useAppContext();
+  const navigate                            = useNavigate();
+  const location                            = useLocation();
   const [loggedUsername, setLoggedUsername] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn]         = useState(false);
 
     // Fetch username when component mounts
     useEffect(() => {
@@ -98,6 +98,8 @@ const Navbar = () => {
   const handleLogout = () => {
     // Remove JWT token from localStorage
     localStorage.removeItem('jwtToken');
+    // Clear the shopping cart counter
+    setContextCount(0);
     // Redirect to login page or home
     navigate("/");
     // Reset state

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import { FaRegUserCircle, FaKey, FaSignOutAlt } from 'react-icons/fa';
+import { FaRegUserCircle, FaKey, FaSignOutAlt, FaShoppingBag } from 'react-icons/fa';
 import { createTheme } from '@mui/material/styles';
 import { IoBagOutline } from "react-icons/io5";
 import {
@@ -18,7 +18,7 @@ import {
     Tooltip
 } from '@mui/material';
 import { useAppContext } from './AppContext.js';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { checkJWTExpiration } from './checkJWTExpiration.js';
 
 const Navbar = () => {
@@ -27,6 +27,7 @@ const Navbar = () => {
   const previousController          = useRef();
   const { counter }                 = useAppContext();
   const navigate                    = useNavigate();
+  const location                    = useLocation();
   const [loggedUsername, setLoggedUsername] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -118,6 +119,9 @@ const Navbar = () => {
     },
   });
 
+  // Check if we're in the cart route
+  const isCartRoute = location.pathname === '/cart';
+
   return (
     <ThemeProvider theme={theme}>
       <AppBar position="sticky">
@@ -149,6 +153,13 @@ const Navbar = () => {
               )}
             />
             <Stack direction="row" spacing={2}>
+              {isCartRoute && (
+                <Tooltip title="Каталог товаров">
+                    <IconButton color="inherit" onClick={() => navigate("/")}>
+                        <FaShoppingBag />
+                    </IconButton>
+                </Tooltip>
+              )}
               <IconButton  color="inherit" onClick={() => navigate("/cart")}>
                 <Tooltip title="Корзина">
                     <Badge badgeContent={counter} color="secondary">

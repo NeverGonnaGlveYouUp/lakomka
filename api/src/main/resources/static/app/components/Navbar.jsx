@@ -95,16 +95,35 @@ const Navbar = () => {
       return String(val).charAt(0).toUpperCase() + String(val).slice(1);
   }
 
-  const handleLogout = () => {
-    // Remove JWT token from localStorage
-    localStorage.removeItem('jwtToken');
-    // Clear the shopping cart counter
-    // setContextCount(0);
-    // Redirect to login page or home
-    navigate("/");
-    // Reset state
-    setIsLoggedIn(false);
-    setLoggedUsername('');
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('jwtToken');
+      if (token) {
+        // Call backend logout endpoint
+        await axios.post('/api/logout', {}, {
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+
+      // Remove JWT token from localStorage
+      localStorage.removeItem('jwtToken');
+
+      // Clear the shopping cart counter
+      setContextCount(0);
+
+      // Redirect to login page or home
+      navigate("/");
+
+      // Reset state
+      setIsLoggedIn(false);
+      setLoggedUsername('');
+
+    }
   };
 
   const theme = createTheme({

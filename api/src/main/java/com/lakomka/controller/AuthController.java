@@ -16,6 +16,7 @@ import com.lakomka.utils.JwtUtil;
 import com.lakomka.validators.BasePersonValidator;
 import com.lakomka.validators.RegistrationValidator;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @RestController
@@ -192,6 +194,29 @@ public class AuthController {
 
         log.debug("Success Password changed for user: {}", currentUsername);
         return ResponseEntity.ok().body(new Token(jwtUtil.generateToken(basePerson.getUsername()), "Bearer"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            @AuthenticationPrincipal BasePerson user,
+            HttpServletRequest request
+    ) {
+
+        if (nonNull(user)) {
+            log.info("Logout: {}", user.getLogin());
+        }
+
+        // Manually invalidate session
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        // Clear the security context
+        SecurityContextHolder.clearContext();
+
+        // Return success response
+        return ResponseEntity.ok().build();
     }
 
     private void authUser(String login, String password) {

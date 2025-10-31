@@ -17,7 +17,9 @@ import {
     IconButton,
     List,
     ListItem,
-    ListItemText
+    ListItemText,
+    useMediaQuery,
+    Button
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from './AppContext.js';
@@ -220,6 +222,7 @@ const CartPage = () => {
     const mountedRef                        = useMountedRef();
     const navigate                          = useNavigate();
     const [cartSummary, setCartSummary]     = useState(null);
+    const isDesktopResolution               = useMediaQuery('(min-width:992px)');
 
     const sumByField = (array, field) => {
         return array.reduce((accumulator, current) => {
@@ -270,7 +273,6 @@ const CartPage = () => {
         setPrice(totalPrice);
         setWeight(totalWeight);
 
-        // Update cart summary with new values
         setCartSummary({
             totalItems,
             totalPrice,
@@ -285,7 +287,7 @@ const CartPage = () => {
             </Typography>
             <Box sx={{ flexGrow: 1, width: "-webkit - fill - available" }}>
                 {products.length != 0 ? (
-                    <Container sx={{ display: "flex", flexDirection: "row", gap: "2rem" }}>
+                    <Container sx={{ display: "flex", flexDirection: isDesktopResolution ? "row" : "column-reverse", gap: "2rem" }}>
                         <Grid container spacing={2} sx={{ flexDirection: "column" }}>
                             {products.map((item, index) => (
                                 <Grid key={index}>
@@ -322,31 +324,38 @@ const CartPage = () => {
                                 </Grid>
                             ))}
                         </Grid>
-                        <Paper sx={{ width: "34%%" }}>
-                            <Box sx={{ p: 2 }}>
-                                <Typography variant="h6" sx={{ mb: 2 }}>
-                                    Сводка по корзине
-                                </Typography>
-                                <List>
-                                    <ListItem>
-                                        <ListItemText
-                                            primary="Количество товаров"
-                                            secondary={cartSummary?.totalItems || contextCount}
-                                        />
-                                    </ListItem>
-                                    <ListItem>
-                                        <ListItemText
-                                            primary="Общая стоимость"
-                                            secondary={`${cartSummary?.totalPrice || price} ₽`}
-                                        />
-                                    </ListItem>
-                                    <ListItem>
-                                        <ListItemText
-                                            primary="Общий вес"
-                                            secondary={`${cartSummary?.totalWeight || weight} г`}
-                                        />
-                                    </ListItem>
-                                </List>
+                        <Paper sx={{ width: isDesktopResolution ? "34%" : "100%" }}>
+                            <Box sx={{ p: 2, display: "flex", flexDirection: isDesktopResolution ? "column" : "column-reverse" }}>
+                                <div>
+                                    <Typography variant="h6" sx={{ mb: 2, fontSize: "20px", lineHeight: "20px", fontWeight: 700}}>
+                                        Ваша корзина
+                                    </Typography>
+                                    <List>
+                                        <ListItem>
+                                            <ListItemText
+                                                primary="Количество товаров"
+                                                secondary={cartSummary?.totalItems || contextCount}
+                                            />
+                                        </ListItem>
+                                        <ListItem>
+                                            <ListItemText
+                                                primary="Общая стоимость"
+                                                secondary={`${cartSummary?.totalPrice || price} ₽`}
+                                            />
+                                        </ListItem>
+                                        <ListItem>
+                                            <ListItemText
+                                                primary="Общий вес"
+                                                secondary={`${cartSummary?.totalWeight || weight} г`}
+                                            />
+                                        </ListItem>
+                                    </List>
+                                    <Button
+                                        color="success"
+                                        fullWidth
+                                        variant="contained">
+                                    </Button>
+                                </div>
                             </Box>
                         </Paper>
                     </Container>

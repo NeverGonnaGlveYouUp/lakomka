@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import { FaRegUserCircle, FaKey } from 'react-icons/fa';
+import { FaRegUserCircle } from 'react-icons/fa';
 import { createTheme } from '@mui/material/styles';
 import { IoBagOutline } from "react-icons/io5";
 import {
@@ -106,7 +106,11 @@ const Navbar = () => {
       <AppBar position="sticky">
         <Toolbar>
           <Container maxWidth="lg" sx={{ mt: 3,  display: "flex", justifyContent: "space-between", marginTop: "0px"}}>
-              <Typography variant="h6" component="div" sx={{ alignSelf: "center" }}>
+              <Typography
+                variant="h6"
+                component="div"
+                sx={{ alignSelf: "center" }}
+                onClick={ () => navigate("/") }>
                 My Logo
               </Typography>
               <Autocomplete
@@ -134,9 +138,6 @@ const Navbar = () => {
             <Stack direction="row" spacing={2}>
               <IconButton color="inherit" onClick={() => navigate("/auth/login")}>
                   <FaRegUserCircle  />
-              </IconButton >
-              <IconButton color="inherit" onClick={() => navigate("/private/change-password")}>
-                  <FaKey  />
               </IconButton >
               <IconButton  color="inherit" onClick={() => navigate("/cart")}>
                 <Badge badgeContent={counter} color="secondary">

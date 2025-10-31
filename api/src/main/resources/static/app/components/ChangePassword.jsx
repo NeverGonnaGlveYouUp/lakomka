@@ -111,7 +111,7 @@ const ChangePassword = () => {
                 localStorage.setItem('jwtToken', jwtToken);
                 setSnackbarOpen(true);
                 setTimeout(() => {
-                    navigate('/main');
+                    navigate('/private/profile');
                 }, 1000);
             } else {
                 throw new Error('No token received');
@@ -229,7 +229,7 @@ const ChangePassword = () => {
                         fullWidth
                         variant="text"
                         sx={{ mb: 2 }}
-                        onClick={() => navigate("/main")}
+                        onClick={() => navigate("/private/profile")}
                         disabled={isSubmitting}
                     >
                         Назад

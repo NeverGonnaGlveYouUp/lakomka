@@ -187,7 +187,8 @@ public class Product {
                 stroke,
                 country,
                 description,
-                content
+                content,
+                productGroup
         );
     }
 

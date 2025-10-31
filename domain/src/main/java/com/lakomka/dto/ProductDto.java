@@ -27,4 +27,5 @@ public class ProductDto {
     private String country;
     private String description;
     private String content;
+    private String group;
 }

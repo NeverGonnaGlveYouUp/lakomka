@@ -19,6 +19,7 @@ import {
     } from "@mui/material";
 import { checkJWTExpiration } from './checkJWTExpiration.js';
 import { useAppContext } from './AppContext.js';
+import { useNavigate } from 'react-router-dom';
 
 const ProductPageImage = styled(Box)({
   width: '45%',
@@ -71,6 +72,7 @@ const ProductPage = () => {
 
     const [oldCartQuantity, setOldCartQuantity]= useState(null);
     const { setContextCount }               = useAppContext();
+    const navigate                          = useNavigate();
 
       useEffect(() => {
         const editCart = async () => {
@@ -122,7 +124,7 @@ const ProductPage = () => {
             setCountry(response.data.country);
             setDescription(response.data.description);
             setContent(response.data.content);
-            setGroup(response.data.group);
+            setGroup(response.data.productGroup);
         } catch (error) {
             console.error("There was an error fetching the data!", error);
         }
@@ -147,6 +149,7 @@ const ProductPage = () => {
                                     color="success"
                                     fullWidth
                                     variant="contained"
+                                    onClick={() => navigate("/cart")}
                                 >
                                     <Container>
                                         <Typography variant="h6" >

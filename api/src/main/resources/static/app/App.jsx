@@ -11,6 +11,7 @@ import ProductPage from './components/ProductPage.jsx';
 import Navbar from './components/Navbar.jsx';
 import CartPage from './components/CartPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
+import ErrorPage from './components/ErrorPage.jsx';
 import { checkJWTExpiration } from './components/checkJWTExpiration.js';
 import { AppProvider } from './components/AppContext.js';
 
@@ -92,7 +93,7 @@ function App() {
                                 <Route path="/private/change-password" element={<ChangePassword />} />
                                 <Route path="/private/profile" element={<ProfilePage />} />
                             </Route>
-                            <Route path="*" element={<Navigate to="/" replace />} />
+                            <Route path="/error" element={<ErrorPage />} />
                         </Routes>
                     </BrowserRouter>
                 </ThemeProvider>

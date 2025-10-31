@@ -111,6 +111,42 @@ public class AuthController {
                 .body(new Token(jwtUtil.generateToken(authenticationRequest.getLogin()), "Bearer"));
     }
 
+    @GetMapping("/current-user/model")
+    public ResponseEntity<?> getUserModel(
+            @AuthenticationPrincipal BasePerson user
+    ) {
+        if (Optional.ofNullable(user).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Optional<JPerson> optionalJPerson = jPersonRepository.findById(user.getId());
+        if (optionalJPerson.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        JPerson jPerson = optionalJPerson.get();
+        return ResponseEntity.ok()
+                .body(
+                        LoggedUser.builder()
+                                .userName(user.getLogin())
+                                .name(jPerson.getName())
+                                .nameFull(jPerson.getNameFull())
+                                .address(jPerson.getAddress())
+                                .OGRN(jPerson.getOGRN())
+                                .INN(jPerson.getINN())
+                                .KPP(jPerson.getKPP())
+                                .phone(jPerson.getPhone())
+                                .email(jPerson.getEmail())
+                                .contact(jPerson.getContact())
+                                .post(jPerson.getPost())
+                                .addressDelivery(jPerson.getAddressDelivery())
+                                .mapDelivery(jPerson.getMapDelivery())
+                                .rest(jPerson.getRest())
+                                .restTime(jPerson.getRestTime())
+                                .build()
+                );
+    }
+
     @GetMapping("/current-user")
     public ResponseEntity<?> changePassword(
             @AuthenticationPrincipal BasePerson user

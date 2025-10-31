@@ -11,9 +11,11 @@ import com.lakomka.models.person.Person;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.RecaptchaService;
+import com.lakomka.services.cart.CartService;
 import com.lakomka.utils.JwtUtil;
 import com.lakomka.validators.BasePersonValidator;
 import com.lakomka.validators.RegistrationValidator;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,10 +51,12 @@ public class AuthController {
     private final RegistrationValidator registrationValidator;
     private final RegistrationDtoAssembler registrationDtoAssembler;
     private final RecaptchaService recaptchaService;
+    private final CartService cartService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(
-            @Valid @RequestBody RegistrationDto user
+            @Valid @RequestBody RegistrationDto user,
+            HttpServletRequest request
     ) {
         Errors errors = new BeanPropertyBindingResult(user, "user");
         user.setInn(user.getInn().replaceAll("-", ""));
@@ -84,6 +88,8 @@ public class AuthController {
 
         authUser(user.getLogin(), user.getPassword());
 
+        cartService.moveGuestCartToUserCart(basePerson, request);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Connection", "close")
                 .body(new Token(jwtUtil.generateToken(basePerson.getLogin()), "Bearer"));
@@ -91,7 +97,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(
-            @RequestBody AuthenticationRequest authenticationRequest
+            @RequestBody AuthenticationRequest authenticationRequest,
+            HttpServletRequest request
     ) {
         Errors errors = new BeanPropertyBindingResult(authenticationRequest, "user");
         basePersonValidator.validate(authenticationRequest, errors);
@@ -104,6 +111,11 @@ public class AuthController {
         }
 
         authUser(authenticationRequest.getLogin(), authenticationRequest.getPassword());
+
+        // Переносим товары из анонимной корзины в пользовательскую
+        BasePerson authenticatedUser = basePersonRepository.findByLogin(authenticationRequest.getLogin())
+                .orElseThrow(() -> new RuntimeException("Пользователь " + authenticationRequest.getLogin() + " не найден"));
+        cartService.moveGuestCartToUserCart(authenticatedUser, request);
 
         log.debug("Login: {}", authenticationRequest.getLogin());
         return ResponseEntity.status(HttpStatus.OK)

@@ -80,5 +80,10 @@ public class GuestCartService extends Common {
         return item.getProduct().getPriceKons();
     }
 
+    public void clearCart(String sessionId) {
+        // Очищаем корзину в сессии
+        sessionCarts.remove(sessionId);
+    }
+
 }
 

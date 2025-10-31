@@ -65,6 +65,22 @@ public class CartService {
         }
     }
 
+    public void moveGuestCartToUserCart(BasePerson user, HttpServletRequest request) {
+        String sessionId = getCurrentSessionId(request);
+        if (sessionId != null) {
+            // Получаем содержимое анонимной корзины
+            HashMap<Long, Integer> guestCart = guestCartService.getCartIdQuantityHashMap(sessionId);
+
+            // Переносим товары в пользовательскую корзину
+            for (HashMap.Entry<Long, Integer> entry : guestCart.entrySet()) {
+                userCartService.addToCart(user, entry.getKey(), entry.getValue());
+            }
+
+            // Очищаем анонимную корзину
+            guestCartService.clearCart(sessionId);
+        }
+    }
+
     private String getCurrentSessionId(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {

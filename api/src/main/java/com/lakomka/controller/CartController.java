@@ -47,4 +47,21 @@ public class CartController {
         log.info("getCartSummary: user: {}", Optional.ofNullable(user).map(BasePerson::getId).orElse(null));
         return cartService.getCartSummary(user, request);
     }
+
+    @DeleteMapping("/clear")
+    public ResponseEntity<?> clearCart(
+            @AuthenticationPrincipal BasePerson user,
+            HttpServletRequest request
+    ) {
+        log.info("clearCart: user: {}", Optional.ofNullable(user).map(BasePerson::getId).orElse(null));
+        return cartService.clearCart(user, request);
+    }
+
+    @DeleteMapping("/anonymous/clear")
+    public ResponseEntity<?> clearAnonymousCart(
+            HttpServletRequest request
+    ) {
+        log.info("clearAnonymousCart: anonymous");
+        return cartService.clearCart(null, request);
+    }
 }

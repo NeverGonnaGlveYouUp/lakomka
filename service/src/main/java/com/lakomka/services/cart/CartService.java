@@ -81,6 +81,16 @@ public class CartService {
         }
     }
 
+    public ResponseEntity<?> clearCart(BasePerson user, HttpServletRequest request) {
+        String sessionId = getCurrentSessionId(request);
+        if (user == null) {
+            guestCartService.clearCart(sessionId);
+        } else {
+            userCartService.clearCart(user);
+        }
+        return ResponseEntity.noContent().build();
+    }
+
     private String getCurrentSessionId(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -92,4 +102,5 @@ public class CartService {
         }
         return null;
     }
+
 }

@@ -99,7 +99,7 @@ const Navbar = () => {
     // Remove JWT token from localStorage
     localStorage.removeItem('jwtToken');
     // Clear the shopping cart counter
-    setContextCount(0);
+    // setContextCount(0);
     // Redirect to login page or home
     navigate("/");
     // Reset state

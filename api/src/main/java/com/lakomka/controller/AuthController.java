@@ -11,9 +11,12 @@ import com.lakomka.models.person.Person;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.RecaptchaService;
+import com.lakomka.services.cart.CartService;
 import com.lakomka.utils.JwtUtil;
 import com.lakomka.validators.BasePersonValidator;
 import com.lakomka.validators.RegistrationValidator;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @RestController
@@ -49,10 +53,12 @@ public class AuthController {
     private final RegistrationValidator registrationValidator;
     private final RegistrationDtoAssembler registrationDtoAssembler;
     private final RecaptchaService recaptchaService;
+    private final CartService cartService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(
-            @Valid @RequestBody RegistrationDto user
+            @Valid @RequestBody RegistrationDto user,
+            HttpServletRequest request
     ) {
         Errors errors = new BeanPropertyBindingResult(user, "user");
         user.setInn(user.getInn().replaceAll("-", ""));
@@ -84,6 +90,8 @@ public class AuthController {
 
         authUser(user.getLogin(), user.getPassword());
 
+        cartService.moveGuestCartToUserCart(basePerson, request);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Connection", "close")
                 .body(new Token(jwtUtil.generateToken(basePerson.getLogin()), "Bearer"));
@@ -91,7 +99,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(
-            @RequestBody AuthenticationRequest authenticationRequest
+            @RequestBody AuthenticationRequest authenticationRequest,
+            HttpServletRequest request
     ) {
         Errors errors = new BeanPropertyBindingResult(authenticationRequest, "user");
         basePersonValidator.validate(authenticationRequest, errors);
@@ -104,6 +113,11 @@ public class AuthController {
         }
 
         authUser(authenticationRequest.getLogin(), authenticationRequest.getPassword());
+
+        // Переносим товары из анонимной корзины в пользовательскую
+        BasePerson authenticatedUser = basePersonRepository.findByLogin(authenticationRequest.getLogin())
+                .orElseThrow(() -> new RuntimeException("Пользователь " + authenticationRequest.getLogin() + " не найден"));
+        cartService.moveGuestCartToUserCart(authenticatedUser, request);
 
         log.debug("Login: {}", authenticationRequest.getLogin());
         return ResponseEntity.status(HttpStatus.OK)
@@ -216,6 +230,29 @@ public class AuthController {
 
         log.debug("Success Password changed for user: {}", currentUsername);
         return ResponseEntity.ok().body(new Token(jwtUtil.generateToken(basePerson.getUsername()), "Bearer"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            @AuthenticationPrincipal BasePerson user,
+            HttpServletRequest request
+    ) {
+
+        if (nonNull(user)) {
+            log.info("Logout: {}", user.getLogin());
+        }
+
+        // Manually invalidate session
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        // Clear the security context
+        SecurityContextHolder.clearContext();
+
+        // Return success response
+        return ResponseEntity.ok().build();
     }
 
     private void authUser(String login, String password) {

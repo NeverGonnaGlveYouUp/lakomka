@@ -65,6 +65,32 @@ public class CartService {
         }
     }
 
+    public void moveGuestCartToUserCart(BasePerson user, HttpServletRequest request) {
+        String sessionId = getCurrentSessionId(request);
+        if (sessionId != null) {
+            // Получаем содержимое анонимной корзины
+            HashMap<Long, Integer> guestCart = guestCartService.getCartIdQuantityHashMap(sessionId);
+
+            // Переносим товары в пользовательскую корзину
+            for (HashMap.Entry<Long, Integer> entry : guestCart.entrySet()) {
+                userCartService.addToCart(user, entry.getKey(), entry.getValue());
+            }
+
+            // Очищаем анонимную корзину
+            guestCartService.clearCart(sessionId);
+        }
+    }
+
+    public ResponseEntity<?> clearCart(BasePerson user, HttpServletRequest request) {
+        String sessionId = getCurrentSessionId(request);
+        if (user == null) {
+            guestCartService.clearCart(sessionId);
+        } else {
+            userCartService.clearCart(user);
+        }
+        return ResponseEntity.noContent().build();
+    }
+
     private String getCurrentSessionId(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -76,4 +102,5 @@ public class CartService {
         }
         return null;
     }
+
 }

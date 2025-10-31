@@ -98,4 +98,10 @@ public class UserCartService extends Common {
     public BigDecimal getUserPrice(PersonCartItem item) {
         return item.getProduct().getPriceKons();
     }
+
+    public void clearCart(BasePerson user) {
+        personCartItemRepository
+                .findAllByBasePerson(user)
+                .forEach( ci -> personCartItemRepository.delete(ci));
+    }
 }

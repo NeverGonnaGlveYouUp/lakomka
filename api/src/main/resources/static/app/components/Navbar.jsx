@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import { FaRegUserCircle, FaKey } from 'react-icons/fa';
+import { FaRegUserCircle, FaKey, FaSignOutAlt } from 'react-icons/fa';
 import { createTheme } from '@mui/material/styles';
 import { IoBagOutline } from "react-icons/io5";
 import {
@@ -14,7 +14,8 @@ import {
     Stack,
     Container,
     CircularProgress,
-    Badge
+    Badge,
+    Tooltip
 } from '@mui/material';
 import { useAppContext } from './AppContext.js';
 import { useNavigate } from "react-router-dom";
@@ -27,23 +28,29 @@ const Navbar = () => {
   const { counter }                 = useAppContext();
   const navigate                    = useNavigate();
   const [loggedUsername, setLoggedUsername] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     // Fetch username when component mounts
     useEffect(() => {
         const fetchUsername = async () => {
             try {
-                if (!!localStorage.getItem('jwtToken')){
+                const token = localStorage.getItem('jwtToken');
+                if (!!token){
+                    setIsLoggedIn(true);
                     const response = await axios.get('/api/current-user', {
                         headers: {
-                            'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                            'Authorization': 'Bearer ' + token
                         }
                     });
                     if (response.data && response.data.userName) {
                         setLoggedUsername(response.data.userName);
                     }
+                } else {
+                    setIsLoggedIn(false);
                 }
             } catch (error) {
                 console.error('Error fetching username:', error);
+                setIsLoggedIn(false);
             }
         };
         checkJWTExpiration();
@@ -86,6 +93,16 @@ const Navbar = () => {
   function capitalizeFirstLetter(val) {
       return String(val).charAt(0).toUpperCase() + String(val).slice(1);
   }
+
+  const handleLogout = () => {
+    // Remove JWT token from localStorage
+    localStorage.removeItem('jwtToken');
+    // Redirect to login page or home
+    navigate("/");
+    // Reset state
+    setIsLoggedIn(false);
+    setLoggedUsername('');
+  };
 
   const theme = createTheme({
     palette: {
@@ -132,20 +149,37 @@ const Navbar = () => {
               )}
             />
             <Stack direction="row" spacing={2}>
-              <IconButton color="inherit" onClick={() => navigate("/auth/login")}>
-                  <FaRegUserCircle  />
-              </IconButton >
-              <IconButton color="inherit" onClick={() => navigate("/private/change-password")}>
-                  <FaKey  />
-              </IconButton >
               <IconButton  color="inherit" onClick={() => navigate("/cart")}>
-                <Badge badgeContent={counter} color="secondary">
-                  <IoBagOutline />
-                </Badge>
+                <Tooltip title="Корзина">
+                    <Badge badgeContent={counter} color="secondary">
+                        <IoBagOutline />
+                    </Badge>
+                </Tooltip>
               </IconButton >
+              {!isLoggedIn && (
+                <Tooltip title="Войти">
+                    <IconButton color="inherit" onClick={() => navigate("/auth/login")}>
+                        <FaRegUserCircle />
+                    </IconButton>
+                </Tooltip>
+              )}
               <Typography variant="h6" component="div" sx={{ alignSelf: "center" }}>
                   {loggedUsername}
               </Typography>
+              {isLoggedIn && (
+                <Tooltip title="Сменить пароль">
+                    <IconButton color="inherit" onClick={() => navigate("/private/change-password")}>
+                        <FaKey  />
+                    </IconButton >
+                </Tooltip>
+              )}
+              {isLoggedIn && (
+                <Tooltip title="Выйти">
+                    <IconButton color="inherit" onClick={handleLogout}>
+                        <FaSignOutAlt />
+                    </IconButton>
+                </Tooltip>
+              )}
             </Stack>
           </Container>
         </Toolbar>

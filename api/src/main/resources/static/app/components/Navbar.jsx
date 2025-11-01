@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import { FaRegUserCircle, FaKey, FaSignOutAlt, FaShoppingBag } from 'react-icons/fa';
+import { FaRegUserCircle, FaUser, FaSignOutAlt, FaShoppingBag } from 'react-icons/fa';
 import { createTheme } from '@mui/material/styles';
 import { IoBagOutline } from "react-icons/io5";
 import {
@@ -203,9 +203,9 @@ const Navbar = () => {
                   {loggedUsername}
               </Typography>
               {isLoggedIn && (
-                <Tooltip title="Сменить пароль">
-                    <IconButton color="inherit" onClick={() => navigate("/private/change-password")}>
-                        <FaKey  />
+                <Tooltip title="Профиль">
+                    <IconButton color="inherit" onClick={() => navigate("/private/profile")}>
+                        <FaUser  />
                     </IconButton >
                 </Tooltip>
               )}

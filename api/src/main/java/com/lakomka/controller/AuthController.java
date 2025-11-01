@@ -75,14 +75,14 @@ public class AuthController {
         Object personType = registrationDtoAssembler.toEntity(user);
 
         BasePerson basePerson = new BasePerson(passwordEncoder, user);
-        log.debug("Signup: BasePerson: {}", basePerson.getLogin());
+        log.info("Signup: BasePerson: {}", basePerson.getLogin());
         if (personType instanceof JPerson jPerson) {
             basePerson.setjPerson(jPerson);
             jPerson.setBasePerson(basePerson);
             basePerson = basePersonRepository.save(basePerson);
             jPerson.setBasePerson(basePerson);
             jPersonRepository.save(jPerson);
-            log.debug("Signup: JPerson: {}", jPerson.getName());
+            log.info("Signup: JPerson: {}", jPerson.getName());
         } else if (personType instanceof Person person) {
             ///todo: сейчас поддержки ФЛ нет
             throw new UnsupportedOperationException("Поддержка ФЛ не реализована");
@@ -119,7 +119,7 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("Пользователь " + authenticationRequest.getLogin() + " не найден"));
         cartService.moveGuestCartToUserCart(authenticatedUser, request);
 
-        log.debug("Login: {}", authenticationRequest.getLogin());
+        log.info("Login: {}", authenticationRequest.getLogin());
         return ResponseEntity.status(HttpStatus.OK)
                 .header("Connection", "close")
                 .body(new Token(jwtUtil.generateToken(authenticationRequest.getLogin()), "Bearer"));
@@ -228,7 +228,7 @@ public class AuthController {
         basePerson.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         basePersonRepository.save(basePerson);
 
-        log.debug("Success Password changed for user: {}", currentUsername);
+        log.info("Success Password changed for user: {}", currentUsername);
         return ResponseEntity.ok().body(new Token(jwtUtil.generateToken(basePerson.getUsername()), "Bearer"));
     }
 

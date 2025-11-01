@@ -1,7 +1,6 @@
 import axios from 'axios';
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import { FaRegUserCircle } from 'react-icons/fa';
 import { FaRegUserCircle, FaKey, FaSignOutAlt, FaShoppingBag } from 'react-icons/fa';
 import { createTheme } from '@mui/material/styles';
 import { IoBagOutline } from "react-icons/io5";
@@ -186,9 +185,6 @@ const Navbar = () => {
                     </IconButton>
                 </Tooltip>
               )}
-              <IconButton color="inherit" onClick={() => navigate("/auth/login")}>
-                  <FaRegUserCircle  />
-              </IconButton >
               <IconButton  color="inherit" onClick={() => navigate("/cart")}>
                 <Tooltip title="Корзина">
                     <Badge badgeContent={counter} color="secondary">

@@ -45,7 +45,8 @@ public class UserCartService extends Common {
     private ResponseEntity<CartItemDto> updateExistingItem(PersonCartItem cartItem, Integer quantity) {
         if (quantity == 0) {
             personCartItemRepository.delete(cartItem);
-            return ResponseEntity.ok().build();
+            cartItem.setQuantity(quantity);
+            return ResponseEntity.ok().body(cartItem.toCartItemDto());
         } else {
             cartItem.setQuantity(quantity);
             personCartItemRepository.save(cartItem);

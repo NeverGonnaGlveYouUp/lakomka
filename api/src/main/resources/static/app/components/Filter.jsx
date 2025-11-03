@@ -32,7 +32,8 @@ const Filter = ({ onFilterApply }) => {
     }, []);
 
     const fetchData = async () => {
-        const response = await axios.get(`/api/products/search/getFilterBoundaries`);
+        const response = await axios.get(`/api/products/search/getFilterBoundaries`,
+        { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
         setPriceRange([response.data.minPrice, response.data.maxPrice]);
         setMinPrice(response.data.minPrice);
         setMaxPrice(response.data.maxPrice);

@@ -38,7 +38,7 @@ public class JPerson {
         this.contact = registrationDto.getContact();
         this.rest = new BigDecimal("0");
         this.restTime = new BigDecimal("0");
-        this.basePrice = "Конс";
+        this.basePrice = BasePrice.KONS;
     }
 
     @Id
@@ -143,7 +143,8 @@ public class JPerson {
      * Базовая цена
      */
     @Column(name = "base_price", columnDefinition = "char(4)", nullable = false)
-    private String basePrice;
+    @Enumerated(value = EnumType.STRING)
+    private BasePrice basePrice;
 
     /**
      * Количество дней отсрочки за поставленный товар, если 0 (ноль), то расчет за наличные в момент передачи товара

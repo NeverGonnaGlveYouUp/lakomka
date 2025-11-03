@@ -235,7 +235,7 @@ const CartPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             checkJWTExpiration();
-            const response = await axios.get('/api/cart/items', null,
+            const response = await axios.get('/api/cart/items',
                 { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
 
             setProducts(response.data);
@@ -250,7 +250,7 @@ const CartPage = () => {
             setWeight(totalWeight);
 
             // Fetch cart summary
-            const summaryResponse = await axios.get('/api/cart/summary', null,
+            const summaryResponse = await axios.get('/api/cart/summary',
                 { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
             setCartSummary(summaryResponse.data);
         }

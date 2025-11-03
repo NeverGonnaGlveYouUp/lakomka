@@ -53,13 +53,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     @Query(nativeQuery = true,
-            value = "SELECT id, name, price_kons FROM product\n" +
-                    "WHERE product_group = " +
-                    "(SELECT product_group \n" +
+            value = "SELECT id, name, " +
+                    "CASE " +
+                    "WHEN :level = 'KONS' THEN price_kons " +
+                    "WHEN :level = 'OPT1' THEN price_opt_1 " +
+                    "WHEN :level = 'OPT2' THEN price_opt_2 " +
+                    "WHEN :level = 'NAL' THEN price_nal " +
+                    "ELSE price_kons " +
+                    "END AS price " +
                     "FROM product " +
-                    "WHERE id = :id) AND id <> :id\n" +
+                    "WHERE product_group = " +
+                    "(SELECT product_group " +
+                    "FROM product " +
+                    "WHERE id = :id) AND id <> :id " +
                     "ORDER BY RANDOM() LIMIT :quantity")
     List<ProductFeedDto> findRandomByProductGroup(@Param("id") Long productId,
-                                                  @Param("quantity") Integer quantity);
+                                                  @Param("quantity") Integer quantity,
+                                                  @Param("level") String level);
 
 }

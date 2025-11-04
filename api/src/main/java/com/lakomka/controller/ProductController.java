@@ -134,7 +134,7 @@ public class ProductController {
                 .filter(productFeedDto -> cartKeys.contains(productFeedDto.getId()))
                 .forEach(productFeedDto -> productFeedDto.setCartQuantity(cart.get(productFeedDto.getId())));
 
-        return randomByProductGroup;
+        return productFeedDtoList;
     }
 
 

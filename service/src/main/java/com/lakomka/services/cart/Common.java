@@ -3,6 +3,7 @@ package com.lakomka.services.cart;
 import com.lakomka.models.product.PersonCartItem;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,10 +15,10 @@ public abstract class Common {
     public Map<String, Object> makeSummary(Collection<PersonCartItem> cart) {
         // Calculate summary information
         int totalItems = cart.stream().map(PersonCartItem::getQuantity).reduce(0, Integer::sum);
-        double totalPrice = cart.stream()
+        BigDecimal totalPrice = cart.stream()
                 .map(item -> getUserPrice(item).multiply(BigDecimal.valueOf(item.getQuantity())))
-                .mapToDouble(BigDecimal::doubleValue)
-                .sum();
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
         int totalWeight = cart.stream().map(pci -> pci.getProduct().getWeight()).reduce(0, Integer::sum);
 
         // Create summary object

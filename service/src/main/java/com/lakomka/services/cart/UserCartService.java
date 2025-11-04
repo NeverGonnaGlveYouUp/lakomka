@@ -4,9 +4,10 @@ import com.lakomka.dto.CartItemDto;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.models.product.Product;
-import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.product.PersonCartItemRepository;
 import com.lakomka.repository.product.ProductRepository;
+import com.lakomka.services.DiscountService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +20,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserCartService extends Common {
 
-    @Autowired
-    private BasePersonRepository userRepository;
-
-    @Autowired
-    private PersonCartItemRepository personCartItemRepository;
+    private final PersonCartItemRepository personCartItemRepository;
+    private final DiscountService discountService;
 
     @Autowired
     private ProductRepository productRepository;
@@ -46,7 +45,7 @@ public class UserCartService extends Common {
         if (quantity == 0) {
             personCartItemRepository.delete(cartItem);
             cartItem.setQuantity(quantity);
-            return ResponseEntity.ok().body(cartItem.toCartItemDto());
+            return ResponseEntity.ok().body(discountService.apply(cartItem));
         } else {
             cartItem.setQuantity(quantity);
             personCartItemRepository.save(cartItem);
@@ -61,7 +60,7 @@ public class UserCartService extends Common {
     }
 
     private ResponseEntity<CartItemDto> createResponseEntity(PersonCartItem cartItem) {
-        return ResponseEntity.ok(cartItem.toCartItemDto());
+        return ResponseEntity.ok(discountService.apply(cartItem));
     }
 
     public HashMap<Long, Integer> getCartIdQuantityHashMap(BasePerson user) {
@@ -77,7 +76,7 @@ public class UserCartService extends Common {
         Set<CartItemDto> cartItems =
                 personCartItemRepository.findAllByBasePerson(user)
                         .stream()
-                        .map(PersonCartItem::toCartItemDto)
+                        .map(discountService::apply)
                         .collect(Collectors.toSet());
         return ResponseEntity.ok(cartItems);
     }
@@ -94,15 +93,14 @@ public class UserCartService extends Common {
         }
     }
 
-    // todo выбирать уровень цены для товара в зависимости от установок у пользователя
     @Override
     public BigDecimal getUserPrice(PersonCartItem item) {
-        return item.getProduct().getPriceKons();
+        return discountService.applyToPrice(item);
     }
 
     public void clearCart(BasePerson user) {
         personCartItemRepository
                 .findAllByBasePerson(user)
-                .forEach( ci -> personCartItemRepository.delete(ci));
+                .forEach(personCartItemRepository::delete);
     }
 }

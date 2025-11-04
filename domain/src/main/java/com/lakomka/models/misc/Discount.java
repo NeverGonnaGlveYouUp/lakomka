@@ -44,7 +44,7 @@ public class Discount {
      * Величина сктдки/наценки. В процентах
      */
     @Column(name = "rest_time", length = 12, nullable = false)
-    private BigDecimal discount = new BigDecimal("0");
+    private BigDecimal discount = BigDecimal.ZERO;
 
     /**
      * Базовая цена - PriceOpt1 или PriceOpt2 или PriceNal или PriceKons
@@ -77,14 +77,17 @@ public class Discount {
     public BigDecimal applyDiscount() {
 
         BigDecimal priced;
-        if (this.discount.equals(BigDecimal.ZERO)) {
+        if (BigDecimal.ZERO.compareTo(this.discount) == 0) {
             // базовая цена берется не из профиля пользователя, а из этой скидки.
             // ну и сама скидка не применяется, потому что отсутствует
             priced = this.product.priceSelector(this.basePrice);
-            log.debug("Применена базовая цена из скидки id={}, пользователя id={} к продукту id={}",
+            log.debug("Применена базовая цена {}:{} из скидки id={}, пользователя {} к продукту id={}, art={}",
+                    this.basePrice.name(),
+                    priced.setScale(2, RoundingMode.HALF_UP),
                     this.getId(),
-                    this.jPerson.getId(),
-                    this.product.getId());
+                    this.jPerson.getBasePerson().getLogin(),
+                    this.product.getId(),
+                    this.product.getArticle());
         } else {
             // базовая цена берется из профиля пользователя
             BasePrice userBasePrice = this.jPerson.getBasePrice();
@@ -100,18 +103,26 @@ public class Discount {
                     // скидка
                     priced = priced.add(applied.negate());
                 }
-                log.debug("Применена скидка id={}, пользователя id={} к продукту id={}",
+                log.debug("Применена скидка {}{} {}:{} id={}, пользователя {} к продукту id={}, art={}",
+                        this.bitDiscount ? "+" : "-",
+                        this.discount,
+                        userBasePrice.name(),
+                        priced.setScale(2, RoundingMode.HALF_UP),
                         this.getId(),
-                        this.jPerson.getId(),
-                        this.product.getId());
+                        this.jPerson.getBasePerson().getLogin(),
+                        this.product.getId(),
+                        this.product.getArticle());
             } else {
-                log.debug("Применена базовая цена пользователя id={} к продукту id={}",
-                        this.jPerson.getId(),
-                        this.product.getId());
+                log.debug("Применена базовая {}:{} цена пользователя {} к продукту id={}, art={}",
+                        userBasePrice.name(),
+                        priced.setScale(2, RoundingMode.HALF_UP),
+                        this.jPerson.getBasePerson().getLogin(),
+                        this.product.getId(),
+                        this.product.getArticle());
             }
         }
 
-        return priced;
+        return priced.setScale(2, RoundingMode.HALF_UP);
 
     }
 

@@ -1,10 +1,12 @@
 package com.lakomka.services;
 
+import com.lakomka.dto.CartItemDto;
 import com.lakomka.dto.ProductDto;
 import com.lakomka.models.misc.Discount;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.person.BasePrice;
 import com.lakomka.models.person.JPerson;
+import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.misc.DiscountRepository;
 import com.lakomka.repository.person.JPersonRepository;
@@ -13,6 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +27,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class DiscountService {
 
-    private final static BasePrice DEFAULT_BASE_PRICE = BasePrice.KONS;
+    public final static BasePrice DEFAULT_BASE_PRICE = BasePrice.KONS;
 
     private final DiscountRepository discountRepository;
     private final JPersonRepository jPersonRepository;
@@ -63,12 +68,43 @@ public class DiscountService {
         discounts.discounts().stream()
                 .filter(Discount::isDiscountActive)
                 .filter(discount -> Objects.equals(discount.getProduct().getId(), product.getId()))
-                // среди активных скидок для пользователя\продукта, выбираем одну любую (т.к. опции объединения нет?)
-                .findFirst()
+                // среди активных скидок для этого пользователя и продукта, если их несколько, выбираем свежее по startDate
+                .min(Comparator.comparing(Discount::getDateStart))
                 .map(Discount::applyDiscount)
                 .ifPresent(productDto::setPrice);
 
         return productDto;
+    }
+
+    public CartItemDto apply(PersonCartItem cartItem) {
+        Product product = cartItem.getProduct();
+        Integer quantity = cartItem.getQuantity();
+        return new CartItemDto(
+                product.getId(),
+                product.getName(),
+                applyToPrice(cartItem)
+                        .multiply(BigDecimal.valueOf(quantity))
+                        .setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString(),
+                quantity,
+                product.getWeight() * quantity
+        );
+    }
+
+    public BigDecimal applyToPrice(PersonCartItem cartItem) {
+        Product product = cartItem.getProduct();
+        Integer quantity = cartItem.getQuantity();
+        BasePerson user = cartItem.getBasePerson();
+        Discounts discounts = getDiscounts(user);
+        Optional<Discount> optionalDiscount = discounts.discounts()
+                .stream()
+                .filter(Discount::isDiscountActive)
+                .filter(discount -> Objects.equals(discount.getProduct().getId(), product.getId()))
+                // среди активных скидок для этого пользователя и продукта, если их несколько, выбираем свежее по startDate
+                .min(Comparator.comparing(Discount::getDateStart));
+        return optionalDiscount
+                .map(Discount::applyDiscount)
+                .orElse(product.priceSelector(discounts.basePrice()));
     }
 
 }

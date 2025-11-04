@@ -195,13 +195,14 @@ public class DatabaseInitializer implements CommandLineRunner {
             List<Product> products = List.of(product1, product2, product3, product4);
             List<JPerson> jPersons = List.of(jPerson2, jPerson);
             List<BasePrice> basePrices = List.of(BasePrice.OPT1, BasePrice.KONS, BasePrice.NAL, BasePrice.OPT2);
+            List<Boolean> upDown = List.of(true, false);
 
             // актуальная скидка
             Discount discount1 = new Discount();
-            discount1.setDiscount(new BigDecimal(random.nextInt(5, 90)));
+            discount1.setDiscount(new BigDecimal(random.nextInt(5, 70)));
             discount1.setDateStart(from(now().minusDays(10L).atStartOfDay(systemDefault()).toInstant()));
             discount1.setDateEnd(from(now().plusDays(10L).atStartOfDay(systemDefault()).toInstant()));
-            discount1.setBitDiscount(false);
+            discount1.setBitDiscount(upDown.get(random.nextInt(upDown.size())));
             discount1.setBitStop(false);
             discount1.setBasePrice(basePrices.get(random.nextInt(basePrices.size())));
             discount1.setJPerson(jPersons.get(random.nextInt(jPersons.size())));
@@ -209,10 +210,10 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             // просроченная скидка
             Discount discount2 = new Discount();
-            discount2.setDiscount(new BigDecimal(random.nextInt(5, 90)));
+            discount2.setDiscount(new BigDecimal(random.nextInt(5, 70)));
             discount2.setDateStart(from(now().minusDays(100L).atStartOfDay(systemDefault()).toInstant()));
             discount2.setDateEnd(from(now().minusDays(10L).atStartOfDay(systemDefault()).toInstant()));
-            discount2.setBitDiscount(true);
+            discount2.setBitDiscount(upDown.get(random.nextInt(upDown.size())));
             discount2.setBitStop(false);
             discount2.setBasePrice(basePrices.get(random.nextInt(basePrices.size())));
             discount2.setJPerson(jPersons.get(random.nextInt(jPersons.size())));
@@ -223,7 +224,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             discount3.setDiscount(BigDecimal.ZERO);
             discount3.setDateStart(from(now().minusDays(10L).atStartOfDay(systemDefault()).toInstant()));
             discount3.setDateEnd(from(now().plusDays(10L).atStartOfDay(systemDefault()).toInstant()));
-            discount3.setBitDiscount(true);
+            discount3.setBitDiscount(upDown.get(random.nextInt(upDown.size())));
             discount3.setBitStop(false);
             discount3.setBasePrice(basePrices.get(random.nextInt(basePrices.size())));
             discount3.setJPerson(jPersons.get(random.nextInt(jPersons.size())));
@@ -231,10 +232,10 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             // актуальная накидка
             Discount discount4 = new Discount();
-            discount4.setDiscount(new BigDecimal(random.nextInt(5, 90)));
+            discount4.setDiscount(new BigDecimal(random.nextInt(5, 70)));
             discount4.setDateStart(from(now().minusDays(10L).atStartOfDay(systemDefault()).toInstant()));
             discount4.setDateEnd(from(now().plusDays(10L).atStartOfDay(systemDefault()).toInstant()));
-            discount4.setBitDiscount(false);
+            discount4.setBitDiscount(upDown.get(random.nextInt(upDown.size())));
             discount4.setBitStop(false);
             discount4.setBasePrice(basePrices.get(random.nextInt(basePrices.size())));
             discount4.setJPerson(jPersons.get(random.nextInt(jPersons.size())));

@@ -1,12 +1,10 @@
 package com.lakomka.models.product;
 
-import com.lakomka.dto.CartItemDto;
 import com.lakomka.models.person.BasePerson;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -21,11 +19,11 @@ public class PersonCartItem {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "base_person_id")
+    @JoinColumn(name = "base_person_id", nullable = false)
     private BasePerson basePerson;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     private Integer quantity;
@@ -37,16 +35,6 @@ public class PersonCartItem {
         this.basePerson = basePerson;
         this.product = product;
         this.quantity = quantity;
-    }
-
-    public CartItemDto toCartItemDto(){
-        return new CartItemDto(
-            product.getId(),
-            product.getName(),
-            product.getPriceKons().multiply(BigDecimal.valueOf(quantity)).toPlainString(),
-            quantity,
-            product.getWeight() * quantity
-        );
     }
 
     @Override

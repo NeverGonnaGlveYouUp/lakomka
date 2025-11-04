@@ -5,6 +5,7 @@ import com.lakomka.dto.ProductDto;
 import com.lakomka.dto.ProductFeedDto;
 import com.lakomka.models.misc.Discount;
 import com.lakomka.models.order.OrderItem;
+import com.lakomka.models.person.BasePrice;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -76,7 +77,7 @@ public class Product {
     private Integer packag;
 
     /**
-     *  priceOpt1, priceOpt2, priceNal, priceKons варианты цен
+     * priceOpt1, priceOpt2, priceNal, priceKons варианты цен
      */
     @Column(name = "price_opt_1")
     private BigDecimal priceOpt1;
@@ -157,19 +158,22 @@ public class Product {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", priceKons=" + priceKons +
+                ", priceNal=" + priceNal +
+                ", priceOpt1=" + priceOpt1 +
+                ", priceOpt2=" + priceOpt2 +
                 '}';
     }
 
-    public ProductFeedDto toProductFeedDto(){
+    public ProductFeedDto toProductFeedDto(BasePrice basePrice) {
         return new ProductFeedDto(
                 id,
                 name,
-                priceKons,
+                priceSelector(basePrice),
                 0
         );
     }
 
-    public ProductDto toProductDto(){
+    public ProductDto toProductDto(BasePrice basePrice) {
         return new ProductDto(
                 id,
                 name,
@@ -177,7 +181,7 @@ public class Product {
                 unit,
                 unitVid,
                 packag,
-                priceKons,
+                priceSelector(basePrice),
                 weight,
                 quantity,
                 null,
@@ -190,6 +194,15 @@ public class Product {
                 content,
                 productGroup
         );
+    }
+
+    public BigDecimal priceSelector(BasePrice basePrice) {
+        return switch (basePrice) {
+            case KONS -> priceKons;
+            case NAL -> priceNal;
+            case OPT1 -> priceOpt1;
+            case OPT2 -> priceOpt2;
+        };
     }
 
 }

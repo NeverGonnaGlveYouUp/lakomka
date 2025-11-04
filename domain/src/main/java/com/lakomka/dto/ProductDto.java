@@ -28,4 +28,9 @@ public class ProductDto {
     private String description;
     private String content;
     private String group;
+
+    public ProductFeedDto toProductFeedDto() {
+        return new ProductFeedDto(id, name, price, cartQuantity);
+    }
+
 }

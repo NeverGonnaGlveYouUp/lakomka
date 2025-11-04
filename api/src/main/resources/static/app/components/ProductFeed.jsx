@@ -110,7 +110,8 @@ const ProductFeed = () => {
             url += `&search=${searchParamsGlobal.join('%3B')}`;
         }
         url += sort;
-        const response = await axios.get(url);
+        const response = await axios.get(url,
+        { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
         setTotalElements(response.data.totalElements);
         setTotalPages(response.data.totalPages);
         setNumber(response.data.number);
@@ -162,7 +163,7 @@ const ProductFeed = () => {
                                   id={item.id}
                                   image="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
                                   name={item.name}
-                                  price={item.priceKons}
+                                  price={item.price}
                                   quantity={item.cartQuantity}
                                 />
                           </Grid>

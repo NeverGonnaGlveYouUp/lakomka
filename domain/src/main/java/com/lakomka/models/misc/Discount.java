@@ -1,14 +1,24 @@
 package com.lakomka.models.misc;
 
+import com.lakomka.models.person.BasePrice;
 import com.lakomka.models.person.JPerson;
 import com.lakomka.models.product.Product;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Table
 @Entity
+@Setter
+@Getter
+@Slf4j
 public class Discount {
 
     @Id
@@ -17,11 +27,11 @@ public class Discount {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "j_person_id")
+    @JoinColumn(name = "j_person_id", nullable = false)
     private JPerson jPerson;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     /**
@@ -31,16 +41,18 @@ public class Discount {
     private boolean bitDiscount = false;
 
     /**
-     * Величина сктдки/наценки
+     * Величина сктдки/наценки. В процентах
      */
     @Column(name = "rest_time", length = 12, nullable = false)
-    private BigDecimal discount = new BigDecimal("0");
+    private BigDecimal discount = BigDecimal.ZERO;
 
     /**
-     * Базовая цена - PriseOpt1 или PriseOpt2 или PriseNal или PriseKons  Если Discount=0 это означает применение BasePrice иной отличной от BasePrice которая в карточке Покупателя
+     * Базовая цена - PriceOpt1 или PriceOpt2 или PriceNal или PriceKons
+     * Если Discount=0 это означает применение BasePrice иной отличной от BasePrice которая в карточке Покупателя
      */
     @Column(name = "base_price", columnDefinition = "char(4)", nullable = false)
-    private String basePrice;
+    @Enumerated(value = EnumType.STRING)
+    private BasePrice basePrice;
 
     /**
      * Признак запрета отгрузки – 0 разрешен, 1 - запрещен
@@ -62,75 +74,81 @@ public class Discount {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateEnd;
 
-    public Long getId() {
-        return id;
+    public BigDecimal applyDiscount() {
+
+        BigDecimal priced;
+        if (BigDecimal.ZERO.compareTo(this.discount) == 0) {
+            // базовая цена берется не из профиля пользователя, а из этой скидки.
+            // ну и сама скидка не применяется, потому что отсутствует
+            priced = this.product.priceSelector(this.basePrice);
+            log.debug("Применена базовая цена {}:{} из скидки id={}, пользователя {} к продукту id={}, art={}",
+                    this.basePrice.name(),
+                    priced.setScale(2, RoundingMode.HALF_UP),
+                    this.getId(),
+                    this.jPerson.getBasePerson().getLogin(),
+                    this.product.getId(),
+                    this.product.getArticle());
+        } else {
+            // базовая цена берется из профиля пользователя
+            BasePrice userBasePrice = this.jPerson.getBasePrice();
+            // берем цену независимо от активности скидки по датам
+            priced = this.product.priceSelector(userBasePrice);
+            if (isDiscountActive()) {
+                // даты действия скидки активны
+                BigDecimal applied = applyPercentage(priced, this.discount);
+                if (this.bitDiscount) {
+                    // наценка
+                    priced = priced.add(applied);
+                } else {
+                    // скидка
+                    priced = priced.add(applied.negate());
+                }
+                log.debug("Применена скидка {}{} {}:{} id={}, пользователя {} к продукту id={}, art={}",
+                        this.bitDiscount ? "+" : "-",
+                        this.discount,
+                        userBasePrice.name(),
+                        priced.setScale(2, RoundingMode.HALF_UP),
+                        this.getId(),
+                        this.jPerson.getBasePerson().getLogin(),
+                        this.product.getId(),
+                        this.product.getArticle());
+            } else {
+                log.debug("Применена базовая {}:{} цена пользователя {} к продукту id={}, art={}",
+                        userBasePrice.name(),
+                        priced.setScale(2, RoundingMode.HALF_UP),
+                        this.jPerson.getBasePerson().getLogin(),
+                        this.product.getId(),
+                        this.product.getArticle());
+            }
+        }
+
+        return priced.setScale(2, RoundingMode.HALF_UP);
+
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    /**
+     * Applies a percentage to a BigDecimal value
+     *
+     * @param value      the original BigDecimal value
+     * @param percentage the percentage to apply (e.g., 20 for 20%)
+     * @return the result after applying the percentage
+     */
+    public static BigDecimal applyPercentage(BigDecimal value, BigDecimal percentage) {
+        // Multiply the value by the percentage
+        BigDecimal result = value.multiply(percentage);
+        // Divide by 100 to get the actual percentage value
+        return result.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
     }
 
-    public JPerson getjPerson() {
-        return jPerson;
-    }
-
-    public void setjPerson(JPerson jPerson) {
-        this.jPerson = jPerson;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public boolean isBitDiscount() {
-        return bitDiscount;
-    }
-
-    public void setBitDiscount(boolean bitDiscount) {
-        this.bitDiscount = bitDiscount;
-    }
-
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(BigDecimal discount) {
-        this.discount = discount;
-    }
-
-    public String getBasePrice() {
-        return basePrice;
-    }
-
-    public void setBasePrice(String basePrice) {
-        this.basePrice = basePrice;
-    }
-
-    public boolean isBitStop() {
-        return bitStop;
-    }
-
-    public void setBitStop(boolean bitStop) {
-        this.bitStop = bitStop;
-    }
-
-    public Date getDateStart() {
-        return dateStart;
-    }
-
-    public void setDateStart(Date dateStart) {
-        this.dateStart = dateStart;
-    }
-
-    public Date getDateEnd() {
-        return dateEnd;
-    }
-
-    public void setDateEnd(Date dateEnd) {
-        this.dateEnd = dateEnd;
+    /**
+     * Checks if the current date is within the discount period
+     *
+     * @return true if current date is between dateStart and dateEnd, false otherwise
+     */
+    public boolean isDiscountActive() {
+        LocalDate now = LocalDate.now();
+        LocalDate start = dateStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate end = dateEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return !now.isBefore(start) && !now.isAfter(end);
     }
 }

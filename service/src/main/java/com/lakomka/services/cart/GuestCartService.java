@@ -3,7 +3,8 @@ package com.lakomka.services.cart;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.lakomka.services.DiscountService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class GuestCartService extends Common {
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final DiscountService discountService;
 
     private final Map<String, Set<PersonCartItem>> sessionCarts = new ConcurrentHashMap<>();
 
@@ -45,7 +47,7 @@ public class GuestCartService extends Common {
                 cart.add(cartItem);
             }
 
-            return ResponseEntity.ok().body(cartItem.toCartItemDto());
+            return ResponseEntity.ok().body(discountService.apply(cartItem));
         }
     }
 
@@ -61,7 +63,8 @@ public class GuestCartService extends Common {
     public ResponseEntity<?> getCart(String sessionId) {
         return ResponseEntity.ok().body(
                 sessionCarts.getOrDefault(sessionId, new HashSet<>())
-                        .stream().map(PersonCartItem::toCartItemDto)
+                        .stream()
+                        .map(discountService::apply)
                         .collect(Collectors.toSet())
         );
     }
@@ -74,10 +77,9 @@ public class GuestCartService extends Common {
         return ResponseEntity.ok(makeSummary(cart));
     }
 
-    // todo какой уровень цены для товара у Guest/Anonymous ?
     @Override
     public BigDecimal getUserPrice(PersonCartItem item) {
-        return item.getProduct().getPriceKons();
+        return item.getProduct().priceSelector(DiscountService.DEFAULT_BASE_PRICE);
     }
 
     public void clearCart(String sessionId) {

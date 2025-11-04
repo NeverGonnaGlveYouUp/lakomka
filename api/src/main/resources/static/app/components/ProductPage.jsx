@@ -101,13 +101,15 @@ const ProductPage = () => {
     }, [id]);
 
     const fetchOtherProducts = async () => {
-        const response = await axios.get('/api/randProductsByGroup?id=' + id + '&quantity=8');
+        const response = await axios.get('/api/randProductsByGroup?id=' + id + '&quantity=8',
+        { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
         setOtherProducts(response.data);
     };
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('/api/product?id=' + id);
+            const response = await axios.get('/api/product?id=' + id,
+            { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
             setName(response.data.name);
             setArticle(response.data.article);
             setUnit(response.data.unit);
@@ -271,7 +273,7 @@ const ProductPage = () => {
                                 id={item.id}
                                 image="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
                                 name={item.name}
-                                price={item.priceKons}
+                                price={item.price}
                             />
                         </Grid>
                     ))}

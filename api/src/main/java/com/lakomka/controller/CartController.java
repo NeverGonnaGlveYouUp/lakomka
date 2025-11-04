@@ -26,7 +26,8 @@ public class CartController {
             @RequestParam(value = "id") Long productId,
             @RequestParam(value = "quantity") Integer quantity
     ) {
-        log.info("addToCart: user: {}, product: {}, quantity: {}", Optional.ofNullable(user).map(BasePerson::getLogin).orElse(null), productId, quantity);
+        log.info("addToCart: user: {}, product: {}, quantity: {}",
+                Optional.ofNullable(user).map(BasePerson::getLogin).orElse(null), productId, quantity);
         return cartService.addToCart(user, productId, request, quantity);
     }
 

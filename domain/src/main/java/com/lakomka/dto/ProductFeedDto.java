@@ -15,12 +15,14 @@ public class ProductFeedDto {
 
     private Long id;
     private String name;
-    private BigDecimal priceKons;
+    private BigDecimal price;
     private Integer cartQuantity;
 
-    public ProductFeedDto(Long id, String name, BigDecimal priceKons) {
+    public ProductFeedDto(Long id, String name, BigDecimal price) {
         this.id = id;
         this.name = name;
-        this.priceKons = priceKons;
+        this.price = price;
     }
+
+
 }

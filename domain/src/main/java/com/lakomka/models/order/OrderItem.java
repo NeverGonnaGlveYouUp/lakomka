@@ -3,9 +3,13 @@ package com.lakomka.models.order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.product.Product;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@Setter
+@Getter
 @Table
 @Entity
 public class OrderItem {
@@ -18,21 +22,21 @@ public class OrderItem {
     /**
      * Уникальный индекс заказа
      */
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
 
     /**
      * Уникальный индекс покупателя
      */
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "base_person_id", referencedColumnName = "id")
     private BasePerson basePerson;
 
     /**
      * Уникальный индекс товара
      */
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private Product product;
 
@@ -72,83 +76,4 @@ public class OrderItem {
     @Column(name = "weight_packag", precision = 12, nullable = false)
     private Integer weightPackag;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
-    public BasePerson getBasePerson() {
-        return basePerson;
-    }
-
-    public void setBasePerson(BasePerson basePerson) {
-        this.basePerson = basePerson;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
-    public String getPackag() {
-        return packag;
-    }
-
-    public void setPackag(String packag) {
-        this.packag = packag;
-    }
-
-    public boolean isBitPackag() {
-        return bitPackag;
-    }
-
-    public void setBitPackag(boolean bitPackag) {
-        this.bitPackag = bitPackag;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Integer getWeightPackag() {
-        return weightPackag;
-    }
-
-    public void setWeightPackag(Integer weightPackag) {
-        this.weightPackag = weightPackag;
-    }
 }

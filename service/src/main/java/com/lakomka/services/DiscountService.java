@@ -62,7 +62,7 @@ public class DiscountService {
                 .orElse(DEFAULT_BASE_PRICE);
     }
 
-    public ProductDto apply(Product product, Discounts discounts) {
+    public ProductDto applyToProductDto(Product product, Discounts discounts) {
         ProductDto productDto = product.toProductDto(discounts.basePrice());
 
         discounts.discounts().stream()
@@ -76,7 +76,7 @@ public class DiscountService {
         return productDto;
     }
 
-    public CartItemDto apply(PersonCartItem cartItem) {
+    public CartItemDto applyToCartItemDto(PersonCartItem cartItem) {
         Product product = cartItem.getProduct();
         Integer quantity = cartItem.getQuantity();
         return new CartItemDto(

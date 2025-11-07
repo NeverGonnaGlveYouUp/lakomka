@@ -1,13 +1,20 @@
 package com.lakomka.models.order;
 
+import com.lakomka.dto.OrderDTO;
 import com.lakomka.models.person.BasePerson;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Date;
 
+@Setter
+@Getter
 @Table(name = "orders")
 @Entity
 public class Order {
@@ -21,7 +28,7 @@ public class Order {
     private Long id;
 
     /**
-     * Покупатель
+     * Покупатель. Для анонима\гостя проставится системный пользователь
      */
     @ManyToOne
     @JoinColumn(name = "base_person", nullable = false)
@@ -102,115 +109,31 @@ public class Order {
     @Column(name = "prim", nullable = false)
     private String prim = "";
 
-    public String getPrim() {
-        return prim;
-    }
+    /**
+     * Для анонимного заказа - номер сессии
+     */
+    @Column(name = "guest", length = 40)
+    private String guest = "";
 
-    public void setPrim(String prim) {
-        this.prim = prim;
-    }
+    public OrderDTO toOrderDTO() {
+        return new OrderDTO(
+                this.id,
 
-    public String getContact() {
-        return contact;
-    }
+                this.contact,
+                this.telephone,
+                this.email,
+                this.prim,
+                this.adressDelivery,
 
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
+                this.datePay,
+                this.dateDelivery,
+                this.dateTimeOrder.atZone(ZoneId.systemDefault()).toLocalDateTime(),
 
-    public String getTelephone() {
-        return telephone;
-    }
+                this.sumOrder.setScale(2, RoundingMode.HALF_UP),
+                this.sumWeight,
 
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Date getDatePay() {
-        return datePay;
-    }
-
-    public void setDatePay(Date datePay) {
-        this.datePay = datePay;
-    }
-
-    public boolean isBitSertifPrint() {
-        return bitSertifPrint;
-    }
-
-    public void setBitSertifPrint(boolean bitSertifPrint) {
-        this.bitSertifPrint = bitSertifPrint;
-    }
-
-    public boolean isBitAccPrint() {
-        return bitAccPrint;
-    }
-
-    public void setBitAccPrint(boolean bitAccPrint) {
-        this.bitAccPrint = bitAccPrint;
-    }
-
-    public Date getDateDelivery() {
-        return dateDelivery;
-    }
-
-    public void setDateDelivery(Date dateDelivery) {
-        this.dateDelivery = dateDelivery;
-    }
-
-    public String getAdressDelivery() {
-        return adressDelivery;
-    }
-
-    public void setAdressDelivery(String adressDelivery) {
-        this.adressDelivery = adressDelivery;
-    }
-
-    public Integer getSumWeight() {
-        return sumWeight;
-    }
-
-    public void setSumWeight(Integer sumWeight) {
-        this.sumWeight = sumWeight;
-    }
-
-    public BigDecimal getSumOrder() {
-        return sumOrder;
-    }
-
-    public void setSumOrder(BigDecimal sumOrder) {
-        this.sumOrder = sumOrder;
-    }
-
-    public Instant getDateTimeOrder() {
-        return dateTimeOrder;
-    }
-
-    public void setDateTimeOrder(Instant dateTimeOrder) {
-        this.dateTimeOrder = dateTimeOrder;
-    }
-
-    public BasePerson getBasePerson() {
-        return basePerson;
-    }
-
-    public void setBasePerson(BasePerson basePerson) {
-        this.basePerson = basePerson;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+                this.bitAccPrint,
+                this.bitSertifPrint
+        );
     }
 }

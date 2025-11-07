@@ -1,22 +1,21 @@
 package com.lakomka.services.cart;
 
 import com.lakomka.models.person.BasePerson;
-import jakarta.servlet.http.Cookie;
+import com.lakomka.utils.SessionUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 
 @Service
+@RequiredArgsConstructor
 public class CartService {
 
-    @Autowired
-    private GuestCartService guestCartService;
-
-    @Autowired
-    private UserCartService userCartService;
+    private final GuestCartService guestCartService;
+    private final UserCartService userCartService;
+    private final SessionUtil sessionUtil;
 
     public ResponseEntity<?> addToCart(
             BasePerson user,
@@ -25,7 +24,7 @@ public class CartService {
             Integer quantity
     ) {
         if (user == null) {
-            return guestCartService.addToCart(getCurrentSessionId(request), productId, quantity);
+            return guestCartService.addToCart(sessionUtil.getCurrentSessionId(request), productId, quantity);
         } else {
             return userCartService.addToCart(user, productId, quantity);
         }
@@ -36,7 +35,7 @@ public class CartService {
             HttpServletRequest request
     ) {
         if (user == null) {
-            return guestCartService.getCartIdQuantityHashMap(getCurrentSessionId(request));
+            return guestCartService.getCartIdQuantityHashMap(sessionUtil.getCurrentSessionId(request));
         } else {
             return userCartService.getCartIdQuantityHashMap(user);
         }
@@ -48,7 +47,7 @@ public class CartService {
             HttpServletRequest request
     ) {
         if (user == null) {
-            return guestCartService.getCart(getCurrentSessionId(request));
+            return guestCartService.getCart(sessionUtil.getCurrentSessionId(request));
         } else {
             return userCartService.getCart(user);
         }
@@ -59,14 +58,14 @@ public class CartService {
             HttpServletRequest request
     ) {
         if (user == null) {
-            return guestCartService.getCartSummary(getCurrentSessionId(request));
+            return guestCartService.getCartSummary(sessionUtil.getCurrentSessionId(request));
         } else {
             return userCartService.getCartSummary(user);
         }
     }
 
     public void moveGuestCartToUserCart(BasePerson user, HttpServletRequest request) {
-        String sessionId = getCurrentSessionId(request);
+        String sessionId = sessionUtil.getCurrentSessionId(request);
         if (sessionId != null) {
             // Получаем содержимое анонимной корзины
             HashMap<Long, Integer> guestCart = guestCartService.getCartIdQuantityHashMap(sessionId);
@@ -82,25 +81,13 @@ public class CartService {
     }
 
     public ResponseEntity<?> clearCart(BasePerson user, HttpServletRequest request) {
-        String sessionId = getCurrentSessionId(request);
+        String sessionId = sessionUtil.getCurrentSessionId(request);
         if (user == null) {
             guestCartService.clearCart(sessionId);
         } else {
             userCartService.clearCart(user);
         }
         return ResponseEntity.noContent().build();
-    }
-
-    private String getCurrentSessionId(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("JSESSIONID".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
     }
 
 }

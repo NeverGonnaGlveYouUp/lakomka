@@ -47,7 +47,7 @@ public class GuestCartService extends Common {
                 cart.add(cartItem);
             }
 
-            return ResponseEntity.ok().body(discountService.apply(cartItem));
+            return ResponseEntity.ok().body(discountService.applyToCartItemDto(cartItem));
         }
     }
 
@@ -64,9 +64,13 @@ public class GuestCartService extends Common {
         return ResponseEntity.ok().body(
                 sessionCarts.getOrDefault(sessionId, new HashSet<>())
                         .stream()
-                        .map(discountService::apply)
+                        .map(discountService::applyToCartItemDto)
                         .collect(Collectors.toSet())
         );
+    }
+
+    public List<PersonCartItem> getCartRaw(String sessionId) {
+        return sessionCarts.getOrDefault(sessionId, new HashSet<>()).stream().toList();
     }
 
     public ResponseEntity<?> getCartSummary(String sessionId) {

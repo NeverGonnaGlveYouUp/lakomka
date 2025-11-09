@@ -1,4 +1,4 @@
-package com.lakomka.services;
+package com.lakomka.services.xml;
 
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductRepository;

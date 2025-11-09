@@ -1,7 +1,8 @@
-package com.lakomka.services;
+package com.lakomka.services.xml;
 
+import com.lakomka.services.S3Service;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -11,16 +12,14 @@ import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FileProcessingScheduledService {
 
     private static final String FILE_NAME = "ref_products.xml";
     private static final String ERROR_FILE_NAME = "ref_products_error.xml";
 
-    @Autowired
-    private S3Service s3Service;
-
-    @Autowired
-    private ProductXmlParser productXmlParser;
+    private final S3Service s3Service;
+    private final ProductXmlParser productXmlParser;
 
     @Value("${app.scheduling.enabled:true}")
     private boolean schedulingEnabled;

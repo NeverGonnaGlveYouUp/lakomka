@@ -13,7 +13,9 @@ import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.repository.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +29,9 @@ import static java.time.ZoneId.systemDefault;
 import static java.util.Date.from;
 
 @Component
+@DependsOn(value = "systemUserDatabaseInitializer")
 @Profile({"dev", "jpa-dev"})
+@Order(2)
 public class DatabaseInitializer implements CommandLineRunner {
 
     private final BasePersonRepository basePersonRepository;
@@ -94,7 +98,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson.setRoute(route);
 
         jPersonRepository.save(jPerson);
-        person.setjPerson(jPerson);
+        person.setJPerson(jPerson);
         basePersonRepository.save(person);
 
         BasePerson person2 = new BasePerson();
@@ -126,7 +130,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson2.setRoute(route);
 
         jPersonRepository.save(jPerson2);
-        person2.setjPerson(jPerson2);
+        person2.setJPerson(jPerson2);
         basePersonRepository.save(person2);
 
         for (int i = 0; i < 50; i++) {
@@ -144,6 +148,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product1.setProductGroup("Electronics");
             product1.setDescription(descText);
             product1.setContent(contentText);
+            product1.setUnit("unit");
 
             Product product2 = new Product();
             product2.setName("Smartphone" + i);
@@ -158,6 +163,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product2.setProductGroup("Mobile Phones");
             product2.setDescription(descText);
             product2.setContent(contentText);
+            product2.setUnit("unit");
 
             Product product3 = new Product();
             product3.setName("Tablet" + i);
@@ -172,6 +178,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product3.setProductGroup("Tablet");
             product3.setDescription(descText);
             product3.setContent(contentText);
+            product3.setUnit("unit");
 
             Product product4 = new Product();
             product4.setName("Headphones" + i);
@@ -186,6 +193,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product4.setProductGroup("Audio Accessories");
             product4.setDescription(descText);
             product4.setContent(contentText);
+            product4.setUnit("unit");
 
             productRepository.save(product1);
             productRepository.save(product2);

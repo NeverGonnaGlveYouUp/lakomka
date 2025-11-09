@@ -1,7 +1,9 @@
 package com.lakomka.models.order;
 
-import com.lakomka.dto.OrderDTO;
+import com.lakomka.dto.OrderDto;
+import com.lakomka.dto.OrderXmlDto;
 import com.lakomka.models.person.BasePerson;
+import com.lakomka.util.DateFormatUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +14,9 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Date;
+
+import static com.lakomka.util.DateFormatUtil.DEFAULT_FORMATTER;
+import static com.lakomka.util.DateFormatUtil.SHORT_DATE_FORMATTER;
 
 @Setter
 @Getter
@@ -110,13 +115,20 @@ public class Order {
     private String prim = "";
 
     /**
+     * Экспортирован в файл с таким именем
+     * при нескольких экспортах одного заказа остается последнее имя
+     */
+    @Column(name = "exported_file")
+    private String exportedFileName;
+
+    /**
      * Для анонимного заказа - номер сессии
      */
     @Column(name = "guest", length = 40)
     private String guest = "";
 
-    public OrderDTO toOrderDTO() {
-        return new OrderDTO(
+    public OrderDto toOrderDTO() {
+        return new OrderDto(
                 this.id,
 
                 this.contact,
@@ -135,5 +147,31 @@ public class Order {
                 this.bitAccPrint,
                 this.bitSertifPrint
         );
+    }
+
+    public OrderXmlDto toOrderXmlDTO() {
+        OrderDto im = this.toOrderDTO();
+        return new OrderXmlDto(
+                im.getId().toString(),
+
+                this.basePerson.getLogin(), // SystemUser for guest order
+
+                im.getContact(),
+                im.getTelephone(),
+                im.getEmail(),
+                im.getPrim(),
+                im.getAddressDelivery(),
+
+                DateFormatUtil.formatDate(im.getDatePay(), SHORT_DATE_FORMATTER),
+                DateFormatUtil.formatDate(im.getDateDelivery(), SHORT_DATE_FORMATTER),
+                DateFormatUtil.formatDate(im.getDateTimeOrder(), DEFAULT_FORMATTER),
+
+                im.getSumOrder(),
+                im.getSumWeight(),
+
+                im.isBitAccPrint(),
+                im.isBitSertifPrint()
+        );
+
     }
 }

@@ -1,5 +1,6 @@
 package com.lakomka.models.order;
 
+import com.lakomka.dto.OrderItemXmlDto;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.product.Product;
 import jakarta.persistence.*;
@@ -76,4 +77,14 @@ public class OrderItem {
     @Column(name = "weight_packag", precision = 12, nullable = false)
     private Integer weightPackag;
 
+    public OrderItemXmlDto toOrderItemsXmlDto() {
+        return new OrderItemXmlDto(
+                this.product.getId().toString(),
+                this.product.getArticle(),
+                this.unit,
+                this.packag,
+                this.price.toPlainString(),
+                this.quantity
+        );
+    }
 }

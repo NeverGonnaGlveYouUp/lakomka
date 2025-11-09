@@ -1,4 +1,4 @@
-package com.lakomka.services;
+package com.lakomka.services.xml;
 
 import com.lakomka.models.product.Product;
 import lombok.Getter;
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.lakomka.services.ProductXmlParser.XmlFieldName.*;
+import static com.lakomka.services.xml.ProductXmlParser.XmlFieldName.*;
 
 @Slf4j
 @Service

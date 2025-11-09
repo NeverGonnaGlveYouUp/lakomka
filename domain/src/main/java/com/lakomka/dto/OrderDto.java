@@ -10,14 +10,14 @@ import java.util.Date;
  * DTO for {@link com.lakomka.models.order.Order}
  */
 @Value
-public class OrderDTO {
+public class OrderDto {
     Long id;
 
     String contact;
     String email;
     String telephone;
     String prim;
-    String adressDelivery;
+    String addressDelivery;
 
     Date datePay;
     Date dateDelivery;
@@ -28,4 +28,5 @@ public class OrderDTO {
 
     boolean bitAccPrint;
     boolean bitSertifPrint;
+
 }

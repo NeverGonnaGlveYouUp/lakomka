@@ -22,7 +22,7 @@ public class FileController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            String fileName = s3Service.uploadFile(file);
+            String fileName = s3Service.uploadFile(file, true);
             return ResponseEntity.ok("File uploaded successfully: " + fileName);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

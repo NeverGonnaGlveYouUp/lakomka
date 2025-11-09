@@ -9,11 +9,13 @@ import com.lakomka.repository.order.OrderItemRepository;
 import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.services.DiscountService;
+import com.lakomka.services.xml.OrderExport;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,7 @@ public abstract class Common {
     private final OrderItemRepository orderItemRepository;
     private final DiscountService discountService;
     private final BasePersonRepository basePersonRepository;
+    private final OrderExport orderExport;
 
     public Order makeOrder(BasePerson basePerson, OrderCreationRequest request, List<PersonCartItem> cartItems, String currentSessionId) {
 
@@ -55,6 +58,8 @@ public abstract class Common {
         BigDecimal totalSum = BigDecimal.ZERO;
         int totalWeight = 0;
 
+        List<OrderItem> newItems = new ArrayList<>();
+
         for (PersonCartItem cartItem : cartItems) {
 
             boolean bitPackag = getBitPackag(cartItem);
@@ -79,12 +84,20 @@ public abstract class Common {
 
             // Save order item
             orderItemRepository.save(orderItem);
+
+            newItems.add(orderItem);
+
         }
 
         // Update order with calculated totals
         order.setSumOrder(totalSum);
         order.setSumWeight(totalWeight);
+
+        String exportedFileName = orderExport.safeExportXml(order, newItems);
+        order.setExportedFileName(exportedFileName);
+
         orderRepository.save(order);
+
         return order;
     }
 

@@ -98,7 +98,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson.setRoute(route);
 
         jPersonRepository.save(jPerson);
-        person.setjPerson(jPerson);
+        person.setJPerson(jPerson);
         basePersonRepository.save(person);
 
         BasePerson person2 = new BasePerson();
@@ -130,7 +130,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson2.setRoute(route);
 
         jPersonRepository.save(jPerson2);
-        person2.setjPerson(jPerson2);
+        person2.setJPerson(jPerson2);
         basePersonRepository.save(person2);
 
         for (int i = 0; i < 50; i++) {

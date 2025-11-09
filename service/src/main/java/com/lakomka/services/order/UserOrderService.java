@@ -1,7 +1,7 @@
 package com.lakomka.services.order;
 
 import com.lakomka.dto.OrderCreationRequest;
-import com.lakomka.dto.OrderDTO;
+import com.lakomka.dto.OrderDto;
 import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.product.PersonCartItem;
@@ -10,6 +10,7 @@ import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.product.PersonCartItemRepository;
 import com.lakomka.services.DiscountService;
+import com.lakomka.services.xml.OrderExport;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +26,10 @@ public class UserOrderService extends Common {
                             OrderItemRepository orderItemRepository,
                             DiscountService discountService,
                             PersonCartItemRepository cartItemRepository,
-                            BasePersonRepository basePersonRepository) {
-        super(orderRepository, orderItemRepository, discountService, basePersonRepository);
+                            BasePersonRepository basePersonRepository,
+                            OrderExport orderExport
+    ) {
+        super(orderRepository, orderItemRepository, discountService, basePersonRepository, orderExport);
         this.cartItemRepository = cartItemRepository;
     }
 
@@ -54,7 +57,7 @@ public class UserOrderService extends Common {
         return savedOrder;
     }
 
-    public List<OrderDTO> getOrders(BasePerson user) {
+    public List<OrderDto> getOrders(BasePerson user) {
         return getOrderRepository().findAllByBasePerson(user)
                 .stream()
                 .map(Order::toOrderDTO)

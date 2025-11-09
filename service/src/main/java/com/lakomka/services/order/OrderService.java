@@ -1,7 +1,7 @@
 package com.lakomka.services.order;
 
 import com.lakomka.dto.OrderCreationRequest;
-import com.lakomka.dto.OrderDTO;
+import com.lakomka.dto.OrderDto;
 import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.utils.SessionUtil;
@@ -28,7 +28,7 @@ public class OrderService {
         }
     }
 
-    public List<OrderDTO> getOrders(BasePerson user, HttpServletRequest request) {
+    public List<OrderDto> getOrders(BasePerson user, HttpServletRequest request) {
         if (user == null) {
             // get order list for guest user only for existing session
             String currentSessionId = sessionUtil.getCurrentSessionId(request);

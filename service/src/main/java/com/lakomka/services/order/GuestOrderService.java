@@ -2,7 +2,7 @@ package com.lakomka.services.order;
 
 import com.lakomka.configs.SystemUserDatabaseInitializer;
 import com.lakomka.dto.OrderCreationRequest;
-import com.lakomka.dto.OrderDTO;
+import com.lakomka.dto.OrderDto;
 import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.product.PersonCartItem;
@@ -11,6 +11,7 @@ import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.cart.GuestCartService;
+import com.lakomka.services.xml.OrderExport;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +27,10 @@ public class GuestOrderService extends Common {
                              OrderItemRepository orderItemRepository,
                              DiscountService discountService,
                              GuestCartService guestCartService,
-                             BasePersonRepository basePersonRepository
+                             BasePersonRepository basePersonRepository,
+                             OrderExport orderExport
     ) {
-        super(orderRepository, orderItemRepository, discountService, basePersonRepository);
+        super(orderRepository, orderItemRepository, discountService, basePersonRepository, orderExport);
         this.guestCartService = guestCartService;
     }
 
@@ -55,7 +57,7 @@ public class GuestOrderService extends Common {
         return savedOrder;
     }
 
-    public List<OrderDTO> getOrders(String currentSessionId) {
+    public List<OrderDto> getOrders(String currentSessionId) {
         return getOrderRepository().findAllByGuest(currentSessionId)
                 .stream()
                 .map(Order::toOrderDTO)

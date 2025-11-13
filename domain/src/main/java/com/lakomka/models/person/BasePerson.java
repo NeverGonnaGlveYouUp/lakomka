@@ -1,28 +1,25 @@
 package com.lakomka.models.person;
 
-import com.lakomka.dto.AuthenticationRequest;
-import lombok.ToString;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lakomka.dto.AuthenticationRequest;
 import com.lakomka.dto.RegistrationDto;
-import com.lakomka.models.order.Order;
-import com.lakomka.models.product.PersonCartItem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Table
 @Entity
 @Getter
 @Setter
-@ToString(exclude = {"password","repeatPassword","person","jPerson","cart","orders"})
+//@ToString(exclude = {"password", "repeatPassword", "person", "jPerson", "cart", "orders"})
+@ToString(exclude = {"password", "repeatPassword", "person", "jPerson"})
 public class BasePerson implements UserDetails {
 
     @Id
@@ -39,13 +36,13 @@ public class BasePerson implements UserDetails {
     @Transient
     private String repeatPassword;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "basePerson")
-    private Set<Order> orders = new HashSet<>();
+//    @JsonIgnore
+//    @OneToMany(mappedBy = "basePerson")
+//    private Set<Order> orders = new HashSet<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "basePerson")
-    private Set<PersonCartItem> cart = new HashSet<>();
+//    @JsonIgnore
+//    @OneToMany(mappedBy = "basePerson")
+//    private Set<PersonCartItem> cart = new HashSet<>();
 
     @JsonIgnore
     @PrimaryKeyJoinColumn
@@ -72,14 +69,6 @@ public class BasePerson implements UserDetails {
         String encoded = passwordEncoder.encode(authenticationRequest.getPassword());
         this.password = encoded;
         this.repeatPassword = encoded;
-    }
-
-    public JPerson getjPerson() {
-        return jPerson;
-    }
-
-    public void setjPerson(JPerson jPerson) {
-        this.jPerson = jPerson;
     }
 
     @Override

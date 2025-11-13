@@ -27,8 +27,8 @@ public class S3Service {
     /**
      * Загрузка файла в S3
      */
-    public String uploadFile(MultipartFile file) throws IOException {
-        String fileName = generateFileName(file.getOriginalFilename());
+    public String uploadFile(MultipartFile file, boolean uniq) throws IOException {
+        String fileName = generateFileName(file.getOriginalFilename(), uniq);
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
@@ -108,8 +108,12 @@ public class S3Service {
     /**
      * Генерация уникального имени файла
      */
-    private String generateFileName(String originalFileName) {
-        return UUID.randomUUID().toString() + "_" + originalFileName;
+    private String generateFileName(String originalFileName, boolean uniq) {
+        if (uniq) {
+            return UUID.randomUUID().toString() + "_" + originalFileName;
+        } else {
+            return originalFileName;
+        }
     }
 
     /**

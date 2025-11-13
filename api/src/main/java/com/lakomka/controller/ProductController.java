@@ -68,7 +68,7 @@ public class ProductController {
         Specification<Product> searchSpecificationSorted = searchSpecification.and(toSort(sort));
         Page<ProductFeedDto> all = productFilterRepository
                 .findAll(searchSpecificationSorted, PageRequest.of(page, size))
-                .map(product -> discountService.apply(product, discounts).toProductFeedDto());
+                .map(product -> discountService.applyToProductDto(product, discounts).toProductFeedDto());
 
         all.getContent().stream()
                 .filter(productFeedDto -> cartKeys.contains(productFeedDto.getId()))
@@ -92,7 +92,7 @@ public class ProductController {
         if (product.isPresent()) {
 
             Discounts discounts = discountService.getDiscounts(user);
-            ProductDto productDto = discountService.apply(product.get(), discounts);
+            ProductDto productDto = discountService.applyToProductDto(product.get(), discounts);
             HashMap<Long, Integer> cart = cartService.getCartIdQuantityHashMap(user, request);
             Optional.ofNullable(cart.get(productDto.getId())).ifPresent(productDto::setCartQuantity);
 
@@ -126,7 +126,7 @@ public class ProductController {
         List<Long> productIds = randomByProductGroup.stream().map(ProductFeedDto::getId).toList();
         List<Product> products = productRepository.findAllById(productIds);
         List<ProductFeedDto> productFeedDtoList = products.stream()
-                .map(product -> discountService.apply(product, discounts).toProductFeedDto())
+                .map(product -> discountService.applyToProductDto(product, discounts).toProductFeedDto())
                 .toList();
 
         // проставляем счетчики корзины

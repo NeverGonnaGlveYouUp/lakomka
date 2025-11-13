@@ -45,7 +45,7 @@ public class UserCartService extends Common {
         if (quantity == 0) {
             personCartItemRepository.delete(cartItem);
             cartItem.setQuantity(quantity);
-            return ResponseEntity.ok().body(discountService.apply(cartItem));
+            return ResponseEntity.ok().body(discountService.applyToCartItemDto(cartItem));
         } else {
             cartItem.setQuantity(quantity);
             personCartItemRepository.save(cartItem);
@@ -60,7 +60,7 @@ public class UserCartService extends Common {
     }
 
     private ResponseEntity<CartItemDto> createResponseEntity(PersonCartItem cartItem) {
-        return ResponseEntity.ok(discountService.apply(cartItem));
+        return ResponseEntity.ok(discountService.applyToCartItemDto(cartItem));
     }
 
     public HashMap<Long, Integer> getCartIdQuantityHashMap(BasePerson user) {
@@ -76,7 +76,7 @@ public class UserCartService extends Common {
         Set<CartItemDto> cartItems =
                 personCartItemRepository.findAllByBasePerson(user)
                         .stream()
-                        .map(discountService::apply)
+                        .map(discountService::applyToCartItemDto)
                         .collect(Collectors.toSet());
         return ResponseEntity.ok(cartItems);
     }

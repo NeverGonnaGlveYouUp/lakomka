@@ -78,7 +78,7 @@ public class AuthController {
         BasePerson basePerson = new BasePerson(passwordEncoder, user);
         log.info("Signup: BasePerson: {}", basePerson.getLogin());
         if (personType instanceof JPerson jPerson) {
-            basePerson.setjPerson(jPerson);
+            basePerson.setJPerson(jPerson);
             jPerson.setBasePerson(basePerson);
             basePerson = basePersonRepository.save(basePerson);
             jPerson.setBasePerson(basePerson);

@@ -7,7 +7,7 @@ const ErrorPage = () => {
   const navigate = useNavigate();
 
   const handleBackHome = () => {
-    history.push('/');
+    navigate('/');
   };
 
   return (

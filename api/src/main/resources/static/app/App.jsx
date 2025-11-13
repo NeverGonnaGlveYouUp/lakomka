@@ -12,6 +12,7 @@ import Navbar from './components/Navbar.jsx';
 import CartPage from './components/CartPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import ErrorPage from './components/ErrorPage.jsx';
+import GeneralInfoPage from './components/GeneralInfoPage.jsx';
 import { checkJWTExpiration } from './components/checkJWTExpiration.js';
 import { AppProvider } from './components/AppContext.js';
 
@@ -88,6 +89,7 @@ function App() {
                                 <Route index element={<ProductFeed />} />
                                 <Route path="/product/:id" element={<ProductPage />} />
                                 <Route path="/cart" element={<CartPage />} />
+                                <Route path="/info" element={<GeneralInfoPage />} />
                             </Route>
                             <Route path="/private" element={<ProtectedRoute />}>
                                 <Route path="/private/change-password" element={<ChangePassword />} />

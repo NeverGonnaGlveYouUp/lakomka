@@ -1,12 +1,13 @@
 package com.lakomka.dto;
 
 import lombok.Builder;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
 @Builder
+@ToString
 public class LoggedUser {
-
     public String userName;
     public String name;
     public String nameFull;
@@ -22,5 +23,5 @@ public class LoggedUser {
     public String mapDelivery;
     public BigDecimal rest;
     public BigDecimal restTime;
-
+    public String route;
 }

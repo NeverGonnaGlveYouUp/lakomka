@@ -2,11 +2,15 @@ package com.lakomka.models.misc;
 
 import com.lakomka.models.person.JPerson;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
 @Table
 @Entity
+@Getter
+@Setter
 public class Route {
 
     @Id
@@ -30,35 +34,27 @@ public class Route {
     @OneToMany(mappedBy="route")
     private Set<JPerson> jPeople;
 
-    public Long getId() {
-        return id;
-    }
+    String[] daysOfWeek = {
+            "Понедельник",
+            "Вторник",
+            "Среда",
+            "Четверг",
+            "Пятница",
+            "Суббота",
+            "Воскресение"
+    };
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNameRoute() {
-        return nameRoute;
-    }
-
-    public void setNameRoute(String nameRoute) {
-        this.nameRoute = nameRoute;
-    }
-
-    public String getRouteDays() {
-        return routeDays;
-    }
-
-    public void setRouteDays(String routeDays) {
-        this.routeDays = routeDays;
-    }
-
-    public Set<JPerson> getjPeople() {
-        return jPeople;
-    }
-
-    public void setjPeople(Set<JPerson> jPeople) {
-        this.jPeople = jPeople;
+    public String getRouteString(){
+        if (routeDays != null){
+            String[] days = routeDays.split("");
+            StringBuilder result = new StringBuilder();
+            for (String day : days) {
+                int dayIndex = Integer.parseInt(day) - 1;
+                if (dayIndex >= 0 && dayIndex <= 6){
+                    result.append(daysOfWeek[dayIndex]).append(dayIndex != 6 ? " - " : ".");
+                }
+            }
+            return nameRoute + ": " + result;
+        } else return null;
     }
 }

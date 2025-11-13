@@ -288,7 +288,7 @@ const CartPage = () => {
             <Box sx={{ flexGrow: 1, width: "-webkit - fill - available" }}>
                 {products.length != 0 ? (
                     <Container sx={{ display: "flex", flexDirection: isDesktopResolution ? "row" : "column-reverse", gap: "2rem" }}>
-                        <Grid container spacing={2} sx={{ flexDirection: "column" }}>
+                        <Grid container spacing={2} sx={{ width: "66%", flexDirection: "column" }}>
                             {products.map((item, index) => (
                                 <Grid key={index}>
                                     <CartPageCard newData={(e) => {

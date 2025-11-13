@@ -5,6 +5,7 @@ import com.lakomka.dto.ChangePasswordRequest;
 import com.lakomka.dto.LoggedUser;
 import com.lakomka.dto.RegistrationDto;
 import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
+import com.lakomka.models.misc.Route;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.person.JPerson;
 import com.lakomka.models.person.Person;
@@ -139,26 +140,26 @@ public class AuthController {
         }
 
         JPerson jPerson = optionalJPerson.get();
-        return ResponseEntity.ok()
-                .body(
-                        LoggedUser.builder()
-                                .userName(user.getLogin())
-                                .name(jPerson.getName())
-                                .nameFull(jPerson.getNameFull())
-                                .address(jPerson.getAddress())
-                                .OGRN(jPerson.getOGRN())
-                                .INN(jPerson.getINN())
-                                .KPP(jPerson.getKPP())
-                                .phone(jPerson.getPhone())
-                                .email(jPerson.getEmail())
-                                .contact(jPerson.getContact())
-                                .post(jPerson.getPost())
-                                .addressDelivery(jPerson.getAddressDelivery())
-                                .mapDelivery(jPerson.getMapDelivery())
-                                .rest(jPerson.getRest())
-                                .restTime(jPerson.getRestTime())
-                                .build()
-                );
+        LoggedUser personDto = LoggedUser.builder()
+                .userName(user.getLogin())
+                .name(jPerson.getName())
+                .nameFull(jPerson.getNameFull())
+                .address(jPerson.getAddress())
+                .OGRN(jPerson.getOGRN())
+                .INN(jPerson.getINN())
+                .KPP(jPerson.getKPP())
+                .phone(jPerson.getPhone())
+                .email(jPerson.getEmail())
+                .contact(jPerson.getContact())
+                .post(jPerson.getPost())
+                .addressDelivery(jPerson.getAddressDelivery())
+                .mapDelivery(jPerson.getMapDelivery())
+                .rest(jPerson.getRest())
+                .restTime(jPerson.getRestTime())
+                .route(Optional.ofNullable(jPerson.getRoute()).orElseGet(Route::new).getRouteString())
+                .build();
+        log.info(personDto.toString());
+        return ResponseEntity.ok().body(personDto);
     }
 
     @GetMapping("/current-user")

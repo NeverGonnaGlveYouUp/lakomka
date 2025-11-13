@@ -8,10 +8,13 @@ import {
     ListItemText,
     ListItemButton,
     ListSubheader,
-    ListItemIcon
+    ListItemIcon,
+    Divider,
+    Alert,
+    Link
     } from '@mui/material';
 import { checkJWTExpiration } from './checkJWTExpiration.js';
-import { CiLogout } from "react-icons/ci";
+import { FaSignOutAlt } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { PiPasswordDuotone } from "react-icons/pi";
 
@@ -60,12 +63,19 @@ const ProfilePage = () => {
                 </ListItemButton>
                 <ListItemButton>
                     <ListItemIcon>
-                        <CiLogout />
+                        <FaSignOutAlt />
                     </ListItemIcon>
                     <ListItemText primary="Выйти"
                         onClick={ () => {
                             localStorage.removeItem('jwtToken');
                             navigate("/");
+                            }}/>
+                </ListItemButton>
+                <Divider />
+                <ListItemButton>
+                    <ListItemText primary="Как редактировать профиль?"
+                        onClick={ () => {
+                            navigate("/info#redac_profile");
                             }}/>
                 </ListItemButton>
             </List>
@@ -77,6 +87,19 @@ const ProfilePage = () => {
                     Информация о профиле
                 </Typography>
                 <List>
+                    {data.route === null && (
+                        <ListItem>
+                            <Alert severity="warning">
+                                <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
+                                    {"Чтобы начать покупки вам необходимо заключить "}
+                                    <Link onClick={() => navigate("/info#dogovor")}>
+                                        договор
+                                    </Link>
+                                    {"."}
+                                </Typography>
+                            </Alert>
+                        </ListItem>
+                    )}
                     {typeof data.rest !== 'undefined' && (
                         <ListItem>
                             <ListItemText primary="Долг в рублях" secondary={data.rest} />
@@ -105,6 +128,16 @@ const ProfilePage = () => {
                     {data.addressDelivery && (
                         <ListItem>
                             <ListItemText primary="Адрес доставки" secondary={data.addressDelivery} />
+                        </ListItem>
+                    )}
+                    {data.mapDelivery && (
+                        <ListItem>
+                            <ListItemText primary="Описание места доставки" secondary={data.mapDelivery} />
+                        </ListItem>
+                    )}
+                    {data.route && (
+                        <ListItem>
+                            <ListItemText primary="Дни поставок" secondary={data.route} />
                         </ListItem>
                     )}
                     {data.contact && (

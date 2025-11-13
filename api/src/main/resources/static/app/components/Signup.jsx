@@ -262,6 +262,15 @@ const Signup = () => {
                 <Typography component="h1" variant="h5">
                     Регистрация
                 </Typography>
+                <Alert severity="info">
+                    <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
+                        {"После регистрации вам будет необходимо заключить "}
+                        <Link onClick={() => navigate("/info#dogovor")}>
+                            договор
+                        </Link>
+                        {"."}
+                    </Typography>
+                </Alert>
                 <Box
                     component="form"
                     onSubmit={handleSubmit}

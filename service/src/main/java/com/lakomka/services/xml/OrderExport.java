@@ -9,6 +9,7 @@ import com.lakomka.repository.order.OrderItemRepository;
 import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.services.S3Service;
 import com.lakomka.util.DateFormatUtil;
+import com.lakomka.utils.FileUtil;
 import com.lakomka.utils.SessionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.xml.bind.JAXBContext;
@@ -22,9 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -42,6 +40,7 @@ public class OrderExport {
 
     private final S3Service s3Service;
     private final SessionUtil sessionUtil;
+    private final FileUtil fileUtil;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
 
@@ -54,7 +53,7 @@ public class OrderExport {
             LocalDateTime now = LocalDateTime.now();
             String formattedDateTime = DateFormatUtil.formatDate(now, WITH_SECONDS_FORMATTER);
             String fileName = "orders/order_" + order.getId() + "_" + formattedDateTime + ".xml";
-            MultipartFile file = createMultipartFile(fileName, xmlContent.getBytes());
+            MultipartFile file = fileUtil.createMultipartFile(fileName, xmlContent.getBytes());
             s3Service.uploadFile(file, false);
 
             log.info("Successfully Export XML: order #{} to S3 as {} for {}",
@@ -140,51 +139,6 @@ public class OrderExport {
             return orderItems;
         }
 
-    }
-
-    private MultipartFile createMultipartFile(String fileName, byte[] content) {
-        return new MultipartFile() {
-            @Override
-            public String getName() {
-                return fileName;
-            }
-
-            @Override
-            public String getOriginalFilename() {
-                return fileName;
-            }
-
-            @Override
-            public String getContentType() {
-                return "application/xml";
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return content == null || content.length == 0;
-            }
-
-            @Override
-            public long getSize() {
-                return content != null ? content.length : 0;
-            }
-
-            @Override
-            public byte[] getBytes() throws IOException {
-                return content;
-            }
-
-            @Override
-            public InputStream getInputStream() throws IOException {
-                return new ByteArrayInputStream(content);
-            }
-
-            @Override
-            public void transferTo(java.io.File dest) throws IOException {
-                // Implementation for transferring to file if needed
-                throw new UnsupportedOperationException("Not implemented");
-            }
-        };
     }
 
 }

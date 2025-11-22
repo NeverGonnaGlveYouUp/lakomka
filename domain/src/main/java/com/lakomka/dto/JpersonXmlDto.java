@@ -160,6 +160,6 @@ public class JpersonXmlDto {
     /**
      * Скидка для всего ассортимента товаров
      */
-    private Integer globalDiscount;
+    private Integer globalDiscount; // todo не используется в расчете скидок!
 
 }

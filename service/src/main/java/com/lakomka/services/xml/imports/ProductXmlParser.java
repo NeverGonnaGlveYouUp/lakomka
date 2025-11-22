@@ -1,4 +1,4 @@
-package com.lakomka.services.xml;
+package com.lakomka.services.xml.imports;
 
 import com.lakomka.models.product.Product;
 import lombok.Getter;
@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,12 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.lakomka.services.xml.ProductXmlParser.XmlFieldName.*;
+import static com.lakomka.services.xml.imports.ProductXmlParser.XmlFieldName.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProductXmlParser {
+public class ProductXmlParser implements XmlParser {
 
     private final ProductXmlUpsert productXmlUpsert;
 
@@ -38,10 +36,11 @@ public class ProductXmlParser {
      */
     private final Map<String, String> groups = new HashMap<>();
 
+    @Override
     public boolean parse(byte[] fileContent) {
         long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        int recordsRead = 0;
-        ProductXmlUpsert.Stat stat = new ProductXmlUpsert.Stat(0, 0, 0, 0);
+        int recordsRead;
+        Stat stat = new Stat(0, 0, 0, 0);
 
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -82,26 +81,17 @@ public class ProductXmlParser {
             log.error("XML parsing error: {}", e.getMessage());
             return false;
         } catch (Exception e) {
-            log.error("Unexpected error during XML processing: {}", e.getMessage());
+            log.error("Unexpected error during XML processing: {}", e.getMessage(), e);
             return false;
         }
     }
 
-    private void configureParserSecurity(SAXParserFactory factory)
-            throws ParserConfigurationException, SAXNotSupportedException, SAXNotRecognizedException {
-        // Disable external entity processing to prevent XXE attacks
-        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-
-        // Additional security features
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-
-        factory.setXIncludeAware(false);
-        factory.setNamespaceAware(true);
-    }
-
     private class ProductHandler extends DefaultHandler {
+        public static final String SCHEMA_ELEMENT = "schema";
+        public static final String DATA_ELEMENT = "data";
+        public static final String RECORD_ELEMENT = "record";
+        public static final String FIELD_ELEMENT = "field";
+        public static final String F_ELEMENT = "f";
         @Getter
         private final List<Product> validProducts = new ArrayList<>();
         private final List<String> fieldNames = new ArrayList<>();
@@ -115,23 +105,23 @@ public class ProductXmlParser {
 
         @Override
         public void startElement(String uri, String localName, String qName,
-                                 Attributes attributes) throws SAXException {
+                                 Attributes attributes) {
             switch (qName) {
-                case "schema":
+                case SCHEMA_ELEMENT:
                     inSchema = true;
                     fieldNames.clear();
                     break;
-                case "data":
+                case DATA_ELEMENT:
                     inData = true;
                     break;
-                case "record":
+                case RECORD_ELEMENT:
                     if (inData) {
                         inRecord = true;
                         currentRecord.clear();
                         fieldIndex = -1;
                     }
                     break;
-                case "field":
+                case FIELD_ELEMENT:
                     if (inSchema) {
                         String fieldName = attributes.getValue("name");
                         if (fieldName != null) {
@@ -139,7 +129,7 @@ public class ProductXmlParser {
                         }
                     }
                     break;
-                case "f":
+                case F_ELEMENT:
                     if (inRecord) {
                         fieldIndex++;
                     }
@@ -148,15 +138,15 @@ public class ProductXmlParser {
         }
 
         @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
+        public void endElement(String uri, String localName, String qName) {
             switch (qName) {
-                case "schema":
+                case SCHEMA_ELEMENT:
                     inSchema = false;
                     break;
-                case "data":
+                case DATA_ELEMENT:
                     inData = false;
                     break;
-                case "record":
+                case RECORD_ELEMENT:
                     if (inData) {
                         inRecord = false;
                         processRecord();
@@ -167,7 +157,7 @@ public class ProductXmlParser {
         }
 
         @Override
-        public void characters(char[] ch, int start, int length) throws SAXException {
+        public void characters(char[] ch, int start, int length) {
             if (inRecord && fieldIndex >= 0 && fieldIndex < fieldNames.size()) {
                 String value = new String(ch, start, length);
                 // Ensure we have enough elements in currentRecord

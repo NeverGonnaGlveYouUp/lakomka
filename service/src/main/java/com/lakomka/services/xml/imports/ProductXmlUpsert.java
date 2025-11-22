@@ -1,4 +1,4 @@
-package com.lakomka.services.xml;
+package com.lakomka.services.xml.imports;
 
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductRepository;
@@ -188,6 +188,4 @@ public class ProductXmlUpsert {
         return value.toPlainString();
     }
 
-    public record Stat(int total, int updated, int newRecords, int notTouched) {
-    }
 }

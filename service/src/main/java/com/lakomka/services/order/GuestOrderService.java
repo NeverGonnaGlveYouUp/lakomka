@@ -11,7 +11,7 @@ import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.cart.GuestCartService;
-import com.lakomka.services.xml.OrderExport;
+import com.lakomka.services.xml.exports.OrderExport;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

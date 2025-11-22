@@ -38,7 +38,7 @@ public class S3Service {
 
         s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
 
-        log.info("File uploaded successfully: {}", fileName);
+        log.info("S3:Success:Upload:{}", fileName);
         return fileName;
     }
 
@@ -50,26 +50,26 @@ public class S3Service {
                 .bucket(bucketName)
                 .key(fileName)
                 .build();
-
+        log.info("S3:Success:Download:{}", fileName);
         return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
     }
 
     /**
      * Удаление файла из S3
      */
+    @SuppressWarnings("UnusedReturnValue")
     public boolean deleteFile(String fileName) {
         try {
-
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                     .bucket(bucketName)
                     .key(fileName)
                     .build();
             s3Client.deleteObject(deleteObjectRequest);
         } catch (Throwable t) {
-            log.error("Error:Delete", t);
+            log.error("S3:Error:Delete:{}:{}", fileName, t.getMessage());
             return false;
         }
-        log.info("File deleted successfully: {}", fileName);
+        log.info("S3:Success:Delete:{}", fileName);
         return true;
     }
 
@@ -110,7 +110,7 @@ public class S3Service {
      */
     private String generateFileName(String originalFileName, boolean uniq) {
         if (uniq) {
-            return UUID.randomUUID().toString() + "_" + originalFileName;
+            return UUID.randomUUID() + "_" + originalFileName;
         } else {
             return originalFileName;
         }
@@ -125,17 +125,17 @@ public class S3Service {
             s3Client.headBucket(HeadBucketRequest.builder()
                     .bucket(bucketName)
                     .build());
-            log.info("Bucket alredy existed: {}", bucketName);
+            log.info("S3:Warn:BucketCreate:{}:BucketExist", bucketName);
             return true;
         } catch (NoSuchBucketException e) {
             CreateBucketRequest createBucketRequest = CreateBucketRequest.builder()
                     .bucket(bucketName)
                     .build();
             s3Client.createBucket(createBucketRequest);
-            log.info("Bucket created: {}", bucketName);
+            log.info("S3:Success:BucketCreate:{}", bucketName);
             return true;
         } catch (Throwable t) {
-            log.error("Error:Create bucket", t);
+            log.error("S3:Error:CreateBucket:{}:{}", bucketName, t.getMessage());
             return false;
         }
     }
@@ -147,6 +147,7 @@ public class S3Service {
      * @param newKey The new key/name for the file
      * @return true if successful, false otherwise
      */
+    @SuppressWarnings("UnusedReturnValue")
     public boolean renameFile(String oldKey, String newKey) {
         try {
             // Copy the object to the new key
@@ -167,13 +168,16 @@ public class S3Service {
                         .build();
 
                 s3Client.deleteObject(deleteRequest);
+
+                log.info("S3:Success:Rename:{}:{}", oldKey, newKey);
                 return true;
             }
 
+            log.warn("S3:Warn:Rename:{}:{}", oldKey, newKey);
             return false;
 
         } catch (Throwable t) {
-            log.error("Error:Rename", t);
+            log.error("S3:Error:Rename:{}:{}:{}", oldKey, newKey, t.getMessage());
             return false;
         }
     }

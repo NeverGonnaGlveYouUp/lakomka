@@ -9,7 +9,7 @@ import com.lakomka.repository.order.OrderItemRepository;
 import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.services.DiscountService;
-import com.lakomka.services.xml.OrderExport;
+import com.lakomka.services.xml.exports.OrderExport;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

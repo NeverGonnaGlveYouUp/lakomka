@@ -82,7 +82,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson.setDay(0);
         jPerson.setAccPrint(false);
         jPerson.setDogovor(false);
-        jPerson.setEdo(false);
+        jPerson.setEdo(true);
         jPerson.setINN("1958382111");
         jPerson.setBasePrice(BasePrice.KONS);
         jPerson.setKPP("345953849");
@@ -97,6 +97,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson.setRestTime(new BigDecimal("0"));
         jPerson.setRoute(route);
         jPerson.setPrim("Тестовый JP 1");
+        jPerson.setEdoDate(new Date());
 
         jPersonRepository.save(jPerson);
         person.setJPerson(jPerson);

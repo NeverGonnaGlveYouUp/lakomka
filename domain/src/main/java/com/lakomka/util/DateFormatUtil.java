@@ -1,9 +1,12 @@
 package com.lakomka.util;
 
+import lombok.SneakyThrows;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class DateFormatUtil {
 
@@ -38,4 +41,9 @@ public class DateFormatUtil {
         return localDateTime.format(formatter);
     }
 
+    @SneakyThrows
+    public static Date parseDate(String dateString) {
+        LocalDate localDate = SHORT_DATE_FORMATTER.parse(dateString, LocalDate::from);
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
 }

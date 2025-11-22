@@ -1,4 +1,4 @@
-package com.lakomka.services.xml;
+package com.lakomka.services.xml.exports;
 
 import com.lakomka.dto.OrderItemXmlDto;
 import com.lakomka.dto.OrderXmlDto;

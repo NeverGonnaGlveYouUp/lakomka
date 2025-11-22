@@ -1,12 +1,10 @@
-package com.lakomka.services.xml;
+package com.lakomka.services.xml.exports;
 
 import com.lakomka.dto.JpersonXmlDto;
 import com.lakomka.models.person.JPerson;
-import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.S3Service;
 import com.lakomka.util.DateFormatUtil;
 import com.lakomka.utils.FileUtil;
-import com.lakomka.utils.SessionUtil;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;

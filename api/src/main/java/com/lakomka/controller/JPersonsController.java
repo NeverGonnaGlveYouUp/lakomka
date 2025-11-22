@@ -2,7 +2,7 @@ package com.lakomka.controller;
 
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.repository.person.JPersonRepository;
-import com.lakomka.services.xml.JPersonExport;
+import com.lakomka.services.xml.exports.JPersonExport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

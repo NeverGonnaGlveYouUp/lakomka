@@ -229,6 +229,18 @@ public class JPerson {
     @Column(name = "global_discount")
     private Integer globalDiscount = 0;
 
+    public String getINN() {
+        return INN.trim();
+    }
+
+    public String getKPP() {
+        return KPP.trim();
+    }
+
+    public String getOGRN() {
+        return OGRN.trim();
+    }
+
     public JpersonXmlDto toJpersonXmlDto() {
         JpersonXmlDto dto = new JpersonXmlDto();
 
@@ -260,12 +272,12 @@ public class JPerson {
         );
         dto.setEmail(this.email);
         dto.setGlobalDiscount(this.globalDiscount);
-        dto.setINN(this.INN.trim());
-        dto.setKPP(this.KPP);
+        dto.setINN(this.getINN());
+        dto.setKPP(this.getKPP());
         dto.setMapDelivery(this.mapDelivery);
         dto.setName(this.name);
         dto.setNameFull(this.nameFull);
-        dto.setOGRN(this.OGRN.trim());
+        dto.setOGRN(this.getOGRN());
         dto.setPayVid(this.payVid);
         dto.setPhone(this.phone);
         dto.setPost(this.post);

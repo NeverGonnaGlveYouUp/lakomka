@@ -13,7 +13,7 @@ import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.RecaptchaService;
 import com.lakomka.services.cart.CartService;
-import com.lakomka.services.xml.JPersonExport;
+import com.lakomka.services.xml.exports.JPersonExport;
 import com.lakomka.utils.JwtUtil;
 import com.lakomka.validators.BasePersonValidator;
 import com.lakomka.validators.RegistrationValidator;

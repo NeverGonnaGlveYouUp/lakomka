@@ -15,7 +15,8 @@ import {
     Container,
     CircularProgress,
     Badge,
-    Tooltip
+    Tooltip,
+    Box
 } from '@mui/material';
 import { useAppContext } from './AppContext.js';
 import { useNavigate, useLocation } from "react-router-dom";
@@ -90,7 +91,6 @@ const Navbar = () => {
       fetchData([]);
     }
   };
-
 
   function capitalizeFirstLetter(val) {
       return String(val).charAt(0).toUpperCase() + String(val).slice(1);
@@ -176,41 +176,43 @@ const Navbar = () => {
               )}
             />
             <Stack direction="row" spacing={2}>
-              <IconButton  color="inherit" onClick={() => navigate("/cart")}>
-                <Tooltip title="Корзина">
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <IconButton  color="inherit" onClick={() => navigate("/cart")}>
                     <Badge badgeContent={counter} color="secondary">
                         <FaCartShopping />
                     </Badge>
-                </Tooltip>
-              </IconButton >
-              <IconButton  color="inherit" onClick={() => navigate("/info")}>
-                <Tooltip title="Информация">
-                  <FaRegQuestionCircle />
-                </Tooltip>
-              </IconButton >
+                  </IconButton >
+                  <Typography sx={{ fontSize: "small" }}>Корзина</Typography>
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <IconButton  color="inherit" onClick={() => navigate("/info")}>
+                    <FaRegQuestionCircle />
+                  </IconButton >
+                  <Typography sx={{ fontSize: "small" }}>Информация</Typography>
+                </Box>
               {!isLoggedIn && (
-                <Tooltip title="Войти">
+                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                     <IconButton color="inherit" onClick={() => navigate("/auth/login")}>
                         <FaRegUserCircle />
                     </IconButton>
-                </Tooltip>
+                    <Typography sx={{ fontSize: "small" }}>Войти</Typography>
+                </Box>
               )}
-              <Typography variant="h6" component="div" sx={{ alignSelf: "center" }}>
-                  {loggedUsername}
-              </Typography>
               {isLoggedIn && (
-                <Tooltip title="Профиль">
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
                     <IconButton color="inherit" onClick={() => navigate("/private/profile")}>
                         <FaUser  />
                     </IconButton >
-                </Tooltip>
+                    <Typography sx={{ fontSize: "small" }}>Профиль</Typography>
+                </Box>
               )}
               {isLoggedIn && (
-                <Tooltip title="Выйти">
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
                     <IconButton color="inherit" onClick={handleLogout}>
                         <FaSignOutAlt />
                     </IconButton>
-                </Tooltip>
+                    <Typography sx={{ fontSize: "small" }}>Выйти</Typography>
+                </Box>
               )}
             </Stack>
           </Container>

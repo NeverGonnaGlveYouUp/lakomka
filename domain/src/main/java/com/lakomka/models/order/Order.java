@@ -152,25 +152,25 @@ public class Order {
     public OrderXmlDto toOrderXmlDTO() {
         OrderDto im = this.toOrderDTO();
         return new OrderXmlDto(
-                im.getId().toString(),
+                im.id().toString(),
 
                 this.basePerson.getLogin(), // SystemUser for guest order
 
-                im.getContact(),
-                im.getTelephone(),
-                im.getEmail(),
-                im.getPrim(),
-                im.getAddressDelivery(),
+                im.contact(),
+                im.telephone(),
+                im.email(),
+                im.prim(),
+                im.addressDelivery(),
 
-                DateFormatUtil.formatDate(im.getDatePay(), SHORT_DATE_FORMATTER),
-                DateFormatUtil.formatDate(im.getDateDelivery(), SHORT_DATE_FORMATTER),
-                DateFormatUtil.formatDate(im.getDateTimeOrder(), DEFAULT_FORMATTER),
+                DateFormatUtil.formatDate(im.datePay(), SHORT_DATE_FORMATTER),
+                DateFormatUtil.formatDate(im.dateDelivery(), SHORT_DATE_FORMATTER),
+                DateFormatUtil.formatDate(im.dateTimeOrder(), DEFAULT_FORMATTER),
 
-                im.getSumOrder(),
-                im.getSumWeight(),
+                im.sumOrder(),
+                im.sumWeight(),
 
-                im.isBitAccPrint(),
-                im.isBitSertifPrint()
+                im.bitAccPrint(),
+                im.bitSertifPrint()
         );
 
     }

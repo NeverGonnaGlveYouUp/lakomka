@@ -12,6 +12,7 @@ import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.cart.GuestCartService;
 import com.lakomka.services.xml.exports.OrderExport;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,10 +58,14 @@ public class GuestOrderService extends Common {
         return savedOrder;
     }
 
-    public List<OrderDto> getOrders(String currentSessionId) {
-        return getOrderRepository().findAllByGuest(currentSessionId)
+    public List<OrderDto> getOrders(String currentSessionId, Pageable pageable) {
+        return getOrderRepository().findAllByGuest(currentSessionId, pageable)
                 .stream()
                 .map(Order::toOrderDTO)
                 .toList();
+    }
+
+    public long countOrders(String currentSessionId) {
+        return getOrderRepository().countAllByGuest(currentSessionId);
     }
 }

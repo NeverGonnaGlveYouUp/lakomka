@@ -11,6 +11,7 @@ import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.product.PersonCartItemRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.xml.exports.OrderExport;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,10 +58,14 @@ public class UserOrderService extends Common {
         return savedOrder;
     }
 
-    public List<OrderDto> getOrders(BasePerson user) {
-        return getOrderRepository().findAllByBasePerson(user)
+    public List<OrderDto> getOrders(BasePerson user, Pageable pageable) {
+        return getOrderRepository().findAllByBasePerson(user, pageable)
                 .stream()
                 .map(Order::toOrderDTO)
                 .toList();
+    }
+
+    public long countOrders(BasePerson user) {
+        return getOrderRepository().countAllByBasePerson(user);
     }
 }

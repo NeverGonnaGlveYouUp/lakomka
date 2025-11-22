@@ -7,6 +7,9 @@ import com.lakomka.models.person.BasePerson;
 import com.lakomka.utils.SessionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,13 +31,18 @@ public class OrderService {
         }
     }
 
-    public List<OrderDto> getOrders(BasePerson user, HttpServletRequest request) {
+    public Page<OrderDto> getOrders(BasePerson user, HttpServletRequest request, Pageable pageable) {
+        List<OrderDto> orders;
+        long total;
         if (user == null) {
             // get order list for guest user only for existing session
             String currentSessionId = sessionUtil.getCurrentSessionId(request);
-            return guestOrderService.getOrders(currentSessionId);
+            orders = guestOrderService.getOrders(currentSessionId, pageable);
+            total = guestOrderService.countOrders(currentSessionId);
         } else {
-            return userOrderService.getOrders(user);
+            orders = userOrderService.getOrders(user, pageable);
+            total = userOrderService.countOrders(user);
         }
+        return new PageImpl<>(orders, pageable, total);
     }
 }

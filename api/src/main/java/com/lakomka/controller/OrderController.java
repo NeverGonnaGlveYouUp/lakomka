@@ -10,11 +10,13 @@ import com.lakomka.services.xml.exports.OrderExport;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -75,14 +77,17 @@ public class OrderController {
      *
      * @param user    - user
      * @param request - HttpServletRequest
-     * @return - List<OrderDTO>
+     * @return - page of List<OrderDTO>
      */
     @GetMapping("/list")
-    public ResponseEntity<List<OrderDto>> getOrdersByPerson(
+    public ResponseEntity<Page<OrderDto>> getOrdersByPerson(
             @AuthenticationPrincipal BasePerson user,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        List<OrderDto> orders = orderService.getOrders(user, request);
+        Pageable pageable = PageRequest.of(page, size, Sort.unsorted());
+        Page<OrderDto> orders = orderService.getOrders(user, request, pageable);
         return ResponseEntity.ok(orders);
     }
 

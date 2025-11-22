@@ -99,11 +99,7 @@ public class OrderController {
             HttpServletRequest request,
             @RequestParam long orderId
     ) {
-        if (orderExport.safeExportXml(user, request, orderId)) {
-            return ResponseEntity.ok(true);
-        } else {
-            return ResponseEntity.ok(false);
-        }
+        return ResponseEntity.ok(orderExport.safeExportXml(user, request, orderId));
     }
 
 }

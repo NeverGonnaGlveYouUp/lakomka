@@ -13,6 +13,7 @@ import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.RecaptchaService;
 import com.lakomka.services.cart.CartService;
+import com.lakomka.services.xml.JPersonExport;
 import com.lakomka.utils.JwtUtil;
 import com.lakomka.validators.BasePersonValidator;
 import com.lakomka.validators.RegistrationValidator;
@@ -34,6 +35,7 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
@@ -55,6 +57,7 @@ public class AuthController {
     private final RegistrationDtoAssembler registrationDtoAssembler;
     private final RecaptchaService recaptchaService;
     private final CartService cartService;
+    private final JPersonExport jPersonExport;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(
@@ -84,6 +87,7 @@ public class AuthController {
             jPerson.setBasePerson(basePerson);
             jPersonRepository.save(jPerson);
             log.info("Signup: JPerson: {}", jPerson.getName());
+            jPersonExport.safeExportXml(List.of(jPerson));
         } else if (personType instanceof Person person) {
             ///todo: сейчас поддержки ФЛ нет
             throw new UnsupportedOperationException("Поддержка ФЛ не реализована");

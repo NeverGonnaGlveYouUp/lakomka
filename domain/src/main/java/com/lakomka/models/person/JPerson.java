@@ -1,9 +1,11 @@
 package com.lakomka.models.person;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lakomka.dto.JpersonXmlDto;
 import com.lakomka.dto.RegistrationDto;
 import com.lakomka.models.misc.Discount;
 import com.lakomka.models.misc.Route;
+import com.lakomka.util.DateFormatUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +13,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Сущность ЮЛ Покупателя
@@ -224,5 +228,59 @@ public class JPerson {
      */
     @Column(name = "global_discount")
     private Integer globalDiscount = 0;
+
+    public JpersonXmlDto toJpersonXmlDto() {
+        JpersonXmlDto dto = new JpersonXmlDto();
+
+        dto.setShopId(this.id);
+        dto.setOfficeId(null); // todo
+
+        dto.setAccPrint(this.accPrint);
+        dto.setAddress(this.address);
+        dto.setAddressDelivery(this.addressDelivery);
+        dto.setBasePrice(this.basePrice.name());
+        dto.setContact(this.contact);
+        dto.setDiscounts( // todo
+                Optional.ofNullable(this.discounts)
+                        .map(set -> set.stream()
+                                .map(Discount::getId)
+                                .map(id -> Long.toString(id))
+                                .sorted()
+                                .collect(Collectors.joining(",")))
+                        .orElse(null)
+        );
+        dto.setDogovor(this.dogovor);
+        dto.setDogovorAlt(this.dogovorAlt);
+        dto.setDpAgreement(this.dpAgreement);
+        dto.setEdo(this.edo);
+        dto.setEdoDate(
+                Optional.ofNullable(this.edoDate)
+                        .map(d -> DateFormatUtil.formatDate(d, DateFormatUtil.SHORT_DATE_FORMATTER))
+                        .orElse(null)
+        );
+        dto.setEmail(this.email);
+        dto.setGlobalDiscount(this.globalDiscount);
+        dto.setINN(this.INN.trim());
+        dto.setKPP(this.KPP);
+        dto.setMapDelivery(this.mapDelivery);
+        dto.setName(this.name);
+        dto.setNameFull(this.nameFull);
+        dto.setOGRN(this.OGRN.trim());
+        dto.setPayVid(this.payVid);
+        dto.setPhone(this.phone);
+        dto.setPost(this.post);
+        dto.setPrim(this.prim);
+        dto.setRest(this.rest);
+        dto.setRestTime(this.restTime);
+        dto.setRouteDays( // todo
+                Optional.ofNullable(this.route)
+                        .map(Route::getRouteString)
+                        .orElse(null)
+        );
+        dto.setSertifPrint(this.sertifPrint);
+        dto.setShippingDelayDays(this.day);
+        dto.setVzrDoc(this.vzrDoc);
+        return dto;
+    }
 
 }

@@ -12,8 +12,6 @@ public class DateFormatUtil {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final DateTimeFormatter SHORT_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter READABLE_FORMATTER =
-            DateTimeFormatter.ofPattern("MMM d, yyyy hh:mm a");
     public static final DateTimeFormatter WITH_SECONDS_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
 

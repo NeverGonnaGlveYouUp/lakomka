@@ -11,6 +11,7 @@ import ProductPage from './components/ProductPage.jsx';
 import Navbar from './components/Navbar.jsx';
 import CartPage from './components/CartPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
+import OrdersPage from './components/OrdersPage.jsx';
 import ErrorPage from './components/ErrorPage.jsx';
 import GeneralInfoPage from './components/GeneralInfoPage.jsx';
 import { checkJWTExpiration } from './components/checkJWTExpiration.js';
@@ -94,6 +95,7 @@ function App() {
                             <Route path="/private" element={<ProtectedRoute />}>
                                 <Route path="/private/change-password" element={<ChangePassword />} />
                                 <Route path="/private/profile" element={<ProfilePage />} />
+                                <Route path="/private/orders" element={<OrdersPage />} />
                             </Route>
                             <Route path="/error" element={<ErrorPage />} />
                         </Routes>

@@ -19,13 +19,18 @@ import {
     ListItem,
     ListItemText,
     useMediaQuery,
-    Button
+    Button,
+    Switch
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from './AppContext.js';
 import { checkJWTExpiration } from './checkJWTExpiration.js';
 import useMountedRef from "./useMountedRef.jsx";
 import { FaTrashAlt } from "react-icons/fa";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 
 const CartPageImage = styled(Box)({
   width: '88px',
@@ -223,6 +228,10 @@ const CartPage = () => {
     const navigate                          = useNavigate();
     const [cartSummary, setCartSummary]     = useState(null);
     const isDesktopResolution               = useMediaQuery('(min-width:992px)');
+    const [isPrimVisible, setPrimVisible]   = useState(false);
+    const [prim, setPrim]                   = useState('');
+    const [isSubmitting, setIsSubmitting]   = useState(false);
+    const [dateDelivery, setDateDelivery]   = useState(new Date());
 
     const sumByField = (array, field) => {
         return array.reduce((accumulator, current) => {
@@ -280,6 +289,40 @@ const CartPage = () => {
         });
     };
 
+    const handleSubmit = async (e) => {
+        checkJWTExpiration();
+        setIsSubmitting(true);
+
+        const body = {
+            contact: null,
+            telephone: null,
+            email: null,
+            addressDelivery: null,
+            prim,
+            dateDelivery,
+            bitAccPrint: null,
+            bitSertifPrint: null
+        };
+
+        try {
+            const response = await axios.post('/api/orders/create-from-cart', body, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                transformResponse: [function (data) {
+                    try {
+                        return JSON.parse(data);
+                    } catch (e) {
+                        return data;
+                    }
+                }]
+            });
+            navigate("/private/orders");
+        } catch (error) {
+            navigate("/error");
+        }
+    }
+
     return (
         <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
             <Typography sx={{ margin: "10px 0 12px", lineHeight: "44px", fontSize: '44px', fontWeight: 700 }}>
@@ -325,9 +368,12 @@ const CartPage = () => {
                             ))}
                         </Grid>
                         <Paper sx={{ width: isDesktopResolution ? "34%" : "100%" }}>
-                            <Box sx={{ p: 2, display: "flex", flexDirection: isDesktopResolution ? "column" : "column-reverse" }}>
+                            <Box
+                                sx={{ p: 2, display: "flex",
+                                    flexDirection: isDesktopResolution ? "column" : "column-reverse" }}>
                                 <div>
-                                    <Typography variant="h6" sx={{ mb: 2, fontSize: "20px", lineHeight: "20px", fontWeight: 700}}>
+                                    <Typography variant="h6"
+                                                sx={{ mb: 2, fontSize: "20px", lineHeight: "20px", fontWeight: 700}}>
                                         Ваша корзина
                                     </Typography>
                                     <List>
@@ -344,16 +390,53 @@ const CartPage = () => {
                                             />
                                         </ListItem>
                                         <ListItem>
-                                            <ListItemText
-                                                primary="Общий вес"
-                                                secondary={`${cartSummary?.totalWeight || weight} г`}
-                                            />
+                                                <ListItemText
+                                                    primary="Общий вес"
+                                                    secondary={`${cartSummary?.totalWeight || weight} г`}
+                                                />
+                                        </ListItem>
+                                        <ListItem sx={{flexDirection: "column"}}>
+                                            <div>
+                                                <ListItemText
+                                                    primary="Хотите оставить комментарий к заказу?"
+                                                />
+                                                <Switch
+                                                    checked={isPrimVisible}
+                                                    onChange={() => setPrimVisible((prev) => !prev)}
+                                                    color="primary"
+                                                />
+                                            </div>
+                                            {isPrimVisible && (
+                                                <TextField
+                                                    label="Комментарий к заказу"
+                                                    multiline
+                                                    rows={4}
+                                                    variant="outlined"
+                                                    fullWidth
+                                                    margin="normal"
+                                                    value={prim}
+                                                    helperText={`${prim.length}/255 символов`}
+                                                    onChange={(event) => setPrim(event.target.value)}
+                                                    inputProps={{ maxLength: 255 }}
+                                                />
+                                            )}
+                                        </ListItem>
+                                        <ListItem>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DatePicker
+                                                minDate={dayjs().add(1, 'day')}
+                                                format="DD/MM/YYYY"
+                                                label="Дата доставки *"/>
+                                            </LocalizationProvider>
                                         </ListItem>
                                     </List>
                                     <Button
+                                        onClick={() => handleSubmit()}
+                                        disabled={isSubmitting || price==0}
                                         color="success"
                                         fullWidth
                                         variant="contained">
+                                        {isSubmitting ? 'Делаем заказ...' : 'Заказать'}
                                     </Button>
                                 </div>
                             </Box>

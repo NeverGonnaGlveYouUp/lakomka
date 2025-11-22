@@ -42,36 +42,33 @@ const ProfilePage = () => {
         fetchUsername();
     }, []);
 
-
     return(
         <Container maxWidth="lg" sx={{ mt: 3, display: "flex", flexDirection: "row", gap: "2rem" }}>
             <List
                 sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
-                component="nav"
-                aria-labelledby="nested-list-subheader"
-                subheader={
-                  <ListSubheader component="div" id="nested-list-subheader">
-                    Управление профилем
-                  </ListSubheader>
-                }>
+                component="nav">
+                <ListSubheader sx={{ fontWeight: "900" }}>Заказы</ListSubheader>
                 <ListItemButton>
-                    <ListItemIcon>
-                        <PiPasswordDuotone />
-                    </ListItemIcon>
+                    <ListItemText primary="Моя корзина"
+                        onClick={ () => navigate("/cart") }/>
+                </ListItemButton>
+                <ListItemButton>
+                    <ListItemText primary="Мои заказы"
+                        onClick={ () => navigate("/private/orders") }/>
+                </ListItemButton>
+                <ListSubheader sx={{ fontWeight: "900" }}>Управление профилем</ListSubheader>
+                <ListItemButton>
                     <ListItemText primary="Сменить пароль"
                         onClick={ () => navigate("/private/change-password") }/>
                 </ListItemButton>
                 <ListItemButton>
-                    <ListItemIcon>
-                        <FaSignOutAlt />
-                    </ListItemIcon>
                     <ListItemText primary="Выйти"
                         onClick={ () => {
                             localStorage.removeItem('jwtToken');
                             navigate("/");
                             }}/>
                 </ListItemButton>
-                <Divider />
+                <ListSubheader sx={{ fontWeight: "900" }}>Информация</ListSubheader>
                 <ListItemButton>
                     <ListItemText primary="Как редактировать профиль?"
                         onClick={ () => {

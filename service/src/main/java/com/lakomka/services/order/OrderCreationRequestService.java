@@ -7,6 +7,8 @@ import com.lakomka.repository.person.JPersonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Optional;
 
 import static java.util.Objects.nonNull;
@@ -17,7 +19,7 @@ public class OrderCreationRequestService {
 
     private final JPersonRepository jPersonRepository;
 
-    public OrderCreationRequest fill(BasePerson user, OrderCreationRequest request) {
+    public OrderCreationRequest fill(BasePerson user, OrderCreationRequest request, boolean allowOrdersDetailsEdit) {
 
         // If both parameters are null (Guest without order details), throw RuntimeException
         if (request == null && user == null) {
@@ -39,25 +41,32 @@ public class OrderCreationRequestService {
                 JPerson jPerson = optionalJPerson.get();
 
                 // bitAccPrint and bitSertifPrint leave them as is
-                // Fill dateDelivery - no logic provided, so we'll leave it as is
 
-                if (request.getAddressDelivery() == null) {
+                if (request.getDateDelivery() == null && !allowOrdersDetailsEdit) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.DAY_OF_MONTH, 1);
+                    request.setDateDelivery(calendar.getTime());
+                }
+
+                if (request.getAddressDelivery() == null && !allowOrdersDetailsEdit) {
                     request.setAddressDelivery(jPerson.getAddressDelivery());
                 }
 
-                if (request.getEmail() == null) {
+                if (request.getEmail() == null && !allowOrdersDetailsEdit) {
                     request.setEmail(jPerson.getEmail());
                 }
 
-                if (request.getTelephone() == null) {
+                if (request.getTelephone() == null && !allowOrdersDetailsEdit) {
                     request.setTelephone(jPerson.getPhone());
                 }
 
-                if (request.getContact() == null) {
+                if (request.getContact() == null && !allowOrdersDetailsEdit) {
                     request.setContact(jPerson.getContact());
                 }
 
-                if (request.getPrim() == null) {
+                // Prim field can be changed by user
+                if (request.getPrim() == null && allowOrdersDetailsEdit) {
                     request.setPrim(jPerson.getPrim());
                 }
 

@@ -27,41 +27,20 @@ public class OrderController {
     private final OrderExport orderExport;
 
     /**
-     * Creates order for authenticated user, based on Cart content and user default properties
-     *
-     * @param user    user
-     * @param request HttpServletRequest
-     * @return OrderDTO
-     */
-    @PostMapping("/create-from-cart")
-    public ResponseEntity<OrderDto> createOrderFromCart(
-            @AuthenticationPrincipal BasePerson user,
-            HttpServletRequest request
-    ) {
-        try {
-            OrderCreationRequest orderCreationRequest = requestService.fill(user, null);
-            return this.createOrderFromCartWithDetails(user, request, orderCreationRequest);
-        } catch (Exception e) {
-            log.error("{}", e.getMessage(), e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * Creates order with additional details for guest or authenticated user
+     * Creates order with details for guest or authenticated user
      *
      * @param user                 user
      * @param request              HttpServletRequest
-     * @param orderCreationRequest additional details
+     * @param orderCreationRequest details
      * @return OrderDTO
      */
-    @PostMapping("/create-from-cart/with-additional-details")
+    @PostMapping("/create-from-cart")
     public ResponseEntity<OrderDto> createOrderFromCartWithDetails(
             @AuthenticationPrincipal BasePerson user,
             HttpServletRequest request,
             @RequestBody OrderCreationRequest orderCreationRequest) {
         try {
-            OrderCreationRequest orderCreationRequestEnriched = requestService.fill(user, orderCreationRequest);
+            OrderCreationRequest orderCreationRequestEnriched = requestService.fill(user, orderCreationRequest, false);
             Order order = orderService.createOrderFromCart(user, request, orderCreationRequestEnriched);
             return ResponseEntity.ok(order.toOrderDTO());
         } catch (Exception e) {
@@ -87,7 +66,7 @@ public class OrderController {
     }
 
     /**
-     * Export order to Xml file on S# storage
+     * Export order to Xml file on S3 storage
      *
      * @param user    - user
      * @param request - HttpServletRequest

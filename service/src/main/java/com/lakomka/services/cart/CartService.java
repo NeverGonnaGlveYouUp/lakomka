@@ -21,12 +21,13 @@ public class CartService {
             BasePerson user,
             Long productId,
             HttpServletRequest request,
-            Integer quantity
+            Integer quantity,
+            boolean bitPackag
     ) {
         if (user == null) {
-            return guestCartService.addToCart(sessionUtil.getCurrentSessionId(request), productId, quantity);
+            return guestCartService.addToCart(sessionUtil.getCurrentSessionId(request), productId, quantity, bitPackag);
         } else {
-            return userCartService.addToCart(user, productId, quantity);
+            return userCartService.addToCart(user, productId, quantity, bitPackag);
         }
     }
 
@@ -72,7 +73,7 @@ public class CartService {
 
             // Переносим товары в пользовательскую корзину
             for (HashMap.Entry<Long, Integer> entry : guestCart.entrySet()) {
-                userCartService.addToCart(user, entry.getKey(), entry.getValue());
+                userCartService.addToCart(user, entry.getKey(), entry.getValue(), false);
             }
 
             // Очищаем анонимную корзину

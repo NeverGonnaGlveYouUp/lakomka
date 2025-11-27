@@ -1,5 +1,6 @@
 package com.lakomka.models.order;
 
+import com.lakomka.dto.OrderItemDto;
 import com.lakomka.dto.OrderItemXmlDto;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.product.Product;
@@ -75,7 +76,7 @@ public class OrderItem {
      * Вес товара или упаковки в зависимости от состояния bitPackag
      */
     @Column(name = "weight_packag", precision = 12, nullable = false)
-    private Integer weightPackag;
+    private Double weightPackag;
 
     public OrderItemXmlDto toOrderItemsXmlDto() {
         return new OrderItemXmlDto(
@@ -84,7 +85,22 @@ public class OrderItem {
                 this.unit,
                 this.packag,
                 this.price.toPlainString(),
-                this.quantity
+                this.quantity,
+                this.weightPackag,
+                this.bitPackag
         );
     }
+
+    public OrderItemDto toOrderItemDto(){
+        return new OrderItemDto(
+                this.product.getName(),
+                this.unit,
+                this.packag,
+                this.bitPackag,
+                this.quantity,
+                this.price,
+                this.weightPackag
+        );
+    }
+
 }

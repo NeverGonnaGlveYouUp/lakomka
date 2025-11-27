@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class GuestCartService extends Common {
+public class GuestCartService extends CartCommon {
 
     private final ProductRepository productRepository;
     private final DiscountService discountService;
@@ -26,7 +26,8 @@ public class GuestCartService extends Common {
     public ResponseEntity<?> addToCart(
             String sessionId,
             Long productId,
-            Integer quantity
+            Integer quantity,
+            boolean bitPackag
     ) {
         Optional<Product> product = productRepository.findById(productId);
 
@@ -34,7 +35,7 @@ public class GuestCartService extends Common {
             return ResponseEntity.notFound().build();
         } else {
 
-            PersonCartItem cartItem = new PersonCartItem(null, product.get(), quantity);
+            PersonCartItem cartItem = new PersonCartItem(null, product.get(), quantity, bitPackag);
             Set<PersonCartItem> cart = sessionCarts.computeIfAbsent(sessionId, k -> new CopyOnWriteArraySet<>());
 
             if (quantity == 0) {

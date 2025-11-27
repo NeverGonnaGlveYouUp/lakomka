@@ -24,11 +24,12 @@ public class CartController {
             @AuthenticationPrincipal BasePerson user,
             HttpServletRequest request,
             @RequestParam(value = "id") Long productId,
-            @RequestParam(value = "quantity") Integer quantity
+            @RequestParam(value = "quantity") Integer quantity,
+            @RequestParam(value = "bitPackag", defaultValue = "false") Boolean bitPackag
     ) {
-        log.info("addToCart: user: {}, product: {}, quantity: {}",
-                Optional.ofNullable(user).map(BasePerson::getLogin).orElse(null), productId, quantity);
-        return cartService.addToCart(user, productId, request, quantity);
+        log.info("addToCart: user: {}, product: {}, quantity: {}, bitPackag: {}",
+                Optional.ofNullable(user).map(BasePerson::getLogin).orElse(null), productId, quantity, bitPackag);
+        return cartService.addToCart(user, productId, request, quantity, bitPackag);
     }
 
     @GetMapping("/items")

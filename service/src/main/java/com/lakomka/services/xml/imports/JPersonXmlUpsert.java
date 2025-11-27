@@ -69,7 +69,7 @@ public class JPersonXmlUpsert {
 
         // Set basic fields
 
-        //jPerson.setOfficeId(dto.getOfficeId()) // todo
+        jPerson.setOfficeId(dto.getOfficeId());
         jPerson.setOGRN(dto.getOGRN());
         jPerson.setINN(dto.getINN());
         jPerson.setKPP(dto.getKPP());
@@ -84,7 +84,9 @@ public class JPersonXmlUpsert {
         jPerson.setBasePrice(BasePrice.valueOf(dto.getBasePrice()));
         jPerson.setMapDelivery(dto.getMapDelivery());
         jPerson.setPrim(dto.getPrim());
+
         // Set optional fields
+
         jPerson.setDay(dto.getShippingDelayDays());
         jPerson.setRest(dto.getRest() != null ? dto.getRest() : BigDecimal.ZERO);
         jPerson.setRestTime(dto.getRestTime());

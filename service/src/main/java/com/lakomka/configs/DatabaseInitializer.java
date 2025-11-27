@@ -152,6 +152,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product1.setDescription(descText);
             product1.setContent(contentText);
             product1.setUnit("unit");
+            product1.setPackag(0.9);
 
             Product product2 = new Product();
             product2.setName("Smartphone" + i);
@@ -167,6 +168,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product2.setDescription(descText);
             product2.setContent(contentText);
             product2.setUnit("unit");
+            product2.setPackag(2.6);
 
             Product product3 = new Product();
             product3.setName("Tablet" + i);
@@ -182,6 +184,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product3.setDescription(descText);
             product3.setContent(contentText);
             product3.setUnit("unit");
+            product3.setPackag(1.5);
 
             Product product4 = new Product();
             product4.setName("Headphones" + i);
@@ -197,6 +200,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             product4.setDescription(descText);
             product4.setContent(contentText);
             product4.setUnit("unit");
+            product4.setPackag(5.5);
 
             productRepository.save(product1);
             productRepository.save(product2);

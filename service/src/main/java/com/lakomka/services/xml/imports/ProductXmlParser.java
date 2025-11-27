@@ -23,7 +23,7 @@ import java.util.Map;
 import static com.lakomka.services.xml.imports.ProductXmlParser.XmlFieldName.*;
 
 @Slf4j
-@Service
+@Service(value = "ProductXmlParser")
 @RequiredArgsConstructor
 public class ProductXmlParser implements XmlParser {
 
@@ -206,7 +206,7 @@ public class ProductXmlParser implements XmlParser {
                 String packaging = getFieldValue(PACKAGING);
                 if (packaging != null && !packaging.trim().isEmpty()) {
                     try {
-                        product.setPackag(Integer.parseInt(packaging.trim()));
+                        product.setPackag(Double.parseDouble(packaging.trim()));
                     } catch (NumberFormatException e) {
                         log.debug("Invalid packaging value: {}", packaging);
                     }

@@ -74,7 +74,7 @@ public class Product {
      * Норма упаковки товара (количество товара в одной упаковке)
      */
     @Column(name = "packag", length = 50)
-    private Integer packag;
+    private Double packag;
 
     /**
      * priceOpt1, priceOpt2, priceNal, priceKons варианты цен

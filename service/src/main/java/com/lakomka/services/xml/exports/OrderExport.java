@@ -33,7 +33,7 @@ import static com.lakomka.configs.SystemUserDatabaseInitializer.SYSTEM_USER;
 import static com.lakomka.util.DateFormatUtil.WITH_SECONDS_FORMATTER;
 import static java.util.Objects.isNull;
 
-@Service
+@Service(value = "OrderExport")
 @RequiredArgsConstructor
 @Slf4j
 public class OrderExport {

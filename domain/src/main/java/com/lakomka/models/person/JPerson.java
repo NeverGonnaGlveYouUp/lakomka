@@ -229,6 +229,12 @@ public class JPerson {
     @Column(name = "global_discount")
     private Integer globalDiscount = 0;
 
+    /**
+     * АйДи ЮЛ в офисе
+     */
+    @Column(name = "office_id", unique = true)
+    private Long officeId;
+
     public String getINN() {
         return INN.trim();
     }
@@ -245,7 +251,7 @@ public class JPerson {
         JpersonXmlDto dto = new JpersonXmlDto();
 
         dto.setShopId(this.id);
-        dto.setOfficeId(null); // todo
+        dto.setOfficeId(this.officeId);
 
         dto.setAccPrint(this.accPrint);
         dto.setAddress(this.address);
@@ -284,11 +290,7 @@ public class JPerson {
         dto.setPrim(this.prim);
         dto.setRest(this.rest);
         dto.setRestTime(this.restTime);
-        dto.setRouteDays( // todo
-                Optional.ofNullable(this.route)
-                        .map(Route::getRouteString)
-                        .orElse(null)
-        );
+        dto.setRouteDays(this.getRoute().getRouteDays());
         dto.setSertifPrint(this.sertifPrint);
         dto.setShippingDelayDays(this.day);
         dto.setVzrDoc(this.vzrDoc);

@@ -126,7 +126,7 @@ const ProductPage = () => {
             setCountry(response.data.country);
             setDescription(response.data.description);
             setContent(response.data.content);
-            setGroup(response.data.productGroup);
+            setGroup(response.data.group);
         } catch (error) {
             console.error("There was an error fetching the data!", error);
         }
@@ -240,7 +240,7 @@ const ProductPage = () => {
                                     Характеристики
                                 </Typography>
                                 <Typography variant="body1" gutterBottom>
-                                    Масса: {weight}
+                                    Масса: {weight} грамм
                                 </Typography>
                                 <Typography variant="body1" gutterBottom>
                                     Единица измерения: {unit} - {unitVid}

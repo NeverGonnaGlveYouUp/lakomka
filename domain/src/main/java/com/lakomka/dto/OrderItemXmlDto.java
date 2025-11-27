@@ -42,15 +42,15 @@ public class OrderItemXmlDto {
      */
     private Integer quantity;
 
-//    /**
-//     * Вес товара или упаковки в зависимости от состояния bitPackag
-//     */
-//    private Integer weightPackag;
+    /**
+     * Вес товара или упаковки в зависимости от состояния bitPackag
+     */
+    private Double weightPackag;
 
 
-//    /**
-//     * Бит отгрузки нормами упаковок – 0 – Quantity это штуки или килограммы, 1 – Quantity это упаковки
-//     */
-//    private boolean bitPackag;
+    /**
+     * Бит отгрузки нормами упаковок – 0 – Quantity это штуки или килограммы, 1 – Quantity это упаковки
+     */
+    private boolean bitPackag;
 
 }

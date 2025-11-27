@@ -15,7 +15,7 @@ public class ProductDto {
     private String article;
     private String unit;
     private String unitVid;
-    private Integer packag;
+    private Double packag;
     private BigDecimal price;
     private Integer weight;
     private Integer quantity;

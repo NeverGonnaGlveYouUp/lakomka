@@ -2,7 +2,9 @@ package com.lakomka.services.order;
 
 import com.lakomka.dto.OrderCreationRequest;
 import com.lakomka.dto.OrderDto;
+import com.lakomka.dto.OrderItemDto;
 import com.lakomka.models.order.Order;
+import com.lakomka.models.order.OrderItem;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.repository.order.OrderItemRepository;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserOrderService extends Common {
+public class UserOrderService extends OrderCommon {
 
     private final PersonCartItemRepository cartItemRepository;
 
@@ -62,6 +64,13 @@ public class UserOrderService extends Common {
         return getOrderRepository().findAllByBasePerson(user, pageable)
                 .stream()
                 .map(Order::toOrderDTO)
+                .toList();
+    }
+
+    public List<OrderItemDto> getOrderContent(BasePerson user, Long orderId) {
+        return getOrderItemRepository().findAllByIdAndBasePerson(orderId, user)
+                .stream()
+                .map(OrderItem::toOrderItemDto)
                 .toList();
     }
 

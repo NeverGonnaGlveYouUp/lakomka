@@ -2,6 +2,7 @@ package com.lakomka.services.order;
 
 import com.lakomka.dto.OrderCreationRequest;
 import com.lakomka.dto.OrderDto;
+import com.lakomka.dto.OrderItemDto;
 import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.utils.SessionUtil;
@@ -44,5 +45,9 @@ public class OrderService {
             total = userOrderService.countOrders(user);
         }
         return new PageImpl<>(orders, pageable, total);
+    }
+
+    public List<OrderItemDto> getOrderContent(BasePerson user, Long orderId) {
+        return userOrderService.getOrderContent(user, orderId);
     }
 }

@@ -22,6 +22,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.lakomka.services.order.OrderCommon.getWeightPackag;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -83,17 +85,21 @@ public class DiscountService {
                 product.getId(),
                 product.getName(),
                 applyToPrice(cartItem)
-                        .multiply(BigDecimal.valueOf(quantity))
+                        .multiply(BigDecimal.valueOf(getPackagQuantityCoefficient(cartItem)))
                         .setScale(2, RoundingMode.HALF_UP)
                         .toPlainString(),
                 quantity,
-                product.getWeight() * quantity
+                String.format("%.2f", getWeightPackag(cartItem)).replace(",", "."),
+                cartItem.isBitPackag()
         );
+    }
+
+    public static Double getPackagQuantityCoefficient(PersonCartItem cartItem){
+        return cartItem.isBitPackag() ? cartItem.getQuantity() * cartItem.getProduct().getPackag() : cartItem.getQuantity();
     }
 
     public BigDecimal applyToPrice(PersonCartItem cartItem) {
         Product product = cartItem.getProduct();
-        Integer quantity = cartItem.getQuantity();
         BasePerson user = cartItem.getBasePerson();
         Discounts discounts = getDiscounts(user);
         Optional<Discount> optionalDiscount = discounts.discounts()

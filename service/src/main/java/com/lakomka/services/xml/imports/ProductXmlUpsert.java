@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Service
+@Service(value = "ProductXmlUpsert")
 @Slf4j
 @Transactional
 @RequiredArgsConstructor

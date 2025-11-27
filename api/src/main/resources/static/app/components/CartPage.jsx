@@ -20,7 +20,9 @@ import {
     ListItemText,
     useMediaQuery,
     Button,
-    Switch
+    Switch,
+    FormControlLabel,
+    Checkbox
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from './AppContext.js';
@@ -41,7 +43,7 @@ const CartPageImage = styled(Box)({
   margin: '10px',
 });
 
-const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) => {
+const CartPageCard = ( { newData, id, image, name, price, weight, quantity, bitPackag } ) => {
 
     const [count, setCount]             = useState(null);
     const [oldCount, setOldCount]       = useState(null);
@@ -53,11 +55,13 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) =
     const [oldLocalPrice, setOldLocalPrice]   = useState(null);
     const navigate                      = useNavigate();
     const [visible, setVisible]         = useState(true);
+    const [bitLocalPackag, setLocalBitPackag] = useState(false);
 
     useEffect(() => {
       setCount(quantity);
       setLocalWeight(weight);
       setLocalPrice(price);
+      setLocalBitPackag(bitPackag);
     }, [id])
 
     useEffect(() => {
@@ -68,7 +72,12 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) =
             return;
         }
 
-        const fetchData = async () => {
+        if (mountedRef.current && !isNaN(count) && (count != null && oldCount != null) && count >= 0) {
+            fetchData();
+        }
+    }, [count]);
+
+    const fetchData = async () => {
             try {
                 checkJWTExpiration();
                 setOldCount(count); // Save current count as old
@@ -76,7 +85,7 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) =
                 // Handle empty string or invalid values
                 const quantityToSend = count === '' || isNaN(count) || count < 0 ? 0 : count;
 
-                const response = await axios.put('/api/cart/add?id=' + id + '&quantity=' + (count === '' ? 0 : count), null,
+                const response = await axios.put('/api/cart/add?id=' + id + '&bitPackag=' + !!!bitLocalPackag + '&quantity=' + (count === '' ? 0 : count), null,
                     { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
 
                 if (response.data.quantity == 0) {
@@ -117,12 +126,7 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) =
             } catch (error) {
                 console.error(error);
             }
-        };
-
-        if (mountedRef.current && !isNaN(count) && (count != null && oldCount != null) && count >= 0) {
-            fetchData();
-        }
-    }, [count]);
+    };
 
     return (
         <div>
@@ -153,7 +157,7 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) =
                                 {localPrice} ₽
                             </Typography>
                             <Typography component="div" sx={{ fontSize: "14px", color: "rgba(22, 22, 21, .4)"}}>
-                                {localWeight} грамм
+                                {localWeight} Кг.
                             </Typography>
                         </Stack>
                         <Container sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -202,13 +206,27 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity } ) =
                                         +
                                 </IconButton>
                             </Stack>
-                            <Stack>
+                            <Stack sx={{ display: "flex", flexDirection: "row" }}>
                                 <IconButton sx={{width: "fit-content"}} onClick={() => {
                                         setOldCount(count);
                                         setCount(0);
                                     }}>
                                     <FaTrashAlt />
                                 </IconButton>
+                                <FormControlLabel
+                                    label="Задать кол-во в упаковках"
+                                    labelPlacement="start"
+                                    control={
+                                        <Checkbox
+                                            checked={bitLocalPackag}
+                                            onClick={() => {
+                                                    setLocalBitPackag(!bitLocalPackag);
+                                                    fetchData();
+                                                }
+                                            }
+                                        />
+                                    }
+                                />
                             </Stack>
                         </Container>
                     </CardContent>
@@ -229,13 +247,14 @@ const CartPage = () => {
     const [cartSummary, setCartSummary]     = useState(null);
     const isDesktopResolution               = useMediaQuery('(min-width:992px)');
     const [isPrimVisible, setPrimVisible]   = useState(false);
+    const [payVid, setPayVid]               = useState(false);
+    const [datePayOffset, setDatePayOffset] = useState(0);
     const [prim, setPrim]                   = useState('');
     const [isSubmitting, setIsSubmitting]   = useState(false);
-    const [dateDelivery, setDateDelivery]   = useState(new Date());
+    const [dateDelivery, setDateDelivery]   = useState(null);
 
     const sumByField = (array, field) => {
         return array.reduce((accumulator, current) => {
-            // Ensure we're adding numbers, not strings
             const value = parseFloat(current[field]) || 0;
             return accumulator + value;
         }, 0);
@@ -301,7 +320,9 @@ const CartPage = () => {
             prim,
             dateDelivery,
             bitAccPrint: null,
-            bitSertifPrint: null
+            bitSertifPrint: null,
+            payVid,
+            datePayOffset
         };
 
         try {
@@ -363,7 +384,8 @@ const CartPage = () => {
                                         name={item.name}
                                         price={item.price}
                                         weight={item.weight}
-                                        quantity={item.quantity} />
+                                        quantity={item.quantity}
+                                        bitPackag={item.bitPackag}/>
                                 </Grid>
                             ))}
                         </Grid>
@@ -392,8 +414,36 @@ const CartPage = () => {
                                         <ListItem>
                                                 <ListItemText
                                                     primary="Общий вес"
-                                                    secondary={`${cartSummary?.totalWeight || weight} г`}
+                                                    secondary={`${cartSummary?.totalWeight || weight} Кг.`}
                                                 />
+                                        </ListItem>
+                                        <ListItem sx={{ flexDirection: "column" }}>
+                                            <FormControlLabel
+                                                label="Оплатить безналом с отсрочкой"
+                                                control={
+                                                    <Checkbox
+                                                        checked={payVid}
+                                                        onClick={() => {
+                                                                setPayVid(!payVid);
+                                                            }
+                                                        }
+                                                    />
+                                                }
+                                            />
+                                            {payVid && (
+                                                <TextField
+                                                    label="Кол-во денй отсрочки от даты доставки"
+                                                    value={datePayOffset}
+                                                    onChange={(event) => {
+                                                            const newValue = event.target.value;
+                                                            if (/^-?\d*$/.test(newValue)) {
+                                                                setDatePayOffset(newValue);
+                                                            }
+                                                        }}
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                            )}
                                         </ListItem>
                                         <ListItem sx={{flexDirection: "column"}}>
                                             <div>
@@ -424,6 +474,10 @@ const CartPage = () => {
                                         <ListItem>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DatePicker
+                                                required
+                                                fullWidth
+                                                value={dateDelivery}
+                                                onChange={(dateDelivery) => setSelectedDate(dateDelivery)}
                                                 minDate={dayjs().add(1, 'day')}
                                                 format="DD/MM/YYYY"
                                                 label="Дата доставки *"/>

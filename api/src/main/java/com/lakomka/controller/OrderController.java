@@ -2,6 +2,7 @@ package com.lakomka.controller;
 
 import com.lakomka.dto.OrderCreationRequest;
 import com.lakomka.dto.OrderDto;
+import com.lakomka.dto.OrderItemDto;
 import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.services.order.OrderCreationRequestService;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -42,7 +45,7 @@ public class OrderController {
             HttpServletRequest request,
             @RequestBody OrderCreationRequest orderCreationRequest) {
         try {
-            OrderCreationRequest orderCreationRequestEnriched = requestService.fill(user, orderCreationRequest, false);
+            OrderCreationRequest orderCreationRequestEnriched = requestService.fill(user, orderCreationRequest);
             Order order = orderService.createOrderFromCart(user, request, orderCreationRequestEnriched);
             return ResponseEntity.ok(order.toOrderDTO());
         } catch (Exception e) {
@@ -69,6 +72,25 @@ public class OrderController {
         Page<OrderDto> orders = orderService.getOrders(user, request, pageable);
         return ResponseEntity.ok(orders);
     }
+
+    /**
+     * Return list of order content for user
+     *
+     * @param user    - user
+     * @return - List<OrderItemDto>
+     */
+    @GetMapping("/order-content")
+    public ResponseEntity<List<OrderItemDto>> getOrderContentByPersonAndOrder(
+            @AuthenticationPrincipal BasePerson user,
+            @RequestParam(value = "orderId") Long orderId
+    ) {
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        List<OrderItemDto> orderContent = orderService.getOrderContent(user, orderId);
+        return ResponseEntity.ok(orderContent);
+    }
+
 
     /**
      * Export order to Xml file on S3 storage

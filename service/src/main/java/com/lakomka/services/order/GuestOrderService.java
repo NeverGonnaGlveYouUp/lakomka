@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class GuestOrderService extends Common {
+public class GuestOrderService extends OrderCommon {
 
     private final GuestCartService guestCartService;
 

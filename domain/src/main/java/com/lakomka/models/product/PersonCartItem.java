@@ -28,13 +28,16 @@ public class PersonCartItem {
 
     private Integer quantity;
 
+    private boolean bitPackag = false;
+
     public PersonCartItem() {
     }
 
-    public PersonCartItem(BasePerson basePerson, Product product, Integer quantity) {
+    public PersonCartItem(BasePerson basePerson, Product product, Integer quantity, boolean bitPackag) {
         this.basePerson = basePerson;
         this.product = product;
         this.quantity = quantity;
+        this.bitPackag = bitPackag;
     }
 
     @Override

@@ -15,16 +15,13 @@ import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Objects.nonNull;
 
 @Getter
 @RequiredArgsConstructor
-public abstract class Common {
+public abstract class OrderCommon {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
@@ -32,7 +29,10 @@ public abstract class Common {
     private final BasePersonRepository basePersonRepository;
     private final OrderExport orderExport;
 
-    public Order makeOrder(BasePerson basePerson, OrderCreationRequest request, List<PersonCartItem> cartItems, String currentSessionId) {
+    public Order makeOrder(BasePerson basePerson,
+                           OrderCreationRequest request,
+                           List<PersonCartItem> cartItems,
+                           String currentSessionId) {
 
         // Create the order
         Order order = new Order();
@@ -41,7 +41,7 @@ public abstract class Common {
         order.setSumWeight(0);
         order.setSumOrder(BigDecimal.ZERO);
         order.setAdressDelivery(nonNull(request) && nonNull(request.getAddressDelivery()) ? request.getAddressDelivery() : "");
-        order.setDateDelivery(nonNull(request) && nonNull(request.getDateDelivery()) ? request.getDateDelivery() : new Date());
+        order.setDateDelivery(nonNull(request) && nonNull(request.getDateDelivery()) ? request.getDateDelivery() : getCurrentDateWithOffset(1));
         order.setBitAccPrint(nonNull(request) && request.isBitAccPrint());
         order.setBitSertifPrint(nonNull(request) && request.isBitSertifPrint());
         order.setDatePay(getDatePay(request));
@@ -62,8 +62,7 @@ public abstract class Common {
 
         for (PersonCartItem cartItem : cartItems) {
 
-            boolean bitPackag = getBitPackag(cartItem);
-            Integer weightPackag = getWeightPackag(cartItem, bitPackag);
+            Double weightPackag = getWeightPackag(cartItem);
             BigDecimal appliedToPrice = discountService.applyToPrice(cartItem);
 
             OrderItem orderItem = new OrderItem();
@@ -72,7 +71,7 @@ public abstract class Common {
             orderItem.setProduct(cartItem.getProduct());
             orderItem.setUnit(cartItem.getProduct().getUnit());
             orderItem.setPackag(Optional.ofNullable(cartItem.getProduct().getPackag()).map(Object::toString).orElse("-"));
-            orderItem.setBitPackag(false); // Default value
+            orderItem.setBitPackag(cartItem.isBitPackag());
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setPrice(appliedToPrice);
             orderItem.setWeightPackag(weightPackag);
@@ -80,7 +79,7 @@ public abstract class Common {
             // Calculate total sum and weight
             BigDecimal itemTotal = appliedToPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             totalSum = totalSum.add(itemTotal);
-            totalWeight += cartItem.getQuantity() * weightPackag;
+            totalWeight += (int) (cartItem.getQuantity() * weightPackag);
 
             // Save order item
             orderItemRepository.save(orderItem);
@@ -101,6 +100,16 @@ public abstract class Common {
         return order;
     }
 
+    private Date getCurrentDateWithOffset(Integer datePayOffset) {
+        Date currentDate = new Date();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+        calendar.add(Calendar.DAY_OF_MONTH, datePayOffset);
+
+        return calendar.getTime();
+    }
+
     /**
      * Дата оплаты – если наличные, то DatePay= DateDelivery, если б/нал и в карточке стоит отсрочка,
      * то DatePay= DateDelivery+Количество дней отсрочки
@@ -108,8 +117,9 @@ public abstract class Common {
      * @return дата
      */
     private Date getDatePay(OrderCreationRequest request) {
-        //todo !
-        return nonNull(request) && nonNull(request.getDateDelivery()) ? request.getDateDelivery() : new Date();
+        return nonNull(request) && nonNull(request.getDateDelivery()) && request.isPayVid() ?
+                request.getDateDelivery() :
+                getCurrentDateWithOffset(request.getDatePayOffset());
     }
 
     /**
@@ -117,25 +127,14 @@ public abstract class Common {
      * Бит отгрузки нормами упаковок – 0 – Quantity это штуки или килограммы,
      * 1 – Quantity это упаковки
      */
-    // todo !
-    Integer getWeightPackag(PersonCartItem cartItem, boolean bitPackag) {
-        if (bitPackag) {
+    public static Double getWeightPackag(PersonCartItem cartItem) {
+        Integer weight = cartItem.getProduct().getWeight();
+        if (cartItem.isBitPackag()) {
             // упаковки
+            return cartItem.getQuantity() * (weight / 1000.) * cartItem.getProduct().getPackag();
         } else {
             // штуки или килограммы
+            return cartItem.getQuantity() * (weight / 1000.);
         }
-
-        Integer weight = cartItem.getProduct().getWeight();
-        return cartItem.getQuantity() * weight;
-
-    }
-
-    /**
-     * Бит отгрузки нормами упаковок – 0 – Quantity это штуки или килограммы,
-     * 1 – Quantity это упаковки
-     */
-    // todo !
-    boolean getBitPackag(PersonCartItem cartItem) {
-        return false;
     }
 }

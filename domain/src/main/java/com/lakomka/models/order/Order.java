@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 
 import static com.lakomka.util.DateFormatUtil.DEFAULT_FORMATTER;
@@ -130,22 +131,14 @@ public class Order {
     public OrderDto toOrderDTO() {
         return new OrderDto(
                 this.id,
-
-                this.contact,
-                this.telephone,
-                this.email,
-                this.prim,
-                this.adressDelivery,
-
-                this.datePay,
-                this.dateDelivery,
-                this.dateTimeOrder.atZone(ZoneId.systemDefault()).toLocalDateTime(),
-
-                this.sumOrder.setScale(2, RoundingMode.HALF_UP),
-                this.sumWeight,
-
-                this.bitAccPrint,
-                this.bitSertifPrint
+                this.dateDelivery.compareTo(new Date()) > 0 ? "доставлен" : "не доставлен",
+                DateFormatUtil.formatDate(
+                        this.datePay,
+                        SHORT_DATE_FORMATTER),
+                DateFormatUtil.formatDate(
+                        this.dateDelivery,
+                        SHORT_DATE_FORMATTER),
+                this.sumOrder
         );
     }
 
@@ -156,21 +149,21 @@ public class Order {
 
                 this.basePerson.getLogin(), // SystemUser for guest order
 
-                im.contact(),
-                im.telephone(),
-                im.email(),
-                im.prim(),
-                im.addressDelivery(),
+                this.contact,
+                this.telephone,
+                this.email,
+                this.prim,
+                this.adressDelivery,
 
-                DateFormatUtil.formatDate(im.datePay(), SHORT_DATE_FORMATTER),
-                DateFormatUtil.formatDate(im.dateDelivery(), SHORT_DATE_FORMATTER),
-                DateFormatUtil.formatDate(im.dateTimeOrder(), DEFAULT_FORMATTER),
+                im.datePay(),
+                im.dateDelivery(),
+                DateFormatUtil.formatDate(Date.from(this.dateTimeOrder), DEFAULT_FORMATTER),
 
                 im.sumOrder(),
-                im.sumWeight(),
+                this.sumWeight,
 
-                im.bitAccPrint(),
-                im.bitSertifPrint()
+                this.bitAccPrint,
+                this.bitSertifPrint
         );
 
     }

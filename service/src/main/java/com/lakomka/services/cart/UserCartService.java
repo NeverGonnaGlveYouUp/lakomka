@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserCartService extends Common {
+public class UserCartService extends CartCommon {
 
     private final PersonCartItemRepository personCartItemRepository;
     private final DiscountService discountService;
@@ -29,32 +29,34 @@ public class UserCartService extends Common {
     @Autowired
     private ProductRepository productRepository;
 
-    public ResponseEntity<CartItemDto> addToCart(BasePerson user, Long productId, Integer quantity) {
+    public ResponseEntity<CartItemDto> addToCart(BasePerson user, Long productId, Integer quantity, boolean bitPackag) {
         return productRepository.findById(productId)
-                .map(product -> updateCart(user, quantity, product))
+                .map(product -> updateCart(user, quantity, product, bitPackag))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    private ResponseEntity<CartItemDto> updateCart(BasePerson user, Integer quantity, Product product) {
+    private ResponseEntity<CartItemDto> updateCart(BasePerson user, Integer quantity, Product product, boolean bitPackag) {
         return personCartItemRepository.findAllByBasePersonAndProduct(user, product)
-                .map(cartItem -> updateExistingItem(cartItem, quantity))
-                .orElseGet(() -> addNewItem(user, product, quantity));
+                .map(cartItem -> updateExistingItem(cartItem, quantity, bitPackag))
+                .orElseGet(() -> addNewItem(user, product, quantity, bitPackag));
     }
 
-    private ResponseEntity<CartItemDto> updateExistingItem(PersonCartItem cartItem, Integer quantity) {
+    private ResponseEntity<CartItemDto> updateExistingItem(PersonCartItem cartItem, Integer quantity, boolean bitPackag) {
         if (quantity == 0) {
             personCartItemRepository.delete(cartItem);
             cartItem.setQuantity(quantity);
+            cartItem.setBitPackag(bitPackag);
             return ResponseEntity.ok().body(discountService.applyToCartItemDto(cartItem));
         } else {
             cartItem.setQuantity(quantity);
+            cartItem.setBitPackag(bitPackag);
             personCartItemRepository.save(cartItem);
             return createResponseEntity(cartItem);
         }
     }
 
-    private ResponseEntity<CartItemDto> addNewItem(BasePerson user, Product product, Integer quantity) {
-        PersonCartItem newItem = new PersonCartItem(user, product, quantity);
+    private ResponseEntity<CartItemDto> addNewItem(BasePerson user, Product product, Integer quantity, boolean bitPackag) {
+        PersonCartItem newItem = new PersonCartItem(user, product, quantity, bitPackag);
         personCartItemRepository.save(newItem);
         return createResponseEntity(newItem);
     }

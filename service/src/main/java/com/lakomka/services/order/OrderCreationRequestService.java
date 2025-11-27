@@ -19,7 +19,7 @@ public class OrderCreationRequestService {
 
     private final JPersonRepository jPersonRepository;
 
-    public OrderCreationRequest fill(BasePerson user, OrderCreationRequest request, boolean allowOrdersDetailsEdit) {
+    public OrderCreationRequest fill(BasePerson user, OrderCreationRequest request) {
 
         // If both parameters are null (Guest without order details), throw RuntimeException
         if (request == null && user == null) {
@@ -42,31 +42,28 @@ public class OrderCreationRequestService {
 
                 // bitAccPrint and bitSertifPrint leave them as is
 
-                if (request.getDateDelivery() == null && !allowOrdersDetailsEdit) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.DAY_OF_MONTH, 1);
-                    request.setDateDelivery(calendar.getTime());
+                if (request.getDateDelivery() == null) {
+                    request.setDateDelivery(new Date());
                 }
 
-                if (request.getAddressDelivery() == null && !allowOrdersDetailsEdit) {
+                if (request.getAddressDelivery() == null) {
                     request.setAddressDelivery(jPerson.getAddressDelivery());
                 }
 
-                if (request.getEmail() == null && !allowOrdersDetailsEdit) {
+                if (request.getEmail() == null) {
                     request.setEmail(jPerson.getEmail());
                 }
 
-                if (request.getTelephone() == null && !allowOrdersDetailsEdit) {
+                if (request.getTelephone() == null) {
                     request.setTelephone(jPerson.getPhone());
                 }
 
-                if (request.getContact() == null && !allowOrdersDetailsEdit) {
+                if (request.getContact() == null) {
                     request.setContact(jPerson.getContact());
                 }
 
                 // Prim field can be changed by user
-                if (request.getPrim() == null && allowOrdersDetailsEdit) {
+                if (request.getPrim() == null) {
                     request.setPrim(jPerson.getPrim());
                 }
 

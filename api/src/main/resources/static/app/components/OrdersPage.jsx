@@ -16,7 +16,7 @@ const OrdersPage = () => {
     const [number, setNumber]               = useState(0);
     const [totalElements, setTotalElements] = useState();
     const [totalPages, setTotalPages]       = useState();
-    const [orders, setOrders]           = useState([]);
+    const [orders, setOrders]               = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -44,18 +44,20 @@ const OrdersPage = () => {
                     </Grid>
                     ))}
             </Grid>
-            <Pagination
-                style={{
-                    'justifyItems': 'center',
-                    'margin': '20px 0 40px 0',
-                }}
-                page={number + 1}
-                siblingCount={2}
-                boundaryCount={2}
-                count={totalPages}
-                onChange={() => setNumber(value - 1)}
-                color="primary"
-                shape="rounded"/>
+            {totalElements > 6 && (
+                <Pagination
+                    style={{
+                        'justifyItems': 'center',
+                        'margin': '20px 0 40px 0',
+                    }}
+                    page={number + 1}
+                    siblingCount={2}
+                    boundaryCount={2}
+                    count={totalPages}
+                    onChange={() => setNumber(value - 1)}
+                    color="primary"
+                    shape="rounded"/>
+            )}
         </Container>
     );
 

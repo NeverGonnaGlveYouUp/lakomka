@@ -140,11 +140,14 @@ const ProductPage = () => {
                         src="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
                         component="img"
                     />
-                    <Container sx={{ display: "flex", gap: "0.5rem", flexDirection: "column", padding: "0px", marginTop: "10px"}}>
+                    <Container sx={{ display: "flex", gap: "0.5rem", flexDirection: "column", padding: "0px", marginTop: "10px" }}>
                         <Typography sx={{ fontSize: '14px', fontWeight: 400 }}>{group}</Typography>
                         <Typography sx={{ fontSize: '28px', fontWeight: 900 }}>{name}</Typography>
                         <Typography sx={{ fontSize: '14px', fontWeight: 400 }}>Артикул: {article}</Typography>
-                        <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{price} ₽</Typography>
+                        <div>
+                            <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{price} ₽</Typography>
+                            <Typography sx={{ fontSize: '14px', fontWeight: 400, marginTop: "4px" }}>При заказе в упаковках {price * packag} ₽</Typography>
+                        </div>
                         {cartQuantity > 0 ? (
                             <Container sx={{ display: "flex", gap: "0.5rem", flexDirection: "row", paddingTop: "2rem" }}>
                                 <Button
@@ -240,7 +243,7 @@ const ProductPage = () => {
                                     Характеристики
                                 </Typography>
                                 <Typography variant="body1" gutterBottom>
-                                    Масса: {weight} грамм
+                                    Масса ед. товара: {weight} грамм
                                 </Typography>
                                 <Typography variant="body1" gutterBottom>
                                     Единица измерения: {unit} - {unitVid}

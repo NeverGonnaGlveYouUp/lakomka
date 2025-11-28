@@ -58,10 +58,11 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity, bitP
     const [bitLocalPackag, setLocalBitPackag] = useState(false);
 
     useEffect(() => {
-      setCount(quantity);
-      setLocalWeight(weight);
-      setLocalPrice(price);
-      setLocalBitPackag(bitPackag);
+        setCount(quantity);
+        setOldCount(quantity);
+        setLocalWeight(weight);
+        setLocalPrice(price);
+        setLocalBitPackag(bitPackag);
     }, [id])
 
     useEffect(() => {
@@ -75,57 +76,57 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity, bitP
         if (mountedRef.current && !isNaN(count) && (count != null && oldCount != null) && count >= 0) {
             fetchData();
         }
-    }, [count]);
+    }, [count, bitLocalPackag]);
 
     const fetchData = async () => {
-            try {
-                checkJWTExpiration();
-                setOldCount(count); // Save current count as old
+        try {
+            checkJWTExpiration();
+            setOldCount(count); // Save current count as old
 
-                // Handle empty string or invalid values
-                const quantityToSend = count === '' || isNaN(count) || count < 0 ? 0 : count;
+            // Handle empty string or invalid values
+            const quantityToSend = count === '' || isNaN(count) || count < 0 ? 0 : count;
 
-                const response = await axios.put('/api/cart/add?id=' + id + '&bitPackag=' + !!!bitLocalPackag + '&quantity=' + (count === '' ? 0 : count), null,
-                    { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
+            const response = await axios.put('/api/cart/add?id=' + id + '&bitPackag=' + bitLocalPackag + '&quantity=' + (count === '' ? 0 : count),
+                { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
 
-                if (response.data.quantity == 0) {
-                    setVisible(false);
-                    setContextCount((c) => c - oldCount);
-                    // Call newData with updated values BEFORE setting local state
-                    newData({
-                        localWeight: 0,
-                        oldLocalWeight: localWeight,
-                        localPrice: 0,
-                        oldLocalPrice: localPrice,
-                        id,
-                        quantity: 0
-                    });
-                    setLocalPrice(0);
-                    setLocalWeight(0);
+            if (response.data.quantity == 0) {
+                setVisible(false);
+                setContextCount((c) => c - oldCount);
+                // Call newData with updated values BEFORE setting local state
+                newData({
+                    localWeight: 0,
+                    oldLocalWeight: localWeight,
+                    localPrice: 0,
+                    oldLocalPrice: localPrice,
+                    id,
+                    quantity: 0
+                });
+                setLocalPrice(0);
+                setLocalWeight(0);
+            } else {
+                if (oldCount < response.data.quantity) {
+                    setContextCount((c) => c + (response.data.quantity - oldCount));
                 } else {
-                    if (oldCount < response.data.quantity) {
-                        setContextCount((c) => c + (response.data.quantity - oldCount));
-                    } else {
-                        setContextCount((c) => c - (oldCount - response.data.quantity));
-                    }
+                    setContextCount((c) => c - (oldCount - response.data.quantity));
+                }
 
                     // Call newData with updated values BEFORE setting local state
-                    newData({
-                        localWeight: response.data.weight,
-                        oldLocalWeight: localWeight,
-                        localPrice: response.data.price,
-                        oldLocalPrice: localPrice,
-                        id,
-                        quantity: response.data.quantity
-                    });
+                newData({
+                    localWeight: response.data.weight,
+                    oldLocalWeight: localWeight,
+                    localPrice: response.data.price,
+                    oldLocalPrice: localPrice,
+                    id,
+                    quantity: response.data.quantity
+                });
 
-                    setLocalPrice(response.data.price);
-                    setLocalWeight(response.data.weight);
-                }
-                setOldCount(0);
-            } catch (error) {
-                console.error(error);
+                setLocalPrice(response.data.price);
+                setLocalWeight(response.data.weight);
             }
+            setOldCount(0);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
@@ -220,8 +221,7 @@ const CartPageCard = ( { newData, id, image, name, price, weight, quantity, bitP
                                         <Checkbox
                                             checked={bitLocalPackag}
                                             onClick={() => {
-                                                    setLocalBitPackag(!bitLocalPackag);
-                                                    fetchData();
+                                                    setLocalBitPackag((p) => !p);
                                                 }
                                             }
                                         />

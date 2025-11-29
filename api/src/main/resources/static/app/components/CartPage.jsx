@@ -254,10 +254,15 @@ const CartPage = () => {
     const [dateDelivery, setDateDelivery]   = useState(null);
 
     const sumByField = (array, field) => {
-        return array.reduce((accumulator, current) => {
-            const value = parseFloat(current[field]) || 0;
-            return accumulator + value;
-        }, 0);
+        return array.reduce((integerSum, item) => {
+            const value = parseFloat(item[field]) || 0;
+            return integerSum + Math.round(value * 10000);
+        }, 0) / 10000;
+    };
+
+    const formatDecimal = (value) => {
+        const num = parseFloat(value) || 0;
+        return num.toFixed(3);
     };
 
     useEffect(() => {
@@ -414,7 +419,7 @@ const CartPage = () => {
                                         <ListItem>
                                                 <ListItemText
                                                     primary="Общий вес"
-                                                    secondary={`${cartSummary?.totalWeight || weight} Кг.`}
+                                                    secondary={`${formatDecimal(cartSummary?.totalWeight || weight)} Кг.`}
                                                 />
                                         </ListItem>
                                         <ListItem sx={{ flexDirection: "column" }}>

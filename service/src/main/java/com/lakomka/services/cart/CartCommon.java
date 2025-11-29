@@ -22,7 +22,10 @@ public abstract class CartCommon {
                 .map(item -> getUserPrice(item).multiply(BigDecimal.valueOf(getPackagQuantityCoefficient(item))))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
-        Double totalWeight = cart.stream().map(OrderCommon::getWeightPackag).reduce(.0, Double::sum);
+        BigDecimal totalWeight = cart.stream()
+                .map(OrderCommon::getWeightPackag)
+                .map(val -> BigDecimal.valueOf(val).setScale(2, RoundingMode.HALF_UP))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // Create summary object
         Map<String, Object> summary = new HashMap<>();

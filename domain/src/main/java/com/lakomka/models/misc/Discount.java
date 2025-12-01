@@ -1,8 +1,10 @@
 package com.lakomka.models.misc;
 
+import com.lakomka.dto.DiscountXmlDto;
 import com.lakomka.models.person.BasePrice;
 import com.lakomka.models.person.JPerson;
 import com.lakomka.models.product.Product;
+import com.lakomka.util.DateFormatUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,8 +23,10 @@ import java.util.Date;
 @Slf4j
 public class Discount {
 
+    /**
+     * id общий для офиса и магазина
+     */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, precision = 12)
     private Long id;
 
@@ -150,5 +154,20 @@ public class Discount {
         LocalDate start = dateStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate end = dateEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return !now.isBefore(start) && !now.isAfter(end);
+    }
+
+    public DiscountXmlDto toDiscountXmlDto() {
+        DiscountXmlDto dto = new DiscountXmlDto();
+        dto.setBitDiscount(this.bitDiscount);
+        dto.setBasePrice(this.basePrice.name());
+        dto.setDiscount(this.discount);
+        dto.setBitStop(this.bitStop);
+        dto.setDateStart(DateFormatUtil.formatDate(this.dateStart, DateFormatUtil.SHORT_DATE_FORMATTER));
+        dto.setDateEnd(DateFormatUtil.formatDate(this.dateEnd, DateFormatUtil.SHORT_DATE_FORMATTER));
+        dto.setJPersonShopId(this.jPerson.getId());
+        dto.setJPersonOfficeId(this.jPerson.getOfficeId());
+        dto.setId(this.id);
+        dto.setProductId(this.product.getId());
+        return dto;
     }
 }

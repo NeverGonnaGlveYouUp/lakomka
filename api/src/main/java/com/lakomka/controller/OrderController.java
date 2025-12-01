@@ -7,7 +7,6 @@ import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.services.order.OrderCreationRequestService;
 import com.lakomka.services.order.OrderService;
-import com.lakomka.services.xml.exports.OrderExport;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,6 @@ public class OrderController {
 
     private final OrderService orderService;
     private final OrderCreationRequestService requestService;
-    private final OrderExport orderExport;
 
     /**
      * Creates order with details for guest or authenticated user
@@ -89,23 +87,6 @@ public class OrderController {
         }
         List<OrderItemDto> orderContent = orderService.getOrderContent(user, orderId);
         return ResponseEntity.ok(orderContent);
-    }
-
-
-    /**
-     * Export order to Xml file on S3 storage
-     *
-     * @param user    - user
-     * @param request - HttpServletRequest
-     * @return - true if success
-     */
-    @GetMapping("/export-to-s3")
-    public ResponseEntity<?> exportXml(
-            @AuthenticationPrincipal BasePerson user,
-            HttpServletRequest request,
-            @RequestParam long orderId
-    ) {
-        return ResponseEntity.ok(orderExport.safeExportXml(user, request, orderId));
     }
 
 }

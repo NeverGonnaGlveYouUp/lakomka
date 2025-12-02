@@ -149,6 +149,7 @@
                     <exclude>static/package*json</exclude>
                     <exclude>webpack.config.js</exclude>
                     <exclude>application-debug.yaml</exclude>
+                    <exclude>application-demo.yaml</exclude>
                     <exclude>application-dev.yaml</exclude>
                     <exclude>application-jpa-dev.yaml</exclude>
                 </excludes>
@@ -193,6 +194,7 @@
                             <exclude>static/package*json</exclude>
                             <exclude>webpack.config.js</exclude>
                             <exclude>application-debug.yaml</exclude>
+                            <exclude>application-demo.yaml</exclude>
                             <exclude>application-dev.yaml</exclude>
                             <exclude>application-jpa-dev.yaml</exclude>
                         </excludes>

@@ -1,0 +1,5 @@
+# конфигурация spring-профиля "demo"
+# отключает показ sql
+spring:
+  jpa:
+    show-sql: false

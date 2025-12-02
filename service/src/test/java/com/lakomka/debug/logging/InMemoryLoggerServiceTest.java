@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 public class InMemoryLoggerServiceTest {
 
@@ -26,11 +27,9 @@ public class InMemoryLoggerServiceTest {
 
     @Test
     void testEnableInMemoryLogging() {
-        // Given
-        loggerService.enableInMemoryLogging("com.example.test", Level.DEBUG);
-
         // When
-        Logger logger = (Logger) LoggerFactory.getLogger("com.example.test");
+        Logger logger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER_NAME);
+        logger.setLevel(Level.DEBUG);
         logger.debug("Test debug message");
         logger.info("Test info message");
 
@@ -39,15 +38,14 @@ public class InMemoryLoggerServiceTest {
         assertEquals(2, logs.size());
 
         List<String> messages = loggerService.getLogMessages();
-        assertTrue(messages.contains("Test debug message"));
-        assertTrue(messages.contains("Test info message"));
+        assertTrue(messages.stream().anyMatch(line -> line.contains("Test debug message")));
+        assertTrue(messages.stream().anyMatch(line -> line.contains("Test info message")));
     }
 
     @Test
     void testClearLogs() {
         // Given
-        loggerService.enableInMemoryLogging("com.example.test", Level.INFO);
-        Logger logger = (Logger) LoggerFactory.getLogger("com.example.test");
+        Logger logger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER_NAME);
         logger.info("Test message");
 
         // When
@@ -60,8 +58,8 @@ public class InMemoryLoggerServiceTest {
     @Test
     void testGetLogMessages() {
         // Given
-        loggerService.enableInMemoryLogging("com.example.test", Level.WARN);
-        Logger logger = (Logger) LoggerFactory.getLogger("com.example.test");
+        Logger logger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER_NAME);
+        logger.setLevel(Level.WARN);
         logger.warn("Warning message");
         logger.error("Error message");
 
@@ -70,7 +68,7 @@ public class InMemoryLoggerServiceTest {
 
         // Then
         assertEquals(2, messages.size());
-        assertTrue(messages.contains("Warning message"));
-        assertTrue(messages.contains("Error message"));
+        assertTrue(messages.stream().anyMatch(line -> line.contains("Warning message")));
+        assertTrue(messages.stream().anyMatch(line -> line.contains("Error message")));
     }
 }

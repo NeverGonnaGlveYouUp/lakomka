@@ -1,7 +1,8 @@
 
 logging:
   level:
-    root: DEBUG
+    root: INFO
+    com.lakomka: DEBUG
     #org.apache.http: DEBUG
     #org.springframework: DEBUG
     #org.springframework.web: DEBUG

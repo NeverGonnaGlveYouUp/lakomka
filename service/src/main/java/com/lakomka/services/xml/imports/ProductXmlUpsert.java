@@ -66,7 +66,7 @@ public class ProductXmlUpsert {
             productRepository.saveAll(productsToSave);
         }
 
-        return new Stat(validProducts.size(), updatedProducts, newProducts, notTouchedProducts);
+        return new Stat(validProducts.size(), updatedProducts, newProducts, notTouchedProducts, 0);
     }
 
     private boolean productsEqual(Product existing, Product newProduct) {

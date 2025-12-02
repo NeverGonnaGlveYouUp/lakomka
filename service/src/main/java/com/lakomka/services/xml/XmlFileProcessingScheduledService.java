@@ -1,11 +1,13 @@
 package com.lakomka.services.xml;
 
 import com.lakomka.services.S3Service;
+import com.lakomka.services.xml.imports.DiscountXmlParser;
 import com.lakomka.services.xml.imports.JPersonXmlParser;
 import com.lakomka.services.xml.imports.ProductXmlParser;
 import com.lakomka.services.xml.imports.XmlParser;
 import com.lakomka.util.DateFormatUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,15 +27,18 @@ public class XmlFileProcessingScheduledService {
     @Value("${app.scheduling.enabled:true}")
     private boolean schedulingEnabled;
 
+    @Autowired
     private XmlFileProcessingScheduledService(
             S3Service s3Service,
             ProductXmlParser productXmlParser,
-            JPersonXmlParser jPersonXmlParser
+            JPersonXmlParser jPersonXmlParser,
+            DiscountXmlParser discountXmlParser
     ) {
         this.s3Service = s3Service;
         xmlParserMap = Map.of(
                 "ref_products.xml", productXmlParser,
-                "ref_jpersons.xml", jPersonXmlParser
+                "ref_jpersons.xml", jPersonXmlParser,
+                "ref_discounts.xml", discountXmlParser
         );
     }
 

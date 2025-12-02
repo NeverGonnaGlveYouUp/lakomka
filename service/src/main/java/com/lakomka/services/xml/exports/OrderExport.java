@@ -134,7 +134,7 @@ public class OrderExport {
             return order;
         }
 
-        @XmlElement(name = "order_items")
+        @XmlElement(name = "order_item")
         public List<OrderItemXmlDto> getOrderItems() {
             return orderItems;
         }

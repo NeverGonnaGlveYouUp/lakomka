@@ -136,6 +136,8 @@ public class DatabaseInitializer implements CommandLineRunner {
         person2.setJPerson(jPerson2);
         basePersonRepository.save(person2);
 
+        long discountId = 1;
+
         for (int i = 0; i < 50; i++) {
 
             Product product1 = new Product();
@@ -214,6 +216,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             // актуальная скидка
             Discount discount1 = new Discount();
+            discount1.setId(discountId++);
             discount1.setDiscount(new BigDecimal(random.nextInt(5, 70)));
             discount1.setDateStart(from(now().minusDays(10L).atStartOfDay(systemDefault()).toInstant()));
             discount1.setDateEnd(from(now().plusDays(10L).atStartOfDay(systemDefault()).toInstant()));
@@ -225,6 +228,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             // просроченная скидка
             Discount discount2 = new Discount();
+            discount2.setId(discountId++);
             discount2.setDiscount(new BigDecimal(random.nextInt(5, 70)));
             discount2.setDateStart(from(now().minusDays(100L).atStartOfDay(systemDefault()).toInstant()));
             discount2.setDateEnd(from(now().minusDays(10L).atStartOfDay(systemDefault()).toInstant()));
@@ -236,6 +240,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             // нулевая скидка
             Discount discount3 = new Discount();
+            discount3.setId(discountId++);
             discount3.setDiscount(BigDecimal.ZERO);
             discount3.setDateStart(from(now().minusDays(10L).atStartOfDay(systemDefault()).toInstant()));
             discount3.setDateEnd(from(now().plusDays(10L).atStartOfDay(systemDefault()).toInstant()));
@@ -247,6 +252,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             // актуальная накидка
             Discount discount4 = new Discount();
+            discount4.setId(discountId++);
             discount4.setDiscount(new BigDecimal(random.nextInt(5, 70)));
             discount4.setDateStart(from(now().minusDays(10L).atStartOfDay(systemDefault()).toInstant()));
             discount4.setDateEnd(from(now().plusDays(10L).atStartOfDay(systemDefault()).toInstant()));

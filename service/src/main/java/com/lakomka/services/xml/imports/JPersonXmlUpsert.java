@@ -61,7 +61,7 @@ public class JPersonXmlUpsert {
             }
         }
 
-        return new Stat(jpersonXmlDtoList.size(), updated, created, unchanged);
+        return new Stat(jpersonXmlDtoList.size(), updated, created, unchanged, 0);
     }
 
     private JPerson createNewJPerson(JpersonXmlDto dto) {

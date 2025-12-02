@@ -40,7 +40,7 @@ public class ProductXmlParser implements XmlParser {
     public boolean parse(byte[] fileContent) {
         long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         int recordsRead;
-        Stat stat = new Stat(0, 0, 0, 0);
+        Stat stat = new Stat(0, 0, 0, 0, 0);
 
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();

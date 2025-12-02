@@ -31,7 +31,7 @@ public class JPersonXmlParser implements XmlParser {
 
         long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         int recordsRead;
-        Stat stat = new Stat(0, 0, 0, 0);
+        Stat stat = new Stat(0, 0, 0, 0, 0);
 
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -82,7 +82,6 @@ public class JPersonXmlParser implements XmlParser {
 
     private static class JPersonHandler extends DefaultHandler {
 
-        public static final String JPERSON_ITEM = "jperson";
         @Getter
         private final List<JpersonXmlDto> validJPersons = new ArrayList<>();
         private JpersonXmlDto currentJPerson;
@@ -203,10 +202,8 @@ public class JPersonXmlParser implements XmlParser {
                 case JPERSON_ITEM:
                     recordsRead++;
                     break;
-
             }
         }
-
     }
 
     public static class XmlFieldName {
@@ -239,6 +236,7 @@ public class JPersonXmlParser implements XmlParser {
         public static final String SHIPPING_DELAY_DAYS = "shippingDelayDays";
         public static final String SHOP_ID = "shopId";
         public static final String VZR_DOC = "vzrDoc";
+        public static final String JPERSON_ITEM = "jperson";
     }
 
 }

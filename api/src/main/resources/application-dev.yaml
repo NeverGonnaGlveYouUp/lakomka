@@ -2,6 +2,14 @@
 # переводит liquibase в режим drop-first (очистка БД перед миграцией)
 # проводит миграцию liquibase, включая testdata.xml
 # выполняет бин DatabaseInitializer
+# разрешает работу кук по http
+
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
+        same-site: lax
 
 spring:
   jpa:

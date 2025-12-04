@@ -2,6 +2,14 @@
 # отключает liquibase
 # включает миграцию через jpa, создаст таблицы бд, которые можно будет забрать по liquibase diff
 # выполняет бин DatabaseInitializer
+# разрешает работу кук по http
+
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
+        same-site: lax
 
 spring:
   jpa:

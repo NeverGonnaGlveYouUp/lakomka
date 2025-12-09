@@ -21,6 +21,4 @@ public class OrderCreationRequest {
     private boolean bitSertifPrint;
     private boolean payVid;
 
-    private Integer datePayOffset;
-
 }

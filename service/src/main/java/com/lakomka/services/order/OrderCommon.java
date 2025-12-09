@@ -44,7 +44,7 @@ public abstract class OrderCommon {
         order.setDateDelivery(nonNull(request) && nonNull(request.getDateDelivery()) ? request.getDateDelivery() : getCurrentDateWithOffset(1));
         order.setBitAccPrint(nonNull(request) && request.isBitAccPrint());
         order.setBitSertifPrint(nonNull(request) && request.isBitSertifPrint());
-        order.setDatePay(getDatePay(request));
+        order.setDatePay(getDatePay(request, basePerson));
         order.setEmail(nonNull(request) && nonNull(request.getEmail()) ? request.getEmail() : "");
         order.setTelephone(nonNull(request) && nonNull(request.getTelephone()) ? request.getTelephone() : "");
         order.setContact(nonNull(request) && nonNull(request.getContact()) ? request.getContact() : "");
@@ -116,10 +116,10 @@ public abstract class OrderCommon {
      *
      * @return дата
      */
-    private Date getDatePay(OrderCreationRequest request) {
+    private Date getDatePay(OrderCreationRequest request, BasePerson basePerson) {
         return nonNull(request) && nonNull(request.getDateDelivery()) && request.isPayVid() ?
                 request.getDateDelivery() :
-                getCurrentDateWithOffset(request.getDatePayOffset());
+                getCurrentDateWithOffset(basePerson.getJPerson().getDay());
     }
 
     /**

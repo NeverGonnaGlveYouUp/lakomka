@@ -33,6 +33,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
 
 const CartPageImage = styled(Box)({
   width: '88px',
@@ -248,7 +249,6 @@ const CartPage = () => {
     const isDesktopResolution               = useMediaQuery('(min-width:992px)');
     const [isPrimVisible, setPrimVisible]   = useState(false);
     const [payVid, setPayVid]               = useState(false);
-    const [datePayOffset, setDatePayOffset] = useState(0);
     const [prim, setPrim]                   = useState('');
     const [isSubmitting, setIsSubmitting]   = useState(false);
     const [dateDelivery, setDateDelivery]   = useState(null);
@@ -326,8 +326,7 @@ const CartPage = () => {
             dateDelivery,
             bitAccPrint: null,
             bitSertifPrint: null,
-            payVid,
-            datePayOffset
+            payVid
         };
 
         try {
@@ -348,6 +347,11 @@ const CartPage = () => {
             navigate("/error");
         }
     }
+
+    const isWeekend = (date) => {
+        const day = date.day();
+        return day === 0 || day === 6; // Sunday = 0, Saturday = 6
+    };
 
     return (
         <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
@@ -397,107 +401,100 @@ const CartPage = () => {
                         <Paper sx={{ width: isDesktopResolution ? "34%" : "100%" }}>
                             <Box
                                 sx={{ p: 2, display: "flex",
-                                    flexDirection: isDesktopResolution ? "column" : "column-reverse" }}>
-                                <div>
-                                    <Typography variant="h6"
-                                                sx={{ mb: 2, fontSize: "20px", lineHeight: "20px", fontWeight: 700}}>
-                                        Ваша корзина
-                                    </Typography>
-                                    <List>
-                                        <ListItem>
+                                flexDirection: isDesktopResolution ? "column" : "column-reverse" }}>
+                                <List>
+                                    <ListItem>
+                                        <Typography variant="h6"
+                                                    sx={{ mt: 2, fontSize: "20px", lineHeight: "20px", fontWeight: 700}}>
+                                            Ваша корзина
+                                        </Typography>
+                                    </ListItem>
+                                    <ListItem>
+                                        <ListItemText
+                                            primary="Количество товаров"
+                                            secondary={cartSummary?.totalItems || contextCount}
+                                        />
+                                    </ListItem>
+                                    <ListItem>
+                                        <ListItemText
+                                            primary="Общая стоимость"
+                                            secondary={`${cartSummary?.totalPrice || price} ₽`}
+                                        />
+                                    </ListItem>
+                                    <ListItem>
                                             <ListItemText
-                                                primary="Количество товаров"
-                                                secondary={cartSummary?.totalItems || contextCount}
+                                                primary="Общий вес"
+                                                secondary={`${formatDecimal(cartSummary?.totalWeight || weight)} Кг.`}
                                             />
-                                        </ListItem>
-                                        <ListItem>
-                                            <ListItemText
-                                                primary="Общая стоимость"
-                                                secondary={`${cartSummary?.totalPrice || price} ₽`}
-                                            />
-                                        </ListItem>
-                                        <ListItem>
-                                                <ListItemText
-                                                    primary="Общий вес"
-                                                    secondary={`${formatDecimal(cartSummary?.totalWeight || weight)} Кг.`}
-                                                />
-                                        </ListItem>
-                                        <ListItem sx={{ flexDirection: "column" }}>
-                                            <FormControlLabel
-                                                label="Оплатить безналом с отсрочкой"
-                                                control={
-                                                    <Checkbox
-                                                        checked={payVid}
-                                                        onClick={() => {
-                                                                setPayVid(!payVid);
-                                                            }
-                                                        }
-                                                    />
-                                                }
-                                            />
-                                            {payVid && (
-                                                <TextField
-                                                    label="Кол-во денй отсрочки от даты доставки"
-                                                    value={datePayOffset}
-                                                    onChange={(event) => {
-                                                            const newValue = event.target.value;
-                                                            if (/^-?\d*$/.test(newValue)) {
-                                                                setDatePayOffset(newValue);
-                                                            }
-                                                        }}
-                                                    variant="outlined"
-                                                    fullWidth
-                                                />
-                                            )}
-                                        </ListItem>
-                                        <ListItem sx={{flexDirection: "column"}}>
-                                            <div>
-                                                <ListItemText
-                                                    primary="Хотите оставить комментарий к заказу?"
-                                                />
-                                                <Switch
-                                                    checked={isPrimVisible}
-                                                    onChange={() => setPrimVisible((prev) => !prev)}
-                                                    color="primary"
-                                                />
-                                            </div>
-                                            {isPrimVisible && (
-                                                <TextField
-                                                    label="Комментарий к заказу"
-                                                    multiline
-                                                    rows={4}
-                                                    variant="outlined"
-                                                    fullWidth
-                                                    margin="normal"
-                                                    value={prim}
-                                                    helperText={`${prim.length}/255 символов`}
-                                                    onChange={(event) => setPrim(event.target.value)}
-                                                    inputProps={{ maxLength: 255 }}
-                                                />
-                                            )}
-                                        </ListItem>
-                                        <ListItem>
-                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                <DatePicker
+                                    </ListItem>
+                                    <ListItem>
+                                        <Typography variant="h6"
+                                                sx={{ mt: 2, fontSize: "20px", lineHeight: "20px", fontWeight: 700}}>
+                                            Опции заказа
+                                        </Typography>
+                                    </ListItem>
+                                    <ListItem>
+                                        <LocalizationProvider
+                                            adapterLocale="ru"
+                                            dateAdapter={AdapterDayjs}>
+                                            <DatePicker
+                                                sx={{ width: "-webkit-fill-available" }}
                                                 required
-                                                fullWidth
                                                 value={dateDelivery}
-                                                onChange={(dateDelivery) => setSelectedDate(dateDelivery)}
+                                                onChange={setDateDelivery}
                                                 minDate={dayjs().add(1, 'day')}
-                                                format="DD/MM/YYYY"
-                                                label="Дата доставки *"/>
+                                                maxDate={dayjs().add(14, 'day')}
+                                                label="Дата доставки*"
+                                                inputVariant="outlined"
+                                                shouldDisableDate={isWeekend}
+                                                views={['month', 'day']} />
                                             </LocalizationProvider>
-                                        </ListItem>
-                                    </List>
-                                    <Button
-                                        onClick={() => handleSubmit()}
-                                        disabled={isSubmitting || price==0}
-                                        color="success"
-                                        fullWidth
-                                        variant="contained">
-                                        {isSubmitting ? 'Делаем заказ...' : 'Заказать'}
-                                    </Button>
-                                </div>
+                                    </ListItem>
+                                    <ListItem sx={{ flexDirection: "column", alignItems: "flex-start" }}>
+                                        <FormControlLabel
+                                            label="Оплатить безналом с отсрочкой"
+                                            control={
+                                                <Checkbox
+                                                    checked={payVid}
+                                                    onClick={() => setPayVid((prev) => !prev)}
+                                                />
+                                            }
+                                        />
+                                    </ListItem>
+                                    <ListItem sx={{flexDirection: "column"}}>
+                                        <FormControlLabel
+                                            label="Хотите оставить комментарий к заказу?"
+                                            control={
+                                                <Checkbox
+                                                checked={isPrimVisible}
+                                                    onClick={() => setPrimVisible((prev) => !prev)}
+                                                />
+                                            }
+                                        />
+                                        {isPrimVisible && (
+                                            <TextField
+                                                label="Комментарий к заказу"
+                                                multiline
+                                                rows={4}
+                                                variant="outlined"
+                                                fullWidth
+                                                margin="normal"
+                                                value={prim}
+                                                helperText={`${prim.length}/255 символов`}
+                                                onChange={(event) => setPrim(event.target.value)}
+                                                inputProps={{ maxLength: 255 }}
+                                            />
+                                        )}
+                                    </ListItem>
+                                </List>
+                                <Button
+                                    onClick={() => handleSubmit()}
+                                    disabled={isSubmitting || price==0}
+                                    color="success"
+                                    fullWidth
+                                    variant="contained">
+                                    {isSubmitting ? 'Делаем заказ...' : 'Заказать'}
+                                </Button>
                             </Box>
                         </Paper>
                     </Container>

@@ -8,8 +8,23 @@ import {
     TextField,
     useMediaQuery,
     Typography,
-    Grid
+    Grid,
+    Card,
+    CardContent,
+    Paper
     } from "@mui/material";
+
+const CartPageCard = ( { id } ) => {
+
+    useEffect(() => {
+    }, [id])
+
+    return (
+        <Card sx={{ display: 'flex' }}>
+
+        </Card>
+    );
+}
 
 const OrdersPage = () => {
 
@@ -32,32 +47,36 @@ const OrdersPage = () => {
     }, [])
 
     return(
-        <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
-            <Grid container spacing={2}>
-                {orders.map(item => (
-                    <Grid item xs={12} sm={6} md={4} key={item.id}>
-                        <Card onClick={() => onItemSelect(item.id)}>
-                            <CardContent>
-                                <Typography variant="h6">№ {item.id} • {item.quantity} </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    ))}
-            </Grid>
-            {totalElements > 6 && (
-                <Pagination
-                    style={{
-                        'justifyItems': 'center',
-                        'margin': '20px 0 40px 0',
-                    }}
-                    page={number + 1}
-                    siblingCount={2}
-                    boundaryCount={2}
-                    count={totalPages}
-                    onChange={() => setNumber(value - 1)}
-                    color="primary"
-                    shape="rounded"/>
-            )}
+        <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "4rem", flexDirection: "row" }}>
+            <Container sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
+                <Grid container spacing={2}>
+                    {orders.map(item => (
+                        <Grid item xs={12} sm={6} md={4} key={item.id}>
+                            <Card onClick={() => onItemSelect(item.id)}>
+                                <CardContent>
+                                    <Typography variant="h6">№ {item.id} • {item.quantity} </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        ))}
+                </Grid>
+                {totalElements > 6 && (
+                    <Pagination
+                        style={{
+                            'justifyItems': 'center',
+                            'margin': '20px 0 40px 0',
+                        }}
+                        page={number + 1}
+                        siblingCount={2}
+                        boundaryCount={2}
+                        count={totalPages}
+                        onChange={() => setNumber(value - 1)}
+                        color="primary"
+                        shape="rounded"/>
+                )}
+            </Container>
+            <Container sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
+            </Container>
         </Container>
     );
 

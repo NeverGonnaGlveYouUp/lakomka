@@ -9,13 +9,12 @@ import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,44 +24,38 @@ public class UserCartService extends CartCommon {
 
     private final PersonCartItemRepository personCartItemRepository;
     private final DiscountService discountService;
+    private final ProductRepository productRepository;
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    public ResponseEntity<CartItemDto> addToCart(BasePerson user, Long productId, Integer quantity, boolean bitPackag) {
+    public CartItemDto addToCart(BasePerson user, Long productId, Integer quantity, boolean bitPackag) {
         return productRepository.findById(productId)
                 .map(product -> updateCart(user, quantity, product, bitPackag))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElse(null);
     }
 
-    private ResponseEntity<CartItemDto> updateCart(BasePerson user, Integer quantity, Product product, boolean bitPackag) {
+    private CartItemDto updateCart(BasePerson user, Integer quantity, Product product, boolean bitPackag) {
         return personCartItemRepository.findAllByBasePersonAndProduct(user, product)
                 .map(cartItem -> updateExistingItem(cartItem, quantity, bitPackag))
                 .orElseGet(() -> addNewItem(user, product, quantity, bitPackag));
     }
 
-    private ResponseEntity<CartItemDto> updateExistingItem(PersonCartItem cartItem, Integer quantity, boolean bitPackag) {
+    private CartItemDto updateExistingItem(PersonCartItem cartItem, Integer quantity, boolean bitPackag) {
         if (quantity == 0) {
             personCartItemRepository.delete(cartItem);
             cartItem.setQuantity(quantity);
             cartItem.setBitPackag(bitPackag);
-            return ResponseEntity.ok().body(discountService.applyToCartItemDto(cartItem));
+            return discountService.applyToCartItemDto(cartItem);
         } else {
             cartItem.setQuantity(quantity);
             cartItem.setBitPackag(bitPackag);
             personCartItemRepository.save(cartItem);
-            return createResponseEntity(cartItem);
+            return discountService.applyToCartItemDto(cartItem);
         }
     }
 
-    private ResponseEntity<CartItemDto> addNewItem(BasePerson user, Product product, Integer quantity, boolean bitPackag) {
+    private CartItemDto addNewItem(BasePerson user, Product product, Integer quantity, boolean bitPackag) {
         PersonCartItem newItem = new PersonCartItem(user, product, quantity, bitPackag);
         personCartItemRepository.save(newItem);
-        return createResponseEntity(newItem);
-    }
-
-    private ResponseEntity<CartItemDto> createResponseEntity(PersonCartItem cartItem) {
-        return ResponseEntity.ok(discountService.applyToCartItemDto(cartItem));
+        return discountService.applyToCartItemDto(newItem);
     }
 
     public HashMap<Long, Integer> getCartIdQuantityHashMap(BasePerson user) {
@@ -74,25 +67,19 @@ public class UserCartService extends CartCommon {
                                 PersonCartItem::getQuantity));
     }
 
-    public ResponseEntity<Set<CartItemDto>> getCart(BasePerson user) {
-        Set<CartItemDto> cartItems =
-                personCartItemRepository.findAllByBasePerson(user)
-                        .stream()
-                        .map(discountService::applyToCartItemDto)
-                        .collect(Collectors.toSet());
-        return ResponseEntity.ok(cartItems);
+    public Set<CartItemDto> getCart(BasePerson user) {
+        return personCartItemRepository.findAllByBasePerson(user)
+                .stream()
+                .map(discountService::applyToCartItemDto)
+                .collect(Collectors.toSet());
     }
 
-    public ResponseEntity<?> getCartSummary(BasePerson user) {
-        try {
-            List<PersonCartItem> cart = personCartItemRepository.findAllByBasePerson(user);
-            if (cart == null || cart.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(makeSummary(cart));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    public Map<String, Object> getCartSummary(BasePerson user) {
+        List<PersonCartItem> cart = personCartItemRepository.findAllByBasePerson(user);
+        if (cart == null || cart.isEmpty()) {
+            return null;
         }
+        return makeSummary(cart);
     }
 
     @Override

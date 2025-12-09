@@ -1,13 +1,17 @@
 package com.lakomka.services.cart;
 
+import com.lakomka.dto.CartItemDto;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.utils.SessionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +21,7 @@ public class CartService {
     private final UserCartService userCartService;
     private final SessionUtil sessionUtil;
 
-    public ResponseEntity<?> addToCart(
+    public CartItemDto addToCart(
             BasePerson user,
             Long productId,
             HttpServletRequest request,
@@ -43,7 +47,7 @@ public class CartService {
     }
 
 
-    public ResponseEntity<?> getCart(
+    public Set<CartItemDto> getCart(
             BasePerson user,
             HttpServletRequest request
     ) {
@@ -54,7 +58,7 @@ public class CartService {
         }
     }
 
-    public ResponseEntity<?> getCartSummary(
+    public Map<String, Object> getCartSummary(
             BasePerson user,
             HttpServletRequest request
     ) {
@@ -81,14 +85,14 @@ public class CartService {
         }
     }
 
-    public ResponseEntity<?> clearCart(BasePerson user, HttpServletRequest request) {
+    public HttpStatus clearCart(BasePerson user, HttpServletRequest request) {
         String sessionId = sessionUtil.getCurrentSessionId(request);
         if (user == null) {
             guestCartService.clearCart(sessionId);
         } else {
             userCartService.clearCart(user);
         }
-        return ResponseEntity.noContent().build();
+        return HttpStatus.NO_CONTENT;
     }
 
 }

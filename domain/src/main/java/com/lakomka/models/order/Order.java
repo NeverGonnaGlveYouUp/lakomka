@@ -10,10 +10,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Date;
 
 import static com.lakomka.util.DateFormatUtil.DEFAULT_FORMATTER;

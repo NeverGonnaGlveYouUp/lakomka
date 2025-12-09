@@ -1,11 +1,11 @@
 package com.lakomka.services.cart;
 
+import com.lakomka.dto.CartItemDto;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,7 +23,7 @@ public class GuestCartService extends CartCommon {
 
     private final Map<String, Set<PersonCartItem>> sessionCarts = new ConcurrentHashMap<>();
 
-    public ResponseEntity<?> addToCart(
+    public CartItemDto addToCart(
             String sessionId,
             Long productId,
             Integer quantity,
@@ -32,7 +32,7 @@ public class GuestCartService extends CartCommon {
         Optional<Product> product = productRepository.findById(productId);
 
         if (product.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return null;
         } else {
 
             PersonCartItem cartItem = new PersonCartItem(null, product.get(), quantity, bitPackag);
@@ -48,7 +48,7 @@ public class GuestCartService extends CartCommon {
                 cart.add(cartItem);
             }
 
-            return ResponseEntity.ok().body(discountService.applyToCartItemDto(cartItem));
+            return discountService.applyToCartItemDto(cartItem);
         }
     }
 
@@ -61,25 +61,23 @@ public class GuestCartService extends CartCommon {
                                 PersonCartItem::getQuantity));
     }
 
-    public ResponseEntity<?> getCart(String sessionId) {
-        return ResponseEntity.ok().body(
-                sessionCarts.getOrDefault(sessionId, new HashSet<>())
-                        .stream()
-                        .map(discountService::applyToCartItemDto)
-                        .collect(Collectors.toSet())
-        );
+    public Set<CartItemDto> getCart(String sessionId) {
+        return sessionCarts.getOrDefault(sessionId, new HashSet<>())
+                .stream()
+                .map(discountService::applyToCartItemDto)
+                .collect(Collectors.toSet());
     }
 
     public List<PersonCartItem> getCartRaw(String sessionId) {
         return sessionCarts.getOrDefault(sessionId, new HashSet<>()).stream().toList();
     }
 
-    public ResponseEntity<?> getCartSummary(String sessionId) {
+    public Map<String, Object> getCartSummary(String sessionId) {
         Set<PersonCartItem> cart = sessionCarts.getOrDefault(sessionId, new HashSet<>());
         if (cart == null || cart.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return null;
         }
-        return ResponseEntity.ok(makeSummary(cart));
+        return makeSummary(cart);
     }
 
     @Override

@@ -20,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -45,6 +46,7 @@ public class OrderController {
             HttpServletRequest request,
             @RequestBody OrderCreationRequest orderCreationRequest) {
         try {
+            log.info("createOrderFromCartWithDetails: user: {}, orderCreationRequest: {}", Optional.ofNullable(user).map(BasePerson::getLogin).orElse(null), orderCreationRequest.toString());
             OrderCreationRequest orderCreationRequestEnriched = requestService.fill(user, orderCreationRequest);
             Order order = orderService.createOrderFromCart(user, request, orderCreationRequestEnriched);
             return ResponseEntity.ok(order.toOrderDTO());

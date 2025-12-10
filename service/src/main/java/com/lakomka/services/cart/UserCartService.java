@@ -8,7 +8,6 @@ import com.lakomka.repository.product.PersonCartItemRepository;
 import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -43,13 +42,12 @@ public class UserCartService extends CartCommon {
             personCartItemRepository.delete(cartItem);
             cartItem.setQuantity(quantity);
             cartItem.setBitPackag(bitPackag);
-            return discountService.applyToCartItemDto(cartItem);
         } else {
             cartItem.setQuantity(quantity);
             cartItem.setBitPackag(bitPackag);
             personCartItemRepository.save(cartItem);
-            return discountService.applyToCartItemDto(cartItem);
         }
+        return discountService.applyToCartItemDto(cartItem);
     }
 
     private CartItemDto addNewItem(BasePerson user, Product product, Integer quantity, boolean bitPackag) {

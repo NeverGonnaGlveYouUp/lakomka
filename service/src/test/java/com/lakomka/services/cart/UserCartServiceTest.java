@@ -56,7 +56,7 @@ class UserCartServiceTest {
     void addToCart_whenProductNotFound_returnsNull() {
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        assertNull(userCartService.addToCart(user, productId, 1, false));
+        assertNull(userCartService.addToCart(user, null, productId, 1, false));
         verifyNoInteractions(personCartItemRepository);
     }
 
@@ -71,7 +71,7 @@ class UserCartServiceTest {
         CartItemDto dto = mock(CartItemDto.class);
         when(discountService.applyToCartItemDto(any(PersonCartItem.class))).thenReturn(dto);
 
-        CartItemDto result = userCartService.addToCart(user, productId, 3, false); // Add a new product with quantity 3
+        CartItemDto result = userCartService.addToCart(user, null, productId, 3, false); // Add a new product with quantity 3
 
         assertSame(dto, result);
 
@@ -94,7 +94,7 @@ class UserCartServiceTest {
         CartItemDto dto = mock(CartItemDto.class);
         when(discountService.applyToCartItemDto(existing)).thenReturn(dto);
 
-        CartItemDto result = userCartService.addToCart(user, productId, 0, false);
+        CartItemDto result = userCartService.addToCart(user, null, productId, 0, false);
 
         assertSame(dto, result);
         verify(personCartItemRepository, times(1)).delete(existing);
@@ -115,7 +115,7 @@ class UserCartServiceTest {
 
         when(personCartItemRepository.findAllByBasePerson(user)).thenReturn(List.of(item1, item2));
 
-        HashMap<Long, Integer> map = userCartService.getCartIdQuantityHashMap(user);
+        HashMap<Long, Integer> map = userCartService.getCartIdQuantityHashMap(user, null);
 
         assertEquals(2, map.size());
         assertEquals(2, map.get(11L));
@@ -131,7 +131,7 @@ class UserCartServiceTest {
         when(personCartItemRepository.findAllByBasePerson(user)).thenReturn(List.of(item));
         when(discountService.applyToCartItemDto(item)).thenReturn(mock(CartItemDto.class));
 
-        Set<com.lakomka.dto.CartItemDto> cart = userCartService.getCart(user);
+        Set<com.lakomka.dto.CartItemDto> cart = userCartService.getCart(user, null);
 
         assertNotNull(cart);
         assertFalse(cart.isEmpty(), "The cart should not be empty when there are items.");
@@ -145,7 +145,7 @@ class UserCartServiceTest {
         when(personCartItemRepository.findAllByBasePerson(user)).thenReturn(List.of(item));
         when(userCartService.getUserPrice(item)).thenReturn(new BigDecimal("100"));
 
-        Map<String, Object> summary = userCartService.getCartSummary(user);
+        Map<String, Object> summary = userCartService.getCartSummary(user, null);
 
         assertNotNull(summary, "The summary should not be null.");
     }
@@ -158,7 +158,7 @@ class UserCartServiceTest {
 
         when(personCartItemRepository.findAllByBasePerson(user)).thenReturn(List.of(item));
 
-        userCartService.clearCart(user);
+        userCartService.clearCart(user, null);
 
         verify(personCartItemRepository, atLeastOnce()).delete(any(PersonCartItem.class));
     }

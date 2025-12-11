@@ -1,11 +1,12 @@
 package com.lakomka.services.cart;
 
 import com.lakomka.dto.CartItemDto;
+import com.lakomka.models.person.BasePerson;
+import com.lakomka.models.person.PersonEnum;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -15,15 +16,17 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class GuestCartService extends CartCommon {
-
-    private final ProductRepository productRepository;
-    private final DiscountService discountService;
 
     private final Map<String, Set<PersonCartItem>> sessionCarts = new ConcurrentHashMap<>();
 
+    public GuestCartService(DiscountService discountService, ProductRepository productRepository) {
+        super(PersonEnum.GUEST, discountService, productRepository);
+    }
+
+    @Override
     public CartItemDto addToCart(
+            BasePerson ignoredUser,
             String sessionId,
             Long productId,
             Integer quantity,
@@ -52,7 +55,11 @@ public class GuestCartService extends CartCommon {
         }
     }
 
-    public HashMap<Long, Integer> getCartIdQuantityHashMap(String sessionId) {
+    @Override
+    public HashMap<Long, Integer> getCartIdQuantityHashMap(
+            BasePerson ignoredUser,
+            String sessionId
+    ) {
         return (HashMap<Long, Integer>)
                 sessionCarts.getOrDefault(sessionId, new HashSet<>())
                         .stream()
@@ -61,18 +68,20 @@ public class GuestCartService extends CartCommon {
                                 PersonCartItem::getQuantity));
     }
 
-    public Set<CartItemDto> getCart(String sessionId) {
+    @Override
+    public Set<CartItemDto> getCart(BasePerson ignoredUser, String sessionId) {
         return sessionCarts.getOrDefault(sessionId, new HashSet<>())
                 .stream()
                 .map(discountService::applyToCartItemDto)
                 .collect(Collectors.toSet());
     }
 
-    public List<PersonCartItem> getCartRaw(String sessionId) {
+    public List<PersonCartItem> getCartRaw(BasePerson ignoredUser, String sessionId) {
         return sessionCarts.getOrDefault(sessionId, new HashSet<>()).stream().toList();
     }
 
-    public Map<String, Object> getCartSummary(String sessionId) {
+    @Override
+    public Map<String, Object> getCartSummary(BasePerson ignoredUser, String sessionId) {
         Set<PersonCartItem> cart = sessionCarts.getOrDefault(sessionId, new HashSet<>());
         if (cart == null || cart.isEmpty()) {
             return null;
@@ -85,7 +94,8 @@ public class GuestCartService extends CartCommon {
         return item.getProduct().priceSelector(DiscountService.DEFAULT_BASE_PRICE);
     }
 
-    public void clearCart(String sessionId) {
+    @Override
+    public void clearCart(BasePerson ignoredUser, String sessionId) {
         // Очищаем корзину в сессии
         sessionCarts.remove(sessionId);
     }

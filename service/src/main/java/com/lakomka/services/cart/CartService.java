@@ -2,16 +2,15 @@ package com.lakomka.services.cart;
 
 import com.lakomka.dto.CartItemDto;
 import com.lakomka.models.person.BasePerson;
+import com.lakomka.models.person.PersonEnum;
 import com.lakomka.utils.SessionUtil;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +19,21 @@ public class CartService {
     private final GuestCartService guestCartService;
     private final UserCartService userCartService;
     private final SessionUtil sessionUtil;
+    private final List<CartCommon> cartServices;
+    private final Map<PersonEnum, CartCommon> personServiceMap = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        for (CartCommon personService : cartServices) {
+            personServiceMap.put(personService.personEnum, personService);
+        }
+    }
+
+    private PersonEnum getPersonEnum(
+            BasePerson user
+    ) {
+        return user == null ? PersonEnum.GUEST : PersonEnum.JPERSON;
+    }
 
     public CartItemDto addToCart(
             BasePerson user,
@@ -28,22 +42,23 @@ public class CartService {
             Integer quantity,
             boolean bitPackag
     ) {
-        if (user == null) {
-            return guestCartService.addToCart(sessionUtil.getCurrentSessionId(request), productId, quantity, bitPackag);
-        } else {
-            return userCartService.addToCart(user, productId, quantity, bitPackag);
-        }
+        return personServiceMap.get(getPersonEnum(user)).addToCart(
+                user,
+                sessionUtil.getCurrentSessionId(request),
+                productId,
+                quantity,
+                bitPackag
+        );
     }
 
     public HashMap<Long, Integer> getCartIdQuantityHashMap(
             BasePerson user,
             HttpServletRequest request
     ) {
-        if (user == null) {
-            return guestCartService.getCartIdQuantityHashMap(sessionUtil.getCurrentSessionId(request));
-        } else {
-            return userCartService.getCartIdQuantityHashMap(user);
-        }
+        return personServiceMap.get(getPersonEnum(user)).getCartIdQuantityHashMap(
+                user,
+                sessionUtil.getCurrentSessionId(request)
+        );
     }
 
 
@@ -51,47 +66,43 @@ public class CartService {
             BasePerson user,
             HttpServletRequest request
     ) {
-        if (user == null) {
-            return guestCartService.getCart(sessionUtil.getCurrentSessionId(request));
-        } else {
-            return userCartService.getCart(user);
-        }
+        return personServiceMap.get(getPersonEnum(user)).getCart(
+                user,
+                sessionUtil.getCurrentSessionId(request)
+        );
     }
 
     public Map<String, Object> getCartSummary(
             BasePerson user,
             HttpServletRequest request
     ) {
-        if (user == null) {
-            return guestCartService.getCartSummary(sessionUtil.getCurrentSessionId(request));
-        } else {
-            return userCartService.getCartSummary(user);
-        }
+        return personServiceMap.get(getPersonEnum(user)).getCartSummary(
+                user,
+                sessionUtil.getCurrentSessionId(request)
+        );
     }
 
     public void moveGuestCartToUserCart(BasePerson user, HttpServletRequest request) {
         String sessionId = sessionUtil.getCurrentSessionId(request);
         if (sessionId != null) {
             // Получаем содержимое анонимной корзины
-            HashMap<Long, Integer> guestCart = guestCartService.getCartIdQuantityHashMap(sessionId);
+            HashMap<Long, Integer> guestCart = guestCartService.getCartIdQuantityHashMap(null, sessionId);
 
             // Переносим товары в пользовательскую корзину
             for (HashMap.Entry<Long, Integer> entry : guestCart.entrySet()) {
-                userCartService.addToCart(user, entry.getKey(), entry.getValue(), false);
+                userCartService.addToCart(user, null, entry.getKey(), entry.getValue(), false);
             }
 
             // Очищаем анонимную корзину
-            guestCartService.clearCart(sessionId);
+            guestCartService.clearCart(null ,sessionId);
         }
     }
 
     public HttpStatus clearCart(BasePerson user, HttpServletRequest request) {
-        String sessionId = sessionUtil.getCurrentSessionId(request);
-        if (user == null) {
-            guestCartService.clearCart(sessionId);
-        } else {
-            userCartService.clearCart(user);
-        }
+        personServiceMap.get(getPersonEnum(user)).clearCart(
+                user,
+                sessionUtil.getCurrentSessionId(request)
+        );
         return HttpStatus.NO_CONTENT;
     }
 

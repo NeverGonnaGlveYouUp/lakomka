@@ -39,7 +39,7 @@ public class GuestOrderService extends OrderCommon {
     public Order createOrderFromCart(String currentSessionId, OrderCreationRequest request) {
 
         // Get cart items for this session
-        List<PersonCartItem> cartItems = guestCartService.getCartRaw(currentSessionId);
+        List<PersonCartItem> cartItems = guestCartService.getCartRaw(null, currentSessionId);
         if (cartItems.isEmpty()) {
             throw new RuntimeException("Cart is empty for session " + currentSessionId);
         }
@@ -53,7 +53,7 @@ public class GuestOrderService extends OrderCommon {
         Order savedOrder = makeOrder(systemUser.get(), request, cartItems, currentSessionId);
 
         // Clear cart after savedOrder creation
-        guestCartService.clearCart(currentSessionId);
+        guestCartService.clearCart(null, currentSessionId);
 
         return savedOrder;
     }

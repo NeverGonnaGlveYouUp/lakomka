@@ -3,7 +3,6 @@ package com.lakomka.controller;
 import com.lakomka.dto.OrderCreationRequest;
 import com.lakomka.dto.OrderDto;
 import com.lakomka.dto.OrderItemDto;
-import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.services.order.OrderCreationRequestService;
 import com.lakomka.services.order.OrderService;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -48,8 +46,7 @@ public class OrderController {
         try {
             log.info("createOrderFromCartWithDetails: user: {}, orderCreationRequest: {}", Optional.ofNullable(user).map(BasePerson::getLogin).orElse(null), orderCreationRequest.toString());
             OrderCreationRequest orderCreationRequestEnriched = requestService.fill(user, orderCreationRequest);
-            Order order = orderService.createOrderFromCart(user, request, orderCreationRequestEnriched);
-            return ResponseEntity.ok(order.toOrderDTO());
+            return ResponseEntity.ok(orderService.createOrderFromCart(user, request, orderCreationRequestEnriched));
         } catch (Exception e) {
             log.error("{}", e.getMessage(), e);
             return ResponseEntity.badRequest().build();
@@ -70,27 +67,27 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.unsorted());
-        Page<OrderDto> orders = orderService.getOrders(user, request, pageable);
-        return ResponseEntity.ok(orders);
+        return ResponseEntity.of(Optional.of(orderService.getOrders(user, request,
+                PageRequest.of(page, size, Sort.unsorted())
+        )));
     }
 
     /**
      * Return list of order content for user
      *
-     * @param user    - user
+     * @param user - user
      * @return - List<OrderItemDto>
      */
     @GetMapping("/order-content")
     public ResponseEntity<List<OrderItemDto>> getOrderContentByPersonAndOrder(
             @AuthenticationPrincipal BasePerson user,
+            HttpServletRequest request,
             @RequestParam(value = "orderId") Long orderId
     ) {
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
-        List<OrderItemDto> orderContent = orderService.getOrderContent(user, orderId);
-        return ResponseEntity.ok(orderContent);
+        return ResponseEntity.of(Optional.of(orderService.getOrderContent(user, request, orderId)));
     }
 
 
@@ -107,7 +104,7 @@ public class OrderController {
             HttpServletRequest request,
             @RequestParam long orderId
     ) {
-        return ResponseEntity.ok(orderExport.safeExportXml(user, request, orderId));
+        return ResponseEntity.of(Optional.of(orderExport.safeExportXml(user, request, orderId)));
     }
 
 }

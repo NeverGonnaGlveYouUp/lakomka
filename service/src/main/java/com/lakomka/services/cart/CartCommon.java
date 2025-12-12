@@ -7,6 +7,7 @@ import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.order.OrderCommon;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
@@ -21,7 +22,9 @@ import static com.lakomka.services.DiscountService.getPackagQuantityCoefficient;
 @RequiredArgsConstructor
 public abstract class CartCommon {
 
-    protected final PersonEnum personEnum;
+    @Getter
+    private final PersonEnum personEnum;
+
     protected final DiscountService discountService;
     protected final ProductRepository productRepository;
 
@@ -52,4 +55,9 @@ public abstract class CartCommon {
         return summary;
     }
 
+    public static PersonEnum getPersonKind(
+            BasePerson user
+    ) {
+        return user == null ? PersonEnum.GUEST : PersonEnum.JPERSON;
+    }
 }

@@ -7,6 +7,7 @@ import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
+import jakarta.annotation.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,7 +27,7 @@ public class GuestCartService extends CartCommon {
 
     @Override
     public CartItemDto addToCart(
-            BasePerson ignoredUser,
+            @Nullable BasePerson ignoredUser,
             String sessionId,
             Long productId,
             Integer quantity,
@@ -57,7 +58,7 @@ public class GuestCartService extends CartCommon {
 
     @Override
     public HashMap<Long, Integer> getCartIdQuantityHashMap(
-            BasePerson ignoredUser,
+            @Nullable BasePerson ignoredUser,
             String sessionId
     ) {
         return (HashMap<Long, Integer>)
@@ -69,19 +70,28 @@ public class GuestCartService extends CartCommon {
     }
 
     @Override
-    public Set<CartItemDto> getCart(BasePerson ignoredUser, String sessionId) {
+    public Set<CartItemDto> getCart(
+            @Nullable BasePerson ignoredUser,
+            String sessionId
+    ) {
         return sessionCarts.getOrDefault(sessionId, new HashSet<>())
                 .stream()
                 .map(discountService::applyToCartItemDto)
                 .collect(Collectors.toSet());
     }
 
-    public List<PersonCartItem> getCartRaw(BasePerson ignoredUser, String sessionId) {
+    public List<PersonCartItem> getCartRaw(
+            @Nullable BasePerson ignoredUser,
+            String sessionId
+    ) {
         return sessionCarts.getOrDefault(sessionId, new HashSet<>()).stream().toList();
     }
 
     @Override
-    public Map<String, Object> getCartSummary(BasePerson ignoredUser, String sessionId) {
+    public Map<String, Object> getCartSummary(
+            @Nullable BasePerson ignoredUser,
+            String sessionId
+    ) {
         Set<PersonCartItem> cart = sessionCarts.getOrDefault(sessionId, new HashSet<>());
         if (cart == null || cart.isEmpty()) {
             return null;
@@ -95,7 +105,10 @@ public class GuestCartService extends CartCommon {
     }
 
     @Override
-    public void clearCart(BasePerson ignoredUser, String sessionId) {
+    public void clearCart(
+            @Nullable BasePerson ignoredUser,
+            String sessionId
+    ) {
         // Очищаем корзину в сессии
         sessionCarts.remove(sessionId);
     }

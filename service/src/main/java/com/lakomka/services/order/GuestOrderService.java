@@ -3,8 +3,11 @@ package com.lakomka.services.order;
 import com.lakomka.configs.SystemUserDatabaseInitializer;
 import com.lakomka.dto.OrderCreationRequest;
 import com.lakomka.dto.OrderDto;
+import com.lakomka.dto.OrderItemDto;
 import com.lakomka.models.order.Order;
+import com.lakomka.models.order.OrderItem;
 import com.lakomka.models.person.BasePerson;
+import com.lakomka.models.person.PersonEnum;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.repository.order.OrderItemRepository;
 import com.lakomka.repository.order.OrderRepository;
@@ -12,6 +15,10 @@ import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.cart.GuestCartService;
 import com.lakomka.services.xml.exports.OrderExport;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,20 +31,25 @@ public class GuestOrderService extends OrderCommon {
 
     private final GuestCartService guestCartService;
 
-    public GuestOrderService(OrderRepository orderRepository,
-                             OrderItemRepository orderItemRepository,
-                             DiscountService discountService,
-                             GuestCartService guestCartService,
-                             BasePersonRepository basePersonRepository,
-                             OrderExport orderExport
+    public GuestOrderService(
+            OrderRepository orderRepository,
+            OrderItemRepository orderItemRepository,
+            DiscountService discountService,
+            GuestCartService guestCartService,
+            BasePersonRepository basePersonRepository,
+            OrderExport orderExport
     ) {
-        super(orderRepository, orderItemRepository, discountService, basePersonRepository, orderExport);
+        super(PersonEnum.GUEST, orderRepository, orderItemRepository, discountService, basePersonRepository, orderExport);
         this.guestCartService = guestCartService;
     }
 
+    @Override
     @Transactional
-    public Order createOrderFromCart(String currentSessionId, OrderCreationRequest request) {
-
+    public OrderDto createOrderFromCart(
+            @Nullable BasePerson ignoredBasePerson,
+            String currentSessionId,
+            OrderCreationRequest request
+    ) {
         // Get cart items for this session
         List<PersonCartItem> cartItems = guestCartService.getCartRaw(null, currentSessionId);
         if (cartItems.isEmpty()) {
@@ -50,7 +62,7 @@ public class GuestOrderService extends OrderCommon {
             throw new RuntimeException("Not found system user");
         }
 
-        Order savedOrder = makeOrder(systemUser.get(), request, cartItems, currentSessionId);
+        OrderDto savedOrder = makeOrder(systemUser.get(), request, cartItems, currentSessionId).toOrderDTO();
 
         // Clear cart after savedOrder creation
         guestCartService.clearCart(null, currentSessionId);
@@ -58,14 +70,40 @@ public class GuestOrderService extends OrderCommon {
         return savedOrder;
     }
 
-    public List<OrderDto> getOrders(String currentSessionId, Pageable pageable) {
+    @Override
+    public Page<OrderDto> getOrdersPage(
+            @Nullable BasePerson ignoredUser,
+            String currentSessionId,
+            HttpServletRequest request,
+            Pageable pageable
+    ) {
+        return new PageImpl<>(getOrders(currentSessionId, pageable), pageable, countOrders(currentSessionId));
+    }
+
+    @Override
+    public List<OrderItemDto> getOrderContent(
+            @Nullable BasePerson ignoredUser,
+            String currentSessionId,
+            Long orderId
+    ) {
+        return getOrderRepository().findByIdAndGuest(orderId, currentSessionId)
+                .map(order -> getOrderItemRepository().findAllByOrder(order))
+                .orElse(List.of()).stream()
+                .map(OrderItem::toOrderItemDto)
+                .toList();
+    }
+
+    private List<OrderDto> getOrders(
+            String currentSessionId,
+            Pageable pageable
+    ) {
         return getOrderRepository().findAllByGuest(currentSessionId, pageable)
                 .stream()
                 .map(Order::toOrderDTO)
                 .toList();
     }
 
-    public long countOrders(String currentSessionId) {
+    private long countOrders(String currentSessionId) {
         return getOrderRepository().countAllByGuest(currentSessionId);
     }
 }

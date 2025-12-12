@@ -1,17 +1,24 @@
 package com.lakomka.services.order;
 
 import com.lakomka.dto.OrderCreationRequest;
+import com.lakomka.dto.OrderDto;
+import com.lakomka.dto.OrderItemDto;
 import com.lakomka.models.order.Order;
 import com.lakomka.models.order.OrderItem;
 import com.lakomka.models.person.BasePerson;
+import com.lakomka.models.person.PersonEnum;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.repository.order.OrderItemRepository;
 import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.xml.exports.OrderExport;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -23,18 +30,25 @@ import static java.util.Objects.nonNull;
 @RequiredArgsConstructor
 public abstract class OrderCommon {
 
+    @Getter
+    private final PersonEnum personEnum;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final DiscountService discountService;
     private final BasePersonRepository basePersonRepository;
     private final OrderExport orderExport;
 
-    public Order makeOrder(BasePerson basePerson,
-                           OrderCreationRequest request,
-                           List<PersonCartItem> cartItems,
-                           String currentSessionId) {
+    @Transactional
+    public abstract OrderDto createOrderFromCart(BasePerson basePerson, String currentSessionId, OrderCreationRequest request);
+    public abstract Page<OrderDto> getOrdersPage(BasePerson user, String currentSessionId, HttpServletRequest request, Pageable pageable);
+    public abstract List<OrderItemDto> getOrderContent(BasePerson user, String currentSessionId, Long orderId);
 
-        // Create the order
+    public Order makeOrder(
+            BasePerson basePerson,
+            OrderCreationRequest request,
+            List<PersonCartItem> cartItems,
+            String currentSessionId
+    ) {
         Order order = new Order();
         order.setBasePerson(basePerson);
         order.setDateTimeOrder(Instant.now());
@@ -136,5 +150,11 @@ public abstract class OrderCommon {
             // штуки или килограммы
             return cartItem.getQuantity() * (weight / 1000.);
         }
+    }
+
+    public static PersonEnum getPersonKind(
+            BasePerson user
+    ) {
+        return user == null ? PersonEnum.GUEST : PersonEnum.JPERSON;
     }
 }

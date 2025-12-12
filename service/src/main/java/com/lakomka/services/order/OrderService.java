@@ -5,49 +5,71 @@ import com.lakomka.dto.OrderDto;
 import com.lakomka.dto.OrderItemDto;
 import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
+import com.lakomka.models.person.PersonEnum;
 import com.lakomka.utils.SessionUtil;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.lakomka.services.order.OrderCommon.getPersonKind;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final UserOrderService userOrderService;
-    private final GuestOrderService guestOrderService;
     private final SessionUtil sessionUtil;
+    private final List<OrderCommon> orderServices;
+    private final Map<PersonEnum, OrderCommon> personServiceMap = new HashMap<>();
 
-    public Order createOrderFromCart(BasePerson user, HttpServletRequest request, OrderCreationRequest orderCreationRequest) {
-        if (user == null) {
-            String currentSessionId = sessionUtil.getCurrentSessionId(request);
-            return guestOrderService.createOrderFromCart(currentSessionId, orderCreationRequest);
-        } else {
-            return userOrderService.createOrderFromCart(user, orderCreationRequest);
+    @PostConstruct
+    public void init() {
+        for (OrderCommon personService : orderServices) {
+            personServiceMap.put(personService.getPersonEnum(), personService);
         }
     }
 
-    public Page<OrderDto> getOrders(BasePerson user, HttpServletRequest request, Pageable pageable) {
-        List<OrderDto> orders;
-        long total;
-        if (user == null) {
-            // get order list for guest user only for existing session
-            String currentSessionId = sessionUtil.getCurrentSessionId(request);
-            orders = guestOrderService.getOrders(currentSessionId, pageable);
-            total = guestOrderService.countOrders(currentSessionId);
-        } else {
-            orders = userOrderService.getOrders(user, pageable);
-            total = userOrderService.countOrders(user);
-        }
-        return new PageImpl<>(orders, pageable, total);
+    public OrderDto createOrderFromCart(
+            BasePerson user,
+            HttpServletRequest request,
+            OrderCreationRequest orderCreationRequest
+    ) {
+        return personServiceMap.get(getPersonKind(user)).createOrderFromCart(
+                user,
+                sessionUtil.getCurrentSessionId(request),
+                orderCreationRequest
+        );
     }
 
-    public List<OrderItemDto> getOrderContent(BasePerson user, Long orderId) {
-        return userOrderService.getOrderContent(user, orderId);
+    public Page<OrderDto> getOrders(
+            BasePerson user,
+            HttpServletRequest request,
+            Pageable pageable
+    ) {
+        return personServiceMap.get(getPersonKind(user)).getOrdersPage(
+                user,
+                sessionUtil.getCurrentSessionId(request),
+                request,
+                pageable
+        );
+    }
+
+    public List<OrderItemDto> getOrderContent(
+            BasePerson user,
+            HttpServletRequest request,
+            Long orderId
+    ) {
+        return personServiceMap.get(getPersonKind(user)).getOrderContent(
+                user,
+                sessionUtil.getCurrentSessionId(request),
+                orderId
+        );
     }
 }

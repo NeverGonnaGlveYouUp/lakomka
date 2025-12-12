@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static com.lakomka.services.cart.CartCommon.getPersonKind;
+
 @Service
 @RequiredArgsConstructor
 public class CartService {
@@ -25,14 +27,8 @@ public class CartService {
     @PostConstruct
     public void init() {
         for (CartCommon personService : cartServices) {
-            personServiceMap.put(personService.personEnum, personService);
+            personServiceMap.put(personService.getPersonEnum(), personService);
         }
-    }
-
-    private PersonEnum getPersonEnum(
-            BasePerson user
-    ) {
-        return user == null ? PersonEnum.GUEST : PersonEnum.JPERSON;
     }
 
     public CartItemDto addToCart(
@@ -42,7 +38,7 @@ public class CartService {
             Integer quantity,
             boolean bitPackag
     ) {
-        return personServiceMap.get(getPersonEnum(user)).addToCart(
+        return personServiceMap.get(getPersonKind(user)).addToCart(
                 user,
                 sessionUtil.getCurrentSessionId(request),
                 productId,
@@ -55,7 +51,7 @@ public class CartService {
             BasePerson user,
             HttpServletRequest request
     ) {
-        return personServiceMap.get(getPersonEnum(user)).getCartIdQuantityHashMap(
+        return personServiceMap.get(getPersonKind(user)).getCartIdQuantityHashMap(
                 user,
                 sessionUtil.getCurrentSessionId(request)
         );
@@ -66,7 +62,7 @@ public class CartService {
             BasePerson user,
             HttpServletRequest request
     ) {
-        return personServiceMap.get(getPersonEnum(user)).getCart(
+        return personServiceMap.get(getPersonKind(user)).getCart(
                 user,
                 sessionUtil.getCurrentSessionId(request)
         );
@@ -76,7 +72,7 @@ public class CartService {
             BasePerson user,
             HttpServletRequest request
     ) {
-        return personServiceMap.get(getPersonEnum(user)).getCartSummary(
+        return personServiceMap.get(getPersonKind(user)).getCartSummary(
                 user,
                 sessionUtil.getCurrentSessionId(request)
         );
@@ -99,7 +95,7 @@ public class CartService {
     }
 
     public HttpStatus clearCart(BasePerson user, HttpServletRequest request) {
-        personServiceMap.get(getPersonEnum(user)).clearCart(
+        personServiceMap.get(getPersonKind(user)).clearCart(
                 user,
                 sessionUtil.getCurrentSessionId(request)
         );

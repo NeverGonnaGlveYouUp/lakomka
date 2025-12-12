@@ -8,6 +8,7 @@ import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.PersonCartItemRepository;
 import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
+import jakarta.annotation.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -30,7 +31,7 @@ public class UserCartService extends CartCommon {
     @Override
     public CartItemDto addToCart(
             BasePerson user,
-            String ignoredSessionId,
+            @Nullable String ignoredSessionId,
             Long productId,
             Integer quantity,
             boolean bitPackag

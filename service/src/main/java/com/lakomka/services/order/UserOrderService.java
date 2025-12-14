@@ -44,7 +44,7 @@ public class UserOrderService extends OrderCommon {
 
     @Override
     @Transactional
-    public OrderDto createOrderFromCart(
+    public Optional<OrderDto> createOrderFromCart(
             BasePerson basePerson,
             String currentSessionId,
             OrderCreationRequest request
@@ -62,12 +62,12 @@ public class UserOrderService extends OrderCommon {
             throw new RuntimeException("Not found user " + basePerson.getLogin());
         }
 
-        OrderDto savedOrder = makeOrder(attachedUser.get(), request, cartItems, null).toOrderDTO();
+        Order savedOrder = makeOrder(attachedUser.get(), request, cartItems, null);
 
         // Clear cart after savedOrder creation
         cartItemRepository.deleteAll(cartItems);
 
-        return savedOrder;
+        return Optional.ofNullable(savedOrder).stream().map(Order::toOrderDTO).findFirst();
     }
 
     @Override

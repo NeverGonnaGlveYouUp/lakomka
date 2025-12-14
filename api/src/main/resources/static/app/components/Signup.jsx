@@ -274,8 +274,7 @@ const Signup = () => {
                 <Box
                     component="form"
                     onSubmit={handleSubmit}
-                    sx={{ mt: 1, width: '100%' }}
-                >
+                    sx={{ mt: 1, width: '100%' }}>
                     <TextField
                         margin="normal"
                         required

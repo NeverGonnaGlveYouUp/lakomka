@@ -30,7 +30,7 @@ public class OrderXmlDto {
     String dateTimeOrder;
 
     BigDecimal sumOrder;
-    Integer sumWeight;
+    Double sumWeight;
 
     boolean bitAccPrint;
     boolean bitSertifPrint;

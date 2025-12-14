@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.lakomka.services.order.OrderCommon.getPersonKind;
 
@@ -36,7 +37,7 @@ public class OrderService {
         }
     }
 
-    public OrderDto createOrderFromCart(
+    public Optional<OrderDto> createOrderFromCart(
             BasePerson user,
             HttpServletRequest request,
             OrderCreationRequest orderCreationRequest

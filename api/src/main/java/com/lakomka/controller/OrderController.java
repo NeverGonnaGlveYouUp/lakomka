@@ -7,6 +7,7 @@ import com.lakomka.models.person.BasePerson;
 import com.lakomka.services.order.OrderCreationRequestService;
 import com.lakomka.services.order.OrderService;
 import com.lakomka.services.xml.exports.OrderExport;
+import com.lakomka.validators.OrderCreationValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +32,7 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderCreationRequestService requestService;
     private final OrderExport orderExport;
+    private final OrderCreationValidator orderCreationValidator;
 
     /**
      * Creates order with details for guest or authenticated user
@@ -39,14 +43,20 @@ public class OrderController {
      * @return OrderDTO
      */
     @PostMapping("/create-from-cart")
-    public ResponseEntity<OrderDto> createOrderFromCartWithDetails(
+    public ResponseEntity<?> createOrderFromCartWithDetails(
             @AuthenticationPrincipal BasePerson user,
             HttpServletRequest request,
-            @RequestBody OrderCreationRequest orderCreationRequest) {
+            @RequestBody OrderCreationRequest orderCreationRequest
+    ) {
         try {
             log.info("createOrderFromCartWithDetails: user: {}, orderCreationRequest: {}", Optional.ofNullable(user).map(BasePerson::getLogin).orElse(null), orderCreationRequest.toString());
+            Errors errors = new BeanPropertyBindingResult(orderCreationRequest, "orderCreationRequest");
+            orderCreationValidator.validate(orderCreationRequest, errors);
+            if (errors.hasErrors()) {
+                return ResponseEntity.badRequest().body(errors.getAllErrors());
+            }
             OrderCreationRequest orderCreationRequestEnriched = requestService.fill(user, orderCreationRequest);
-            return ResponseEntity.ok(orderService.createOrderFromCart(user, request, orderCreationRequestEnriched));
+            return ResponseEntity.of(orderService.createOrderFromCart(user, request, orderCreationRequestEnriched));
         } catch (Exception e) {
             log.error("{}", e.getMessage(), e);
             return ResponseEntity.badRequest().build();

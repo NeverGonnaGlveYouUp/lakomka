@@ -39,7 +39,7 @@ public abstract class OrderCommon {
     private final OrderExport orderExport;
 
     @Transactional
-    public abstract OrderDto createOrderFromCart(BasePerson basePerson, String currentSessionId, OrderCreationRequest request);
+    public abstract Optional<OrderDto> createOrderFromCart(BasePerson basePerson, String currentSessionId, OrderCreationRequest request);
     public abstract Page<OrderDto> getOrdersPage(BasePerson user, String currentSessionId, HttpServletRequest request, Pageable pageable);
     public abstract List<OrderItemDto> getOrderContent(BasePerson user, String currentSessionId, Long orderId);
 
@@ -49,20 +49,25 @@ public abstract class OrderCommon {
             List<PersonCartItem> cartItems,
             String currentSessionId
     ) {
+
+        if (request == null || (basePerson == null && currentSessionId == null)){
+            return null;
+        }
+
         Order order = new Order();
         order.setBasePerson(basePerson);
         order.setDateTimeOrder(Instant.now());
-        order.setSumWeight(0);
+        order.setSumWeight(0d);
         order.setSumOrder(BigDecimal.ZERO);
-        order.setAdressDelivery(nonNull(request) && nonNull(request.getAddressDelivery()) ? request.getAddressDelivery() : "");
-        order.setDateDelivery(nonNull(request) && nonNull(request.getDateDelivery()) ? request.getDateDelivery() : getCurrentDateWithOffset(1));
-        order.setBitAccPrint(nonNull(request) && request.isBitAccPrint());
-        order.setBitSertifPrint(nonNull(request) && request.isBitSertifPrint());
+        order.setAdressDelivery(nonNull(request.getAddressDelivery()) ? request.getAddressDelivery() : "");
+        order.setDateDelivery(nonNull(request.getDateDelivery()) ? request.getDateDelivery() : new Date(0));
+        order.setBitAccPrint(request.isBitAccPrint());
+        order.setBitSertifPrint(request.isBitSertifPrint());
         order.setDatePay(getDatePay(request, basePerson));
-        order.setEmail(nonNull(request) && nonNull(request.getEmail()) ? request.getEmail() : "");
-        order.setTelephone(nonNull(request) && nonNull(request.getTelephone()) ? request.getTelephone() : "");
-        order.setContact(nonNull(request) && nonNull(request.getContact()) ? request.getContact() : "");
-        order.setPrim(nonNull(request) && nonNull(request.getPrim()) ? request.getPrim() : "");
+        order.setEmail(nonNull(request.getEmail()) ? request.getEmail() : "");
+        order.setTelephone(nonNull(request.getTelephone()) ? request.getTelephone() : "");
+        order.setContact(nonNull(request.getContact()) ? request.getContact() : "");
+        order.setPrim(nonNull(request.getPrim()) ? request.getPrim() : "");
         order.setGuest(currentSessionId);
 
         // Save order to get ID
@@ -70,7 +75,7 @@ public abstract class OrderCommon {
 
         // Create order items from cart items
         BigDecimal totalSum = BigDecimal.ZERO;
-        int totalWeight = 0;
+        double totalWeight = 0;
 
         List<OrderItem> newItems = new ArrayList<>();
 
@@ -93,7 +98,7 @@ public abstract class OrderCommon {
             // Calculate total sum and weight
             BigDecimal itemTotal = appliedToPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             totalSum = totalSum.add(itemTotal);
-            totalWeight += (int) (cartItem.getQuantity() * weightPackag);
+            totalWeight += cartItem.getQuantity() * weightPackag;
 
             // Save order item
             orderItemRepository.save(orderItem);
@@ -114,13 +119,10 @@ public abstract class OrderCommon {
         return order;
     }
 
-    private Date getCurrentDateWithOffset(Integer datePayOffset) {
-        Date currentDate = new Date();
-
+    private Date getDateWithDayOffset(Integer datePayOffset, Date date) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentDate);
+        calendar.setTime(date);
         calendar.add(Calendar.DAY_OF_MONTH, datePayOffset);
-
         return calendar.getTime();
     }
 
@@ -131,9 +133,9 @@ public abstract class OrderCommon {
      * @return дата
      */
     private Date getDatePay(OrderCreationRequest request, BasePerson basePerson) {
-        return nonNull(request) && nonNull(request.getDateDelivery()) && request.isPayVid() ?
-                request.getDateDelivery() :
-                getCurrentDateWithOffset(basePerson.getJPerson().getDay());
+        return nonNull(request.getDateDelivery()) && request.isPayVid() && basePerson.getJPerson().getDay() != 0 ?
+                getDateWithDayOffset(basePerson.getJPerson().getDay(), request.getDateDelivery()) :
+                request.getDateDelivery();
     }
 
     /**

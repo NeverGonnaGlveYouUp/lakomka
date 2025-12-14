@@ -22,7 +22,8 @@ import {
     Button,
     Switch,
     FormControlLabel,
-    Checkbox
+    Checkbox,
+    Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from './AppContext.js';
@@ -252,6 +253,7 @@ const CartPage = () => {
     const [prim, setPrim]                   = useState('');
     const [isSubmitting, setIsSubmitting]   = useState(false);
     const [dateDelivery, setDateDelivery]   = useState(null);
+    const [errors, setErrors]               = useState({});
 
     const sumByField = (array, field) => {
         return array.reduce((integerSum, item) => {
@@ -344,7 +346,19 @@ const CartPage = () => {
             });
             navigate("/private/orders");
         } catch (error) {
-            navigate("/error");
+            if (error.response && error.response.status === 400) {
+                const validationErrors = error.response.data;
+
+                const formattedErrors = validationErrors.reduce((acc, error) => {
+                    acc[error.field] = error.defaultMessage;
+                    return acc;
+                }, {});
+
+                setErrors(formattedErrors);
+                setIsSubmitting(false);
+            } else {
+                console.error("An unexpected error occurred:", error);
+            }
         }
     }
 
@@ -400,6 +414,7 @@ const CartPage = () => {
                         </Grid>
                         <Paper sx={{ width: isDesktopResolution ? "34%" : "100%" }}>
                             <Box
+                                component="form"
                                 sx={{ p: 2, display: "flex",
                                 flexDirection: isDesktopResolution ? "column" : "column-reverse" }}>
                                 <List>
@@ -447,7 +462,13 @@ const CartPage = () => {
                                                 label="Дата доставки*"
                                                 inputVariant="outlined"
                                                 shouldDisableDate={isWeekend}
-                                                views={['month', 'day']} />
+                                                views={['month', 'day']}
+                                                slotProps={{
+                                                    textField: {
+                                                      error: !!errors.dateDelivery,
+                                                      helperText: errors.dateDelivery,
+                                                    },
+                                                  }}/>
                                             </LocalizationProvider>
                                     </ListItem>
                                     <ListItem sx={{ flexDirection: "column", alignItems: "flex-start" }}>
@@ -487,9 +508,20 @@ const CartPage = () => {
                                         )}
                                     </ListItem>
                                 </List>
+                                {!!!localStorage.getItem('jwtToken') && (
+                                    <Alert severity="warning" sx={{ mb: "1rem" }}>
+                                        <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
+                                            <Link onClick={() => navigate("/auth/login")}>
+                                                Авторизуйтесь
+                                            </Link>
+                                            {" для оформления."}
+                                        </Typography>
+                                    </Alert>
+                                )}
                                 <Button
                                     onClick={() => handleSubmit()}
-                                    disabled={isSubmitting || price==0}
+                                    disabled={isSubmitting || price==0 || !!!localStorage.getItem('jwtToken')}
+                                    type="submit"
                                     color="success"
                                     fullWidth
                                     variant="contained">

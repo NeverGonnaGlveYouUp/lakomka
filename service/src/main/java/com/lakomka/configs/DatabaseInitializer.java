@@ -98,6 +98,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson.setRoute(route);
         jPerson.setPrim("Тестовый JP 1");
         jPerson.setEdoDate(new Date());
+        jPerson.setDay(5);
 
         jPersonRepository.save(jPerson);
         person.setJPerson(jPerson);

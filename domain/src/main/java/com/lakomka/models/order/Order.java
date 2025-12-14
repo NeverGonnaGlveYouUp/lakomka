@@ -54,7 +54,7 @@ public class Order {
      * Общий вес заказа
      */
     @Column(name = "sum_weight", nullable = false, precision = 12)
-    private Integer sumWeight;
+    private Double sumWeight;
 
     /**
      * Адрес доставки

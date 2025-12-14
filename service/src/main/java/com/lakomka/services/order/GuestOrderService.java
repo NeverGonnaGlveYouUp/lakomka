@@ -45,7 +45,7 @@ public class GuestOrderService extends OrderCommon {
 
     @Override
     @Transactional
-    public OrderDto createOrderFromCart(
+    public Optional<OrderDto> createOrderFromCart(
             @Nullable BasePerson ignoredBasePerson,
             String currentSessionId,
             OrderCreationRequest request
@@ -62,12 +62,12 @@ public class GuestOrderService extends OrderCommon {
             throw new RuntimeException("Not found system user");
         }
 
-        OrderDto savedOrder = makeOrder(systemUser.get(), request, cartItems, currentSessionId).toOrderDTO();
+        Order savedOrder = makeOrder(systemUser.get(), request, cartItems, currentSessionId);
 
         // Clear cart after savedOrder creation
         guestCartService.clearCart(null, currentSessionId);
 
-        return savedOrder;
+        return Optional.ofNullable(savedOrder).stream().map(Order::toOrderDTO).findFirst();
     }
 
     @Override

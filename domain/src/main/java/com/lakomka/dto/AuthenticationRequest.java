@@ -6,11 +6,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class AuthenticationRequest {
-
     private String login;
     private String password;
     private String siteKey;
     private String token;
-    private String expectedAction;
-
 }

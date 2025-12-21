@@ -17,8 +17,6 @@ import { keyframes } from "@emotion/react";
 import axios from 'axios';
 import InputMask from 'react-input-mask'
 import PropTypes from 'prop-types';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { postReCaptcha } from './postReCaptcha.js';
 
 const PhoneMask = React.forwardRef(function PhoneMask(props, ref) {
     const { onChange, ...other } = props
@@ -152,11 +150,9 @@ const Signup = () => {
     const [errors, setErrors]                   = useState({});
     const [reCaptchaError, setReCaptchaError]   = useState(false);
 
-    const { executeRecaptcha } = useGoogleReCaptcha();
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        const token = await postReCaptcha(executeRecaptcha, 'SIGNUP');
         const body = {
             login,
             password,

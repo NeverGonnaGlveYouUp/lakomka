@@ -22,11 +22,11 @@ import { useAppContext } from './AppContext.js';
 import { useNavigate } from 'react-router-dom';
 
 const ProductPageImage = styled(Box)({
-  width: '45%',
+  width: '-webkit-fill-available',
   height: '100%',
-  'object-fit': 'cover',
-  'object-position': 'center',
-  'border-radius': '3%',
+  'objectFit': 'cover',
+  'objectPosition': 'center',
+  'borderRadius': '3%',
   margin: '10px',
 });
 
@@ -135,8 +135,9 @@ const ProductPage = () => {
     return (
         <div>
             <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
-                <Container maxWidth="lg" sx={{ display: "flex", gap: "0.5rem", flexDirection: "row" }}>
+                <Container maxWidth="lg" sx={{ display: "flex", gap: "0.5rem", flexDirection: isDesktopResolution ? "row" : "column" }}>
                     <ProductPageImage
+                        sx={{ width: isDesktopResolution ? '45%' : '-webkit-fill-available' }}
                         src="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
                         component="img"
                     />
@@ -145,8 +146,9 @@ const ProductPage = () => {
                         <Typography sx={{ fontSize: '28px', fontWeight: 900 }}>{name}</Typography>
                         <Typography sx={{ fontSize: '14px', fontWeight: 400 }}>Артикул: {article}</Typography>
                         <div>
-                            <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>{price} ₽</Typography>
+                            <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>Цена за {unit} {price} ₽</Typography>
                             <Typography sx={{ fontSize: '14px', fontWeight: 400, marginTop: "4px" }}>При заказе в упаковках {price * packag} ₽</Typography>
+                            <Typography sx={{ fontSize: '14px', fontWeight: 400 }}>Одна упаковка это {packag} {unit}</Typography>
                         </div>
                         {cartQuantity > 0 ? (
                             <Container sx={{ display: "flex", gap: "0.5rem", flexDirection: "row", paddingTop: "2rem" }}>
@@ -214,58 +216,72 @@ const ProductPage = () => {
                             )}
                     </Container>
                 </Container>
-                <Container maxWidth="lg" sx={{ display: "flex", gap: "2rem", flexDirection: "column" }}>
+                <Container maxWidth="lg" sx={{ display: "flex", gap: "1rem", flexDirection: "column" }}>
                     <Typography variant="h6" gutterBottom>
                         О товаре
                     </Typography>
                     <Container maxWidth="lg" sx={{ display: "flex", gap: "1rem", flexDirection: isDesktopResolution ? "row" : "column"}}>
                         <Grid container spacing={1.5} columns={{ xs: 4, md: 8, lg: 8 }}>
                             <Grid size={{ xs: 4, md: 4, lg: 4 }}>
-                                <Typography variant="subtitle1"
-                                 size={{ xs: 4, md: 4, lg: 4 }}
-                                 gutterBottom>
+                                <Typography variant="subtitle1" size={{ xs: 4, md: 4, lg: 4 }} gutterBottom>
                                     Описание
                                 </Typography>
-                                <Typography variant="body1" gutterBottom>
-                                    {description}
-                                </Typography>
+                                {description && (
+                                    <Typography variant="body1" gutterBottom>
+                                        {description}
+                                    </Typography>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 4, md: 4, lg: 4 }}>
                                 <Typography variant="subtitle1" gutterBottom>
                                     Состав
                                 </Typography>
-                                <Typography variant="body1" gutterBottom>
-                                    {content}
-                                </Typography>
+                                {content && (
+                                    <Typography variant="body1" gutterBottom>
+                                        {content}
+                                    </Typography>
+                                )}
                             </Grid>
                             <Grid size={{ xs: 4, md: 4, lg: 4 }}>
                                 <Typography variant="subtitle1" gutterBottom>
                                     Характеристики
                                 </Typography>
-                                <Typography variant="body1" gutterBottom>
-                                    Масса ед. товара: {weight} грамм
-                                </Typography>
-                                <Typography variant="body1" gutterBottom>
-                                    Единица измерения: {unit} - {unitVid}
-                                </Typography>
-                                <Typography variant="body1" gutterBottom>
-                                    Количество товара в одной упаковке: {packag}
-                                </Typography>
-                                <Typography variant="body1" gutterBottom>
-                                    Страна изготовитель: {country}
-                                </Typography>
-                                <Typography variant="body1" gutterBottom>
-                                    Изготовитель: {worker}
-                                </Typography>
-                                <Typography variant="body1" gutterBottom>
-                                    Тип: {group}
-                                </Typography>
+                                {weight && (
+                                    <Typography variant="body1" gutterBottom>
+                                        Масса ед. товара: {weight} грамм
+                                    </Typography>
+                                )}
+                                {unit && unitVid && (
+                                    <Typography variant="body1" gutterBottom>
+                                        Единица измерения: {unit} - {unitVid}
+                                    </Typography>
+                                )}
+                                {packag && (
+                                    <Typography variant="body1" gutterBottom>
+                                        Количество товара в одной упаковке: {packag} {unitVid}
+                                    </Typography>
+                                )}
+                                {country && (
+                                    <Typography variant="body1" gutterBottom>
+                                        Страна изготовитель: {country}
+                                    </Typography>
+                                )}
+                                {worker && (
+                                    <Typography variant="body1" gutterBottom>
+                                        Изготовитель: {worker}
+                                    </Typography>
+                                )}
+                                {group && (
+                                    <Typography variant="body1" gutterBottom>
+                                        Тип: {group}
+                                    </Typography>
+                                )}
                             </Grid>
                         </Grid>
                     </Container>
                 </Container>
             </Container>
-            <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
+            <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "1rem", flexDirection: "column" }}>
                 <Typography variant="h6" gutterBottom>
                     Другие товары этого производителя
                 </Typography>

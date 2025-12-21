@@ -11,7 +11,7 @@ import com.lakomka.models.person.JPerson;
 import com.lakomka.models.person.Person;
 import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
-import com.lakomka.services.RecaptchaService;
+import com.lakomka.services.CaptchaService;
 import com.lakomka.services.cart.CartService;
 import com.lakomka.services.xml.exports.JPersonExport;
 import com.lakomka.utils.JwtUtil;
@@ -55,7 +55,7 @@ public class AuthController {
     private final BasePersonValidator basePersonValidator;
     private final RegistrationValidator registrationValidator;
     private final RegistrationDtoAssembler registrationDtoAssembler;
-    private final RecaptchaService recaptchaService;
+    private final CaptchaService captchaService;
     private final CartService cartService;
     private final JPersonExport jPersonExport;
 
@@ -64,16 +64,16 @@ public class AuthController {
             @Valid @RequestBody RegistrationDto user,
             HttpServletRequest request
     ) {
+        if (captchaService.unverifyCaptcha(user.getToken())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Errors errors = new BeanPropertyBindingResult(user, "user");
         user.setInn(user.getInn().replaceAll("-", ""));
         basePersonValidator.validate(user, errors);
         registrationValidator.validateRequisitesOnly(user, errors);
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
-        }
-
-        if (recaptchaService.verifyRecaptcha(user.getToken(), user.getSiteKey())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         Object personType = registrationDtoAssembler.toEntity(user);
@@ -113,7 +113,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
         }
 
-        if (recaptchaService.verifyRecaptcha(authenticationRequest.getToken(), authenticationRequest.getSiteKey())) {
+        if (captchaService.unverifyCaptcha(authenticationRequest.getToken())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -192,7 +192,7 @@ public class AuthController {
 
         log.info("Begin change password for: {}", user.getUsername());
 
-        if (recaptchaService.verifyRecaptcha(changePasswordRequest.getToken(), changePasswordRequest.getSiteKey())) {
+        if (captchaService.unverifyCaptcha(changePasswordRequest.getToken())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

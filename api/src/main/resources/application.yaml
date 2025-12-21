@@ -50,10 +50,10 @@ app:
     cron: 0 */5 * * * *
     enabled: true
 
-recaptcha:
+captcha:
   default:
-    score: ${RECAPTCHA_DEFAULT_SCORE:0.5}
+    score: ${CAPTCHA_DEFAULT_SCORE:0.5}
   secret:
-    key: ${RECAPTCHA_SECRET_KEY}
+    key: ${CAPTCHA_SECRET_KEY}
   verify:
-    url: https://www.google.com/recaptcha/api/siteverify
+    url: https://smartcaptcha.cloud.yandex.ru/validate

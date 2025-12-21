@@ -30,9 +30,9 @@ const StyledCard = styled(Card)({
 const StyledCardMedia = styled(CardMedia)({
   width: '90.5%',
   height: '100%',
-  'object-fit': 'cover',
-  'object-position': 'center',
-  'border-radius': '3%',
+  'objectFit': 'cover',
+  'objectPosition': 'center',
+  'borderRadius': '3%',
   margin: '10px',
   '&:hover': {
        top: '-10px',

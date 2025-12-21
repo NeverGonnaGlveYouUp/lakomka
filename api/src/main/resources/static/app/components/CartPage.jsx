@@ -39,9 +39,9 @@ import 'dayjs/locale/ru';
 const CartPageImage = styled(Box)({
   width: '88px',
   height: '117.333px',
-  'object-fit': 'cover',
-  'object-position': 'center',
-  'border-radius': '3%',
+  'objectFit': 'cover',
+  'objectPsition': 'center',
+  'borderRadius': '3%',
   margin: '10px',
 });
 
@@ -255,6 +255,7 @@ const CartPage = () => {
     const [dateDelivery, setDateDelivery]   = useState(null);
     const [errors, setErrors]               = useState({});
 
+
     const sumByField = (array, field) => {
         return array.reduce((integerSum, item) => {
             const value = parseFloat(item[field]) || 0;
@@ -328,7 +329,10 @@ const CartPage = () => {
             dateDelivery,
             bitAccPrint: null,
             bitSertifPrint: null,
-            payVid
+            payVid,
+            token,
+            "expectedAction": "CREATE_ORDER",
+            "siteKey": "6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y",
         };
 
         try {
@@ -359,6 +363,8 @@ const CartPage = () => {
             } else {
                 console.error("An unexpected error occurred:", error);
             }
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -514,7 +520,7 @@ const CartPage = () => {
                                             <Link onClick={() => navigate("/auth/login")}>
                                                 Авторизуйтесь
                                             </Link>
-                                            {" для оформления."}
+                                            {" для заказа."}
                                         </Typography>
                                     </Alert>
                                 )}

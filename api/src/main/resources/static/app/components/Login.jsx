@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Button,
     TextField,
@@ -13,8 +13,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { keyframes } from "@emotion/react";
 import axios from 'axios';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { postReCaptcha } from './postReCaptcha.js';
+import { InvisibleSmartCaptcha } from '@yandex/smart-captcha';
 
 const shakeAnimation = keyframes`
     0% { transform: translate(0); }
@@ -24,39 +23,40 @@ const shakeAnimation = keyframes`
     100% { transform: translate(0); }
 `;
 
-const ShakeText = styled(Typography)(({ shake }) => ({
+const ShakeText = styled(Typography)(() => ({
     color: 'red',
-    animation: shake ? `${shakeAnimation} 0.5s` : 'none',
+    animation: `0.5s`,
 }));
 
 const Login = () => {
-    const navigate = useNavigate();
-    const [login, setLogin] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState(false);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate                              = useNavigate();
+    const [login, setLogin]                     = useState('');
+    const [password, setPassword]               = useState('');
+    const [error, setError]                     = useState(false);
+    const [snackbarOpen, setSnackbarOpen]       = useState(false);
+    const [isSubmitting, setIsSubmitting]       = useState(false);
+    const [token, setToken]                     = useState('');
+    const [resetCaptcha, setResetCaptcha]       = useState(0);
+    const [visible, setVisible]                 = useState(false);
+    const handleChallengeHidden                 = useCallback(() => setVisible(false), []);
 
-    const { executeRecaptcha } = useGoogleReCaptcha();
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!login || !password) {
-            setError(true);
-            return;
+    useEffect(() => {
+        if (!!token){
+            handleSubmit();
         }
+    }, [isSubmitting]);
 
-        setIsSubmitting(true);
-        setError(false);
-
+    const handleSubmit = async () => {
         try {
-            const token = await postReCaptcha(executeRecaptcha, 'LOGIN');
+
+            setIsSubmitting(true);
+            setError(false);
+
             const body = {
                 login,
                 password,
                 token,
-                "expectedAction": "LOGIN",
-                "siteKey": "6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y",
+                "siteKey": "ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256",
             };
 
             const response = await axios.post('/api/login', body, {
@@ -125,8 +125,7 @@ const Login = () => {
                 display: "flex",
                 gap: "2rem",
                 justifyContent: "center"
-            }}
-        >
+            }}>
             <Box
                 sx={{
                     display: 'flex',
@@ -138,16 +137,11 @@ const Login = () => {
                     boxShadow: 3,
                     maxWidth: 400,
                     width: '100%'
-                }}
-            >
+                }}>
                 <Typography component="h1" variant="h5">
                     Вход в личный кабинет
                 </Typography>
-                <Box
-                    component="form"
-                    onSubmit={handleSubmit}
-                    sx={{ mt: 1, width: '100%' }}
-                >
+                <Box sx={{ mt: 1, width: '100%' }}>
                     <TextField
                         margin="normal"
                         required
@@ -158,8 +152,7 @@ const Login = () => {
                         autoComplete="username"
                         value={login}
                         error={error}
-                        disabled={isSubmitting}
-                    />
+                        disabled={isSubmitting}/>
                     <TextField
                         margin="normal"
                         required
@@ -170,21 +163,39 @@ const Login = () => {
                         autoComplete="current-password"
                         value={password}
                         error={error}
-                        disabled={isSubmitting}
-                    />
+                        disabled={isSubmitting}/>
+                    <InvisibleSmartCaptcha
+                        sitekey="ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256"
+                        onJavascriptError={(e) => {
+                            console.log("onJavascriptError");
+                            console.log(e.filename);
+                            console.log(e.message);
+                        }}
+                        onNetworkError={() => {
+                                console.log("onNetworkError");
+                        }}
+                        onSuccess={(e) => {
+                            setToken(e);
+                            console.log("onSuccess");
+                            console.log(e);
+                        }}
+                        shieldPosition={"top-left"}
+                        visible={true}
+                        onChallengeHidden={handleChallengeHidden}
+                        language='ru'/>
                     {error && (
-                        <ShakeText shake variant="body2" sx={{ mt: 1 }}>
+                        <ShakeText variant="body2" sx={{ mt: 1 }}>
                             Неправильный логин или пароль.
                         </ShakeText>
                     )}
                     <Button
+                        onClick={() => setIsSubmitting(true)}
                         type="submit"
                         fullWidth
                         variant="contained"
                         color="primary"
                         sx={{ mt: 3, mb: 2 }}
-                        disabled={isSubmitting}
-                    >
+                        disabled={isSubmitting}>
                         {isSubmitting ? 'Вход...' : 'Войти'}
                     </Button>
                     <Button

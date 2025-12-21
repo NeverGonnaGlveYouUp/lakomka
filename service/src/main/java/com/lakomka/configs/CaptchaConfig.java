@@ -9,16 +9,16 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @Getter
-public class RecaptchaConfig {
+public class CaptchaConfig {
 
-    @Value("${recaptcha.secret.key}")
-    private String recaptchaSecretKey;
+    @Value("${captcha.secret.key}")
+    private String captchaSecretKey;
 
-    @Value("${recaptcha.default.score:0.5}")
-    private Double recaptchaDefaultScore;
+    @Value("${captcha.default.score:0.5}")
+    private Double captchaDefaultScore;
 
-    @Value("${recaptcha.verify.url:https://www.google.com/recaptcha/api/siteverify}")
-    private String recaptchaVerifyUrl;
+    @Value("${captcha.verify.url:://smartcaptcha.cloud.yandex.ru/validate}")
+    private String captchaVerifyUrl;
 
     @Bean
     public RestTemplate restTemplate() {

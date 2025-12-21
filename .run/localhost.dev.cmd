@@ -15,7 +15,7 @@ set S3_BUCKET=lakomka
 
 set SPRING_PROFILES_ACTIVE=jpa-dev,debug,demo
 REM set SPRING_PROFILES_ACTIVE=dev,debug,demo
-set RECAPTCHA_SECRET_KEY=
+set CAPTCHA_SECRET_KEY=
 
 echo Environment variables set for dev
 echo.
@@ -32,7 +32,7 @@ echo S3_SECRET=%S3_SECRET%
 echo S3_BUCKET=%S3_BUCKET%
 echo.
 echo SPRING_PROFILES_ACTIVE=%SPRING_PROFILES_ACTIVE%
-echo RECAPTCHA_SECRET_KEY=%RECAPTCHA_SECRET_KEY%
+echo CAPTCHA_SECRET_KEY=%CAPTCHA_SECRET_KEY%
 echo.
 
 REM java -jar api/target/lakomka.jar

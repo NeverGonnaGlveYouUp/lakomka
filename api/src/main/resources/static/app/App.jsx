@@ -1,7 +1,6 @@
 const React = require("react");
 const ReactDOM = require("react-dom/client");
 import { BrowserRouter, Routes, Route, Link, Navigate, Outlet } from 'react-router-dom';
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ProductFeed from './components/ProductFeed.jsx';
 import Login from './components/Login.jsx';
@@ -74,35 +73,31 @@ const ProtectedRoute = () => {
 };
 
 function App() {
-    const SITE_KEY = '6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y';
     return (
-        <GoogleReCaptchaProvider
-            reCaptchaKey={SITE_KEY}>
-            <AppProvider>
-                <ThemeProvider theme={theme}>
-                    <BrowserRouter>
-                        <Routes>
-                            <Route path="/auth" element={<AuthLayout />}>
-                                <Route path="/auth/login" element={<Login />} />
-                                <Route path="/auth/signup" element={<Signup />} />
-                            </Route>
-                            <Route path="/" element={<LayoutWithNavbar />}>
-                                <Route index element={<ProductFeed />} />
-                                <Route path="/product/:id" element={<ProductPage />} />
-                                <Route path="/cart" element={<CartPage />} />
-                                <Route path="/info" element={<GeneralInfoPage />} />
-                            </Route>
-                            <Route path="/private" element={<ProtectedRoute />}>
-                                <Route path="/private/change-password" element={<ChangePassword />} />
-                                <Route path="/private/profile" element={<ProfilePage />} />
-                                <Route path="/private/orders" element={<OrdersPage />} />
-                            </Route>
-                            <Route path="/error" element={<ErrorPage />} />
-                        </Routes>
-                    </BrowserRouter>
-                </ThemeProvider>
-            </AppProvider>
-        </GoogleReCaptchaProvider>
+        <AppProvider>
+            <ThemeProvider theme={theme}>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/auth" element={<AuthLayout />}>
+                            <Route path="/auth/login" element={<Login />} />
+                            <Route path="/auth/signup" element={<Signup />} />
+                        </Route>
+                        <Route path="/" element={<LayoutWithNavbar />}>
+                            <Route index element={<ProductFeed />} />
+                            <Route path="/product/:id" element={<ProductPage />} />
+                            <Route path="/cart" element={<CartPage />} />
+                            <Route path="/info" element={<GeneralInfoPage />} />
+                        </Route>
+                        <Route path="/private" element={<ProtectedRoute />}>
+                            <Route path="/private/change-password" element={<ChangePassword />} />
+                            <Route path="/private/profile" element={<ProfilePage />} />
+                            <Route path="/private/orders" element={<OrdersPage />} />
+                        </Route>
+                        <Route path="/error" element={<ErrorPage />} />
+                    </Routes>
+                </BrowserRouter>
+            </ThemeProvider>
+        </AppProvider>
     );
 }
 ReactDOM.createRoot(document.getElementById("app")).render(<App />);

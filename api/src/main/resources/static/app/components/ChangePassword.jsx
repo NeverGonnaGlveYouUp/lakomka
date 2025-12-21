@@ -13,9 +13,6 @@ import {
 import { styled } from '@mui/material/styles';
 import { keyframes } from "@emotion/react";
 import axios from 'axios';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { postReCaptcha } from './postReCaptcha.js';
-import { checkJWTExpiration } from './checkJWTExpiration.js';
 
 const shakeAnimation = keyframes`
     0% { transform: translate(0); }
@@ -60,7 +57,6 @@ const ChangePassword = () => {
         fetchUsername();
     }, []);
 
-    const { executeRecaptcha } = useGoogleReCaptcha();
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -73,7 +69,6 @@ const ChangePassword = () => {
         setError(false);
 
         try {
-            const token = await postReCaptcha(executeRecaptcha, 'CHANGEPASSWORD');
             const body = {
                 currentPassword,
                 newPassword,

@@ -10,17 +10,16 @@ import java.util.Date;
 @Getter
 @ToString
 public class OrderCreationRequest {
-
     private String contact;
     private String telephone;
     private String email;
     private String addressDelivery;
     private String prim;
-
     private Date dateDelivery;
-
     private boolean bitAccPrint;
     private boolean bitSertifPrint;
     private boolean payVid;
-
+    private String siteKey;
+    private String token;
+    private String expectedAction;
 }

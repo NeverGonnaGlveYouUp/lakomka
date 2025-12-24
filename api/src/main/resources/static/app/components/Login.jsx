@@ -29,24 +29,44 @@ const ShakeText = styled(Typography)(() => ({
 }));
 
 const Login = () => {
-    const navigate                              = useNavigate();
-    const [login, setLogin]                     = useState('');
-    const [password, setPassword]               = useState('');
-    const [error, setError]                     = useState(false);
-    const [snackbarOpen, setSnackbarOpen]       = useState(false);
-    const [isSubmitting, setIsSubmitting]       = useState(false);
-    const [token, setToken]                     = useState('');
-    const [resetCaptcha, setResetCaptcha]       = useState(0);
-    const [visible, setVisible]                 = useState(false);
-    const handleChallengeHidden                 = useCallback(() => setVisible(false), []);
+    const navigate = useNavigate();
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [token, setToken] = useState('');
+    const [visible, setVisible] = useState(false);
+    const [captchaLoaded, setCaptchaLoaded] = useState(false);
+    const handleChallengeHidden = useCallback(() => setVisible(false), []);
 
-    useEffect(() => {
-        if (!!token){
-            handleSubmit();
-        }
-    }, [isSubmitting]);
+    // Handle captcha success
+    const handleCaptchaSuccess = (captchaToken) => {
+        setToken(captchaToken);
+        console.log("Captcha success:", captchaToken);
+        setCaptchaLoaded(true);
+    };
+
+    // Handle captcha error
+    const handleCaptchaError = (error) => {
+        console.error("Captcha error:", error);
+        setError(true);
+        setCaptchaLoaded(true);
+    };
+
+    // Handle captcha load
+    const handleCaptchaLoad = () => {
+        console.log("Captcha loaded");
+        setCaptchaLoaded(true);
+    };
 
     const handleSubmit = async () => {
+        // Only proceed if we have a valid token
+        if (!token) {
+            console.error('No captcha token available');
+            return;
+        }
+
         try {
 
             setIsSubmitting(true);
@@ -117,6 +137,15 @@ const Login = () => {
         setSnackbarOpen(false);
     };
 
+    // Reset captcha state on component unmount
+    useEffect(() => {
+        return () => {
+            // Reset token when component unmounts
+            setToken('');
+            setCaptchaLoaded(false);
+        };
+    }, []);
+
     return (
         <Container
             maxWidth="lg"
@@ -170,15 +199,18 @@ const Login = () => {
                             console.log("onJavascriptError");
                             console.log(e.filename);
                             console.log(e.message);
+                            handleCaptchaError(e);
                         }}
                         onNetworkError={() => {
                                 console.log("onNetworkError");
+                                handleCaptchaError("Network error");
                         }}
                         onSuccess={(e) => {
-                            setToken(e);
+                            handleCaptchaSuccess(e);
                             console.log("onSuccess");
                             console.log(e);
                         }}
+                        onLoad={handleCaptchaLoad}
                         shieldPosition={"top-left"}
                         visible={true}
                         onChallengeHidden={handleChallengeHidden}
@@ -189,13 +221,13 @@ const Login = () => {
                         </ShakeText>
                     )}
                     <Button
-                        onClick={() => setIsSubmitting(true)}
+                        onClick={handleSubmit}
                         type="submit"
                         fullWidth
                         variant="contained"
                         color="primary"
                         sx={{ mt: 3, mb: 2 }}
-                        disabled={isSubmitting}>
+                        disabled={isSubmitting || !captchaLoaded || !token}>
                         {isSubmitting ? 'Вход...' : 'Войти'}
                     </Button>
                     <Button

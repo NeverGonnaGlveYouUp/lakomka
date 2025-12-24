@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 @Slf4j
 @Component
-@Profile("debug")
+@Profile("detailed-controller-logger")
 public class DetailedControllerLogger implements CommandLineRunner {
 
     @Autowired

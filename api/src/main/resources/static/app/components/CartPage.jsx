@@ -332,7 +332,7 @@ const CartPage = () => {
             payVid,
             token,
             "expectedAction": "CREATE_ORDER",
-            "siteKey": "6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y",
+            "siteKey": "ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256",
         };
 
         try {

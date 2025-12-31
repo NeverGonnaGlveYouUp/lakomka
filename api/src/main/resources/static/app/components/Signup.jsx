@@ -18,6 +18,7 @@ import axios from 'axios';
 import InputMask from 'react-input-mask'
 import PropTypes from 'prop-types';
 import { SmartCaptcha } from '@yandex/smart-captcha';
+import { CAPTCHA_SITEKEY } from './constants.js';
 
 const PhoneMask = React.forwardRef(function PhoneMask(props, ref) {
     const { onChange, ...other } = props
@@ -201,7 +202,7 @@ const Signup = () => {
             dpAgreement,
             token,
             "expectedAction": "SIGNUP",
-            "siteKey": "ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256",
+            "siteKey": CAPTCHA_SITEKEY,
         }
 
         try {
@@ -466,7 +467,7 @@ const Signup = () => {
                     </Box>
                     <SmartCaptcha
                         key={resetCaptcha}
-                        sitekey="ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256"
+                        sitekey={CAPTCHA_SITEKEY}
                         onJavascriptError={(e) => {
                             console.log(e.filename);
                             console.log(e.message);

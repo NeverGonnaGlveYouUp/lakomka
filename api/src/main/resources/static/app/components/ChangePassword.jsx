@@ -15,6 +15,7 @@ import { keyframes } from "@emotion/react";
 import axios from 'axios';
 import { checkJWTExpiration } from './checkJWTExpiration.js';
 import { SmartCaptcha } from '@yandex/smart-captcha';
+import { CAPTCHA_SITEKEY } from './constants.js';
 
 const shakeAnimation = keyframes`
     0% { transform: translate(0); }
@@ -108,7 +109,7 @@ const ChangePassword = () => {
                 newPasswordRepeat,
                 token,
                 "expectedAction": "CHANGEPASSWORD",
-                "siteKey": "ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256",
+                "siteKey": CAPTCHA_SITEKEY,
             };
 
             checkJWTExpiration();
@@ -246,7 +247,7 @@ const ChangePassword = () => {
                     )}
                     <SmartCaptcha
                         key={resetCaptcha}
-                        sitekey="ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256"
+                        sitekey={CAPTCHA_SITEKEY}
                         onJavascriptError={(e) => {
                             console.log(e.filename);
                             console.log(e.message);

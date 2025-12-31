@@ -36,6 +36,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import { SmartCaptcha } from '@yandex/smart-captcha';
+import { CAPTCHA_SITEKEY } from './constants.js';
 
 const CartPageImage = styled(Box)({
   width: '88px',
@@ -363,7 +364,7 @@ const CartPage = () => {
             payVid,
             token,
             "expectedAction": "CREATE_ORDER",
-            "siteKey": "ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256",
+            "siteKey": CAPTCHA_SITEKEY,
         };
 
         try {
@@ -548,7 +549,7 @@ const CartPage = () => {
                                 </List>
                                 <SmartCaptcha
                                     key={resetCaptcha}
-                                    sitekey="ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256"
+                                    sitekey={CAPTCHA_SITEKEY}
                                     onJavascriptError={(e) => {
                                         console.log(e.filename);
                                         console.log(e.message);

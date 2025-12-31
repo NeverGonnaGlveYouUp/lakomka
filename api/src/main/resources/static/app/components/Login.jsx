@@ -14,6 +14,7 @@ import { styled } from '@mui/material/styles';
 import { keyframes } from "@emotion/react";
 import axios from 'axios';
 import { SmartCaptcha } from '@yandex/smart-captcha';
+import { CAPTCHA_SITEKEY } from './constants.js';
 
 const shakeAnimation = keyframes`
     0% { transform: translate(0); }
@@ -78,7 +79,7 @@ const Login = () => {
                 login,
                 password,
                 token,
-                "siteKey": "ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256",
+                "siteKey": CAPTCHA_SITEKEY,
             };
 
             const response = await axios.post('/api/login', body, {
@@ -189,7 +190,7 @@ const Login = () => {
                         disabled={isSubmitting}/>
                     <SmartCaptcha
                         key={resetCaptcha}
-                        sitekey="ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256"
+                        sitekey={CAPTCHA_SITEKEY}
                         onJavascriptError={(e) => {
                             console.log(e.filename);
                             console.log(e.message);

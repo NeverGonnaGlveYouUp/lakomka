@@ -222,7 +222,6 @@ const Login = () => {
                     )}
                     <Button
                         onClick={handleSubmit}
-                        type="submit"
                         fullWidth
                         variant="contained"
                         color="primary"

@@ -2,6 +2,7 @@ package com.lakomka.controller;
 
 import com.lakomka.dto.ProductDto;
 import com.lakomka.dto.ProductFeedDto;
+import com.lakomka.dto.SearchStringProductDto;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.product.Product;
 import com.lakomka.repository.product.ProductFilterRepository;
@@ -9,10 +10,10 @@ import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.DiscountService.Discounts;
 import com.lakomka.services.cart.CartService;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -41,9 +42,21 @@ public class ProductController {
     private final ProductFilterRepository productFilterRepository;
     private final ProductRepository productRepository;
     private final DiscountService discountService;
+    private final CartService cartService;
 
-    @Autowired
-    private CartService cartService;
+    @PostConstruct
+    public void initialize() {
+        productRepository.createTrgmIndex();
+    }
+
+    @ResponseBody
+    @GetMapping("/products/search")
+    public List<SearchStringProductDto> findProductsBySearchString(
+            @RequestParam(value = "search", required = false) String search
+    ) {
+        log.info("findProductsBySearchString: search: {}", search);
+        return productRepository.findProductsBySearchString(search);
+    }
 
     @ResponseBody
     @GetMapping("/products/getByFilter")

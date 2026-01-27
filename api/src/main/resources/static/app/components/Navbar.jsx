@@ -67,10 +67,9 @@ const Navbar = () => {
     const signal = controller.signal;
     previousController.current = controller;
     setLoading(true);
-    const response = await axios.get(`/api/products/getByFilter?search=name%3D%3D%22%2A${capitalizeFirstLetter(searchTerm)}%2A%22%2Cname%3D%3D%22%2A${searchTerm}%2A%22&page=0&size=10&sort=name%2Casc`,
-    { headers: { Authorization: localStorage.getItem('jwtToken') ? 'Bearer ' + localStorage.getItem('jwtToken') : null } });
+    const response = await axios.get(`/api/products/search?search=` + searchTerm);
     setLoading(false);
-    const updatedOptions = response.data.content.map((p) => {
+    const updatedOptions = response.data.map((p) => {
         return {
             id: p.id,
             title: p.name,
@@ -91,10 +90,6 @@ const Navbar = () => {
       fetchData([]);
     }
   };
-
-  function capitalizeFirstLetter(val) {
-      return String(val).charAt(0).toUpperCase() + String(val).slice(1);
-  }
 
   const handleLogout = async () => {
     try {

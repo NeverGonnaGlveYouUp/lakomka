@@ -35,6 +35,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
+import { SmartCaptcha } from '@yandex/smart-captcha';
+import { CAPTCHA_SITEKEY } from './constants.js';
 
 const CartPageImage = styled(Box)({
   width: '88px',
@@ -255,6 +257,30 @@ const CartPage = () => {
     const [dateDelivery, setDateDelivery]   = useState(null);
     const [errors, setErrors]               = useState({});
 
+    const [token, setToken] = useState('');
+    const [captchaLoaded, setCaptchaLoaded] = useState(false);
+    const [resetCaptcha, setResetCaptcha] = useState(0);
+
+    const handleCaptchaSuccess = (captchaToken) => {
+        setToken(captchaToken);
+        setCaptchaLoaded(true);
+    };
+
+    const handleResetCaptcha = () => {
+      console.log('Resetting captcha: ', resetCaptcha);
+      setToken('');
+      setCaptchaLoaded(false);
+      setResetCaptcha((prev) => prev + 1);
+    };
+
+    const handleCaptchaError = (error) => {
+        console.error("Captcha error:", error);
+        setCaptchaLoaded(true);
+    };
+
+    const handleCaptchaLoad = () => {
+        setCaptchaLoaded(true);
+    };
 
     const sumByField = (array, field) => {
         return array.reduce((integerSum, item) => {
@@ -317,6 +343,12 @@ const CartPage = () => {
     };
 
     const handleSubmit = async (e) => {
+
+        if (!token) {
+            console.error('No captcha token available');
+            return;
+        }
+
         checkJWTExpiration();
         setIsSubmitting(true);
 
@@ -332,7 +364,7 @@ const CartPage = () => {
             payVid,
             token,
             "expectedAction": "CREATE_ORDER",
-            "siteKey": "6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y",
+            "siteKey": CAPTCHA_SITEKEY,
         };
 
         try {
@@ -360,6 +392,7 @@ const CartPage = () => {
 
                 setErrors(formattedErrors);
                 setIsSubmitting(false);
+                handleResetCaptcha();
             } else {
                 console.error("An unexpected error occurred:", error);
             }
@@ -514,6 +547,24 @@ const CartPage = () => {
                                         )}
                                     </ListItem>
                                 </List>
+                                <SmartCaptcha
+                                    key={resetCaptcha}
+                                    sitekey={CAPTCHA_SITEKEY}
+                                    onJavascriptError={(e) => {
+                                        console.log(e.filename);
+                                        console.log(e.message);
+                                        handleCaptchaError(e);
+                                    }}
+                                    onNetworkError={() => {
+                                            handleCaptchaError("Network error");
+                                    }}
+                                    onSuccess={(e) => {
+                                        handleCaptchaSuccess(e);
+                                    }}
+                                    onLoad={handleCaptchaLoad}
+                                    shieldPosition={"top-left"}
+                                    visible={true}
+                                    language='ru'/>
                                 {!!!localStorage.getItem('jwtToken') && (
                                     <Alert severity="warning" sx={{ mb: "1rem" }}>
                                         <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
@@ -526,7 +577,7 @@ const CartPage = () => {
                                 )}
                                 <Button
                                     onClick={() => handleSubmit()}
-                                    disabled={isSubmitting || price==0 || !!!localStorage.getItem('jwtToken')}
+                                    disabled={isSubmitting || price==0 || !!!localStorage.getItem('jwtToken') || !captchaLoaded || !token}
                                     type="submit"
                                     color="success"
                                     fullWidth

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Button,
@@ -13,7 +13,8 @@ import {
 import { styled } from '@mui/material/styles';
 import { keyframes } from "@emotion/react";
 import axios from 'axios';
-import { InvisibleSmartCaptcha } from '@yandex/smart-captcha';
+import { SmartCaptcha } from '@yandex/smart-captcha';
+import { CAPTCHA_SITEKEY } from './constants.js';
 
 const shakeAnimation = keyframes`
     0% { transform: translate(0); }
@@ -35,33 +36,35 @@ const Login = () => {
     const [error, setError] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [token, setToken] = useState('');
-    const [visible, setVisible] = useState(false);
-    const [captchaLoaded, setCaptchaLoaded] = useState(false);
-    const handleChallengeHidden = useCallback(() => setVisible(false), []);
 
-    // Handle captcha success
+    const [token, setToken] = useState('');
+    const [captchaLoaded, setCaptchaLoaded] = useState(false);
+    const [resetCaptcha, setResetCaptcha] = useState(0);
+
     const handleCaptchaSuccess = (captchaToken) => {
         setToken(captchaToken);
-        console.log("Captcha success:", captchaToken);
         setCaptchaLoaded(true);
     };
 
-    // Handle captcha error
+    const handleResetCaptcha = () => {
+      console.log('Resetting captcha: ', resetCaptcha);
+      setToken('');
+      setCaptchaLoaded(false);
+      setResetCaptcha((prev) => prev + 1);
+    };
+
     const handleCaptchaError = (error) => {
         console.error("Captcha error:", error);
         setError(true);
         setCaptchaLoaded(true);
     };
 
-    // Handle captcha load
     const handleCaptchaLoad = () => {
-        console.log("Captcha loaded");
         setCaptchaLoaded(true);
     };
 
     const handleSubmit = async () => {
-        // Only proceed if we have a valid token
+
         if (!token) {
             console.error('No captcha token available');
             return;
@@ -76,7 +79,7 @@ const Login = () => {
                 login,
                 password,
                 token,
-                "siteKey": "ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256",
+                "siteKey": CAPTCHA_SITEKEY,
             };
 
             const response = await axios.post('/api/login', body, {
@@ -113,6 +116,7 @@ const Login = () => {
         } catch (error) {
             console.error('Login error:', error);
             setError(true);
+            handleResetCaptcha();
 
             if (error.response) {
                 console.error('Response error:', error.response.status, error.response.data);
@@ -136,15 +140,6 @@ const Login = () => {
     const handleAlertClose = () => {
         setSnackbarOpen(false);
     };
-
-    // Reset captcha state on component unmount
-    useEffect(() => {
-        return () => {
-            // Reset token when component unmounts
-            setToken('');
-            setCaptchaLoaded(false);
-        };
-    }, []);
 
     return (
         <Container
@@ -193,27 +188,23 @@ const Login = () => {
                         value={password}
                         error={error}
                         disabled={isSubmitting}/>
-                    <InvisibleSmartCaptcha
-                        sitekey="ysc1_Z8dzQjm3QK55PUWJk49vKy1Zhv3w8b8bbbiSBzY770f06256"
+                    <SmartCaptcha
+                        key={resetCaptcha}
+                        sitekey={CAPTCHA_SITEKEY}
                         onJavascriptError={(e) => {
-                            console.log("onJavascriptError");
                             console.log(e.filename);
                             console.log(e.message);
                             handleCaptchaError(e);
                         }}
                         onNetworkError={() => {
-                                console.log("onNetworkError");
                                 handleCaptchaError("Network error");
                         }}
                         onSuccess={(e) => {
                             handleCaptchaSuccess(e);
-                            console.log("onSuccess");
-                            console.log(e);
                         }}
                         onLoad={handleCaptchaLoad}
                         shieldPosition={"top-left"}
                         visible={true}
-                        onChallengeHidden={handleChallengeHidden}
                         language='ru'/>
                     {error && (
                         <ShakeText variant="body2" sx={{ mt: 1 }}>

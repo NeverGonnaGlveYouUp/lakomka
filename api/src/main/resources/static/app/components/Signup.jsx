@@ -17,6 +17,8 @@ import { keyframes } from "@emotion/react";
 import axios from 'axios';
 import InputMask from 'react-input-mask'
 import PropTypes from 'prop-types';
+import { SmartCaptcha } from '@yandex/smart-captcha';
+import { CAPTCHA_SITEKEY } from './constants.js';
 
 const PhoneMask = React.forwardRef(function PhoneMask(props, ref) {
     const { onChange, ...other } = props
@@ -148,11 +150,42 @@ const Signup = () => {
     const [isSubmitting, setIsSubmitting]       = useState(false);
 
     const [errors, setErrors]                   = useState({});
-    const [reCaptchaError, setReCaptchaError]   = useState(false);
+
+    const [token, setToken] = useState('');
+    const [captchaLoaded, setCaptchaLoaded] = useState(false);
+    const [resetCaptcha, setResetCaptcha] = useState(0);
+
+    const handleCaptchaSuccess = (captchaToken) => {
+        setToken(captchaToken);
+        setCaptchaLoaded(true);
+    };
+
+    const handleResetCaptcha = () => {
+      console.log('Resetting captcha: ', resetCaptcha);
+      setToken('');
+      setCaptchaLoaded(false);
+      setResetCaptcha((prev) => prev + 1);
+    };
+
+    const handleCaptchaError = (error) => {
+        console.error("Captcha error:", error);
+        setCaptchaLoaded(true);
+    };
+
+    const handleCaptchaLoad = () => {
+        setCaptchaLoaded(true);
+    };
 
     const handleSubmit = async (e) => {
+
+        if (!token) {
+            console.error('No captcha token available');
+            return;
+        }
+
         e.preventDefault();
         setIsSubmitting(true);
+
         const body = {
             login,
             password,
@@ -169,8 +202,9 @@ const Signup = () => {
             dpAgreement,
             token,
             "expectedAction": "SIGNUP",
-            "siteKey": "6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y",
+            "siteKey": CAPTCHA_SITEKEY,
         }
+
         try {
             const response = await axios.post('/api/signup', body, {
                 headers: {
@@ -215,6 +249,7 @@ const Signup = () => {
 
                 setErrors(formattedErrors);
                 setIsSubmitting(false);
+                handleResetCaptcha();
             } else {
                 console.error("An unexpected error occurred:", error);
             }
@@ -430,18 +465,31 @@ const Signup = () => {
                             disabled={isSubmitting}
                         />
                     </Box>
-                    {reCaptchaError && (
-                        <ShakeText shake variant="body2" sx={{ mt: 1 }}>
-                            Ошибка reCaptcha v3.
-                        </ShakeText>
-                    )}
+                    <SmartCaptcha
+                        key={resetCaptcha}
+                        sitekey={CAPTCHA_SITEKEY}
+                        onJavascriptError={(e) => {
+                            console.log(e.filename);
+                            console.log(e.message);
+                            handleCaptchaError(e);
+                        }}
+                        onNetworkError={() => {
+                                handleCaptchaError("Network error");
+                        }}
+                        onSuccess={(e) => {
+                            handleCaptchaSuccess(e);
+                        }}
+                        onLoad={handleCaptchaLoad}
+                        shieldPosition={"top-left"}
+                        visible={true}
+                        language='ru'/>
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
                         color="primary"
                         sx={{ mt: 3, mb: 2 }}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !captchaLoaded || !token}
                     >
                         {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться'}
                     </Button>

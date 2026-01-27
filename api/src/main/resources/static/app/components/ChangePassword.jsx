@@ -13,6 +13,9 @@ import {
 import { styled } from '@mui/material/styles';
 import { keyframes } from "@emotion/react";
 import axios from 'axios';
+import { checkJWTExpiration } from './checkJWTExpiration.js';
+import { SmartCaptcha } from '@yandex/smart-captcha';
+import { CAPTCHA_SITEKEY } from './constants.js';
 
 const shakeAnimation = keyframes`
     0% { transform: translate(0); }
@@ -37,6 +40,31 @@ const ChangePassword = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loggedUsername, setLoggedUsername] = useState('');
 
+    const [token, setToken] = useState('');
+    const [captchaLoaded, setCaptchaLoaded] = useState(false);
+    const [resetCaptcha, setResetCaptcha] = useState(0);
+
+    const handleCaptchaSuccess = (captchaToken) => {
+        setToken(captchaToken);
+        setCaptchaLoaded(true);
+    };
+
+    const handleResetCaptcha = () => {
+      console.log('Resetting captcha: ', resetCaptcha);
+      setToken('');
+      setCaptchaLoaded(false);
+      setResetCaptcha((prev) => prev + 1);
+    };
+
+    const handleCaptchaError = (error) => {
+        console.error("Captcha error:", error);
+        setCaptchaLoaded(true);
+    };
+
+    const handleCaptchaLoad = () => {
+        setCaptchaLoaded(true);
+    };
+
     // Fetch username when component mounts
     useEffect(() => {
         checkJWTExpiration();
@@ -58,6 +86,12 @@ const ChangePassword = () => {
     }, []);
 
     const handleSubmit = async (e) => {
+
+        if (!token) {
+            console.error('No captcha token available');
+            return;
+        }
+
         e.preventDefault();
 
         if (!currentPassword || !newPassword || !newPasswordRepeat) {
@@ -75,7 +109,7 @@ const ChangePassword = () => {
                 newPasswordRepeat,
                 token,
                 "expectedAction": "CHANGEPASSWORD",
-                "siteKey": "6Lf1gPQrAAAAAG_tjJ1Jy4QuHJjKy5uBEZZc0z3y",
+                "siteKey": CAPTCHA_SITEKEY,
             };
 
             checkJWTExpiration();
@@ -114,6 +148,7 @@ const ChangePassword = () => {
         } catch (error) {
             console.error('ChangePassword error:', error);
             setError(true);
+            handleResetCaptcha();
 
             if (error.response) {
                 console.error('Response error:', error.response.status, error.response.data);
@@ -210,13 +245,31 @@ const ChangePassword = () => {
                             Неправильный пароль или Сначала нужно залогиниться или еще что то не так.
                         </ShakeText>
                     )}
+                    <SmartCaptcha
+                        key={resetCaptcha}
+                        sitekey={CAPTCHA_SITEKEY}
+                        onJavascriptError={(e) => {
+                            console.log(e.filename);
+                            console.log(e.message);
+                            handleCaptchaError(e);
+                        }}
+                        onNetworkError={() => {
+                                handleCaptchaError("Network error");
+                        }}
+                        onSuccess={(e) => {
+                            handleCaptchaSuccess(e);
+                        }}
+                        onLoad={handleCaptchaLoad}
+                        shieldPosition={"top-left"}
+                        visible={true}
+                        language='ru'/>
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
                         color="primary"
                         sx={{ mt: 3, mb: 2 }}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !captchaLoaded || !token}
                     >
                         {isSubmitting ? 'Смена пароля...' : 'Сменить пароль'}
                     </Button>

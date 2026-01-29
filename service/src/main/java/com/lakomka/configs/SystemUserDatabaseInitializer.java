@@ -16,7 +16,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 @Component
-@Order(1)
+@Order(-1)
 @Slf4j
 @RequiredArgsConstructor
 public class SystemUserDatabaseInitializer implements CommandLineRunner {

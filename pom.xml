@@ -52,14 +52,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <!-- JAXB API -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
             <version>4.0.0</version>
         </dependency>
-
         <!-- JAXB Implementation (Runtime) -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>

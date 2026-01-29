@@ -31,7 +31,7 @@ import static java.util.Date.from;
 @Component
 @DependsOn(value = "systemUserDatabaseInitializer")
 @Profile({"dev", "jpa-dev"})
-@Order(2)
+@Order(-2)
 public class DatabaseInitializer implements CommandLineRunner {
 
     private final BasePersonRepository basePersonRepository;
@@ -41,8 +41,8 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final RouteRepository routeRepository;
     private final DiscountRepository discountRepository;
 
-    private final String contentText = "Integer iaculis sem sit amet dui rutrum, et porttitor ligula tempus. Donec congue quam sed finibus aliquam. Morbi volutpat nunc ut libero lobortis rutrum eu sed arcu. Quisque pretium, arcu vitae placerat viverra, tellus velit facilisis eros, quis posuere.";
-    private final String descText = "Donec sit amet diam risus. Sed vulputate malesuada nibh, sed blandit nisl porttitor et. Mauris ut ante purus. Pellentesque dapibus mauris non odio ultrices, ac volutpat purus ornare. Sed euismod risus sit amet metus lobortis, eget viverra nibh porta ante.";
+    private static final String contentText = "Integer iaculis sem sit amet dui rutrum, et porttitor ligula tempus. Donec congue quam sed finibus aliquam. Morbi volutpat nunc ut libero lobortis rutrum eu sed arcu. Quisque pretium, arcu vitae placerat viverra, tellus velit facilisis eros, quis posuere.";
+    private static final String descText = "Donec sit amet diam risus. Sed vulputate malesuada nibh, sed blandit nisl porttitor et. Mauris ut ante purus. Pellentesque dapibus mauris non odio ultrices, ac volutpat purus ornare. Sed euismod risus sit amet metus lobortis, eget viverra nibh porta ante.";
 
     @Autowired
     public DatabaseInitializer(BasePersonRepository basePersonRepository,

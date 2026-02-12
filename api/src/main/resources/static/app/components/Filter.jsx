@@ -40,9 +40,21 @@ const Filter = ({ onFilterApply }) => {
         setMassRange([response.data.minMass, response.data.maxMass]);
         setMinMass(response.data.minMass);
         setMaxMass(response.data.maxMass);
-        setWorkers(response.data.workers.split(', '));
-        setCountries(response.data.countries.split(', '));
-        setProductGroups(response.data.productGroups.split(', '));
+        try {
+            setWorkers(response.data.workers.split(';'));
+        } catch (e) {
+            console.error(e);
+        }
+        try {
+            setCountries(response.data.countries.split(';'));
+        } catch (e) {
+            console.error(e);
+        }
+        try {
+            setProductGroups(response.data.productGroups.split(';'));
+        } catch (e) {
+            console.error(e);
+        }
     };
 
     const handlePriceRangeChange = (event, newValue) => {

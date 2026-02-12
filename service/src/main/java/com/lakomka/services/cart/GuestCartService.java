@@ -45,9 +45,9 @@ public class GuestCartService extends CartCommon {
             if (quantity == 0) {
                 cart.remove(cartItem);
             } else if (cart.stream().anyMatch(personCartItem -> personCartItem.equals(cartItem))) {
-                cart.stream().
-                        filter(personCartItem -> personCartItem.getProduct().getId().equals(productId)).
-                        forEach(personCartItem -> personCartItem.setQuantity(quantity));
+                cart.stream()
+                        .filter(personCartItem -> personCartItem.getProduct().getId().equals(productId))
+                        .forEach(personCartItem -> personCartItem.setQuantity(quantity));
             } else {
                 cart.add(cartItem);
             }

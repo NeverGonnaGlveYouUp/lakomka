@@ -13,7 +13,7 @@ import {
   TextField,
   Stack
 } from '@mui/material';
-import { IoBagAddOutline } from "react-icons/io5";
+import { IoBagAddOutline, IoStar } from "react-icons/io5";
 import useMountedRef from "./useMountedRef.jsx";
 import { checkJWTExpiration } from './checkJWTExpiration.js';
 import { useAppContext } from './AppContext.js';
@@ -39,7 +39,7 @@ const StyledCardMedia = styled(CardMedia)({
   },
 });
 
-const ProductCard = ({ id, image, name, price, quantity }) => {
+const ProductCard = ({ id, image, name, price, quantity, zn }) => {
 
   const mountedRef                    = useMountedRef();
   const [count, setCount]             = useState(null);
@@ -73,7 +73,7 @@ const ProductCard = ({ id, image, name, price, quantity }) => {
   }, [count]);
 
   return (
-    <StyledCard>
+    <StyledCard sx={{ height: "-webkit-fill-available" }}>
       <CardActionArea onClick={() => {
               navigate("/product/" + id);
               window.scrollTo({ top: 0, behavior: "smooth" });
@@ -83,24 +83,35 @@ const ProductCard = ({ id, image, name, price, quantity }) => {
           image={image}
           alt={name}
         />
-        <CardContent>
+        {(zn == 2) && (
+          <CardContent
+            sx={{
+              position: 'absolute',
+              display: "inline-flex",
+              bottom: "94px",
+              width: "fit-content",
+              alignItems: "center",
+              left: "16px",
+              padding: 0,
+              backgroundColor: "#f1117eff",
+              color: "#ffffffff",
+              borderRadius: "8px"}}>
+            <IoStar sx={{ padding: "4px" }}/>
+            <Typography sx={{ fontWeight: 150, mr: "8px" }} component="div">
+              Новинка
+            </Typography>
+          </CardContent>
+        )}
+        <CardContent sx={{ padding: "0px 16px 4px"}}>
           <Box display="flex"
                flexDirection="column"
                alignItems="flex-start">
             <Box display="flex" alignItems="center">
               <Typography
-                variant="body1"
-                style={{
-                  fontWeight: 400,
-                  color: 'rgba(0, 0, 0, 0.6)',
-                  marginRight: '8px',
-                }}>
-                  Цена:
-              </Typography>
-              <Typography
                   variant="body1"
                   style={{
                       fontWeight: 700,
+                      color: "rgba(16, 196, 76, 1)"
                   }}>
                   {price} ₽
               </Typography>
@@ -114,8 +125,14 @@ const ProductCard = ({ id, image, name, price, quantity }) => {
                   variant="body1"
                   style={{
                       fontWeight: 500,
+                      display: "-webkit-box",
+                      textTransform: "capitalize",
+                      "-webkit-box-orient": "vertical",
+                      "-webkit-line-clamp": "2",
+                      textOverflow: "ellipsis",
+                      overflow: "hidden"
                   }}>
-                  {name}
+                  {name + '\n\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'}
               </Typography>
               </Box>
           </Box>

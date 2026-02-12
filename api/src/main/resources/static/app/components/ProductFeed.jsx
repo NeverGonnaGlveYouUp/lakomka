@@ -34,7 +34,7 @@ const ProductFeed = () => {
         label: 'Я → А',
       },
       {
-        value: '&sort=zn==1',
+        value: '&sort=zn%2Cdesc',
         label: 'Новинки',
       },
     ];
@@ -165,6 +165,7 @@ const ProductFeed = () => {
                                   name={item.name}
                                   price={item.price}
                                   quantity={item.cartQuantity}
+                                  zn={item.zn}
                                 />
                           </Grid>
                         ))}

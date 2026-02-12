@@ -562,8 +562,6 @@ const CartPage = () => {
                                         handleCaptchaSuccess(e);
                                     }}
                                     onLoad={handleCaptchaLoad}
-                                    shieldPosition={"top-left"}
-                                    visible={true}
                                     language='ru'/>
                                 {!!!localStorage.getItem('jwtToken') && (
                                     <Alert severity="warning" sx={{ mb: "1rem" }}>

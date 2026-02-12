@@ -15,10 +15,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.lakomka.services.xml.imports.ProductXmlParser.XmlFieldName.*;
 
@@ -176,6 +173,14 @@ public class ProductXmlParser implements XmlParser {
             }
 
             try {
+                // Check if any of price fields equals to 0.01, 0.01 means product not at warehouse yet
+                if (Objects.equals(getFieldValue(PR_KONS), "0.01") ||
+                    Objects.equals(getFieldValue(PR_NAL), "0.01") ||
+                    Objects.equals(getFieldValue(PR_OPT1), "0.01") ||
+                    Objects.equals(getFieldValue(PR_OPT2), "0.01")) {
+                    return;
+                }
+
                 // Check if group field equals not "0" - that Group record
                 String group = getFieldValue(GROUP);
                 if (group != null && !"0".equals(group.trim())) {
@@ -196,11 +201,14 @@ public class ProductXmlParser implements XmlParser {
 
                 Product product = new Product();
 
-                // Map fields based on XML schema order
                 product.setArticle(getFieldValue(CODE));
                 product.setName(getFieldValue(NAME));
                 product.setUnit(getFieldValue(UNIT));
                 product.setUnitVid(getFieldValue(M_UNIT));
+                product.setDescription(getFieldValue(DESCRIPTION));
+                product.setContent(getFieldValue(CONTENT));
+                product.setCountry(getFieldValue(COUNTRY));
+                product.setWorker(getFieldValue(WORKER));
 
                 // Parse numeric fields
                 String packaging = getFieldValue(PACKAGING);
@@ -209,6 +217,24 @@ public class ProductXmlParser implements XmlParser {
                         product.setPackag(Double.parseDouble(packaging.trim()));
                     } catch (NumberFormatException e) {
                         log.debug("Invalid packaging value: {}", packaging);
+                    }
+                }
+
+                String weight = getFieldValue(WEIGHT);
+                if (weight != null && !weight.trim().isEmpty()) {
+                    try {
+                        product.setWeight(Integer.parseInt(weight.trim()));
+                    } catch (NumberFormatException e) {
+                        log.debug("Invalid weight value: {}", weight);
+                    }
+                }
+
+                String zn = getFieldValue(ZN);
+                if (zn != null && !zn.trim().isEmpty()) {
+                    try {
+                        product.setZn(Integer.parseInt(zn.trim()) == 2 ? Integer.parseInt(zn.trim()) : 1);
+                    } catch (NumberFormatException e) {
+                        log.debug("Invalid zn value: {}", zn);
                     }
                 }
 
@@ -231,7 +257,7 @@ public class ProductXmlParser implements XmlParser {
 
         private String getFieldValue(String fieldName) {
             int index = fieldNames.indexOf(fieldName);
-            if (index >= 0 && index < currentRecord.size()) {
+            if (index >= 0 && index <= currentRecord.size()) {
                 String value = currentRecord.get(index);
                 return value.isEmpty() ? null : value;
             }
@@ -258,14 +284,21 @@ public class ProductXmlParser implements XmlParser {
             }
 
             return String.format(
-                    "Product {id=%d, name=%s, article=%s, unit=%s, unitVid=%s, packag=%s, " +
+                    "Product {id=%d, name=%s, article=%s, unit=%s, unitVid=%s, description=%s, " +
+                            "content=%s, country=%s, worker=%s, packag=%s, weight=%s, zn=%s," +
                             "priceOpt1=%s, priceOpt2=%s, priceNal=%s, priceKons=%s, group=%s}",
                     product.getId(),
                     quote(product.getName()),
                     quote(product.getArticle()),
                     quote(product.getUnit()),
                     quote(product.getUnitVid()),
+                    quote(product.getDescription()),
+                    quote(product.getContent()),
+                    quote(product.getCountry()),
+                    quote(product.getWorker()),
                     product.getPackag(),
+                    product.getWeight(),
+                    product.getZn(),
                     formatBigDecimal(product.getPriceOpt1()),
                     formatBigDecimal(product.getPriceOpt2()),
                     formatBigDecimal(product.getPriceNal()),
@@ -288,13 +321,19 @@ public class ProductXmlParser implements XmlParser {
         public static final String PR_OPT2 = "price_Опт2";
         public static final String PR_NAL = "price_Нал";
         public static final String PR_KONS = "price_Конс";
-        public static final String CODE = "code";
+        public static final String CODE = "code"; /// Артикул
         public static final String NAME = "name";
-        public static final String UNIT = "unit";
-        public static final String M_UNIT = "measure_unit";
-        public static final String PACKAGING = "packaging";
+        public static final String UNIT = "unit"; /// Единица измерения количества товара (шт, кг, короб и т.д)
+        public static final String M_UNIT = "measure_unit"; /// Краткое описание единицы измерения количества товара. Например, Unit – шт, UnitVid – стеклобанка 900мл
+        public static final String PACKAGING = "packaging"; /// Норма упаковки товара (количество товара в одной упаковке)
         public static final String GROUP = "group";
         public static final String PARENT = "parent";
+        public static final String WEIGHT = "weight"; /// Вес товара в граммах/милилитрах
+        public static final String ZN = "zn"; /// Значимость товара – одна или две цифры
+        public static final String DESCRIPTION = "description"; /// Краткое описание или характеристики товара
+        public static final String CONTENT = "content"; /// Состав
+        public static final String COUNTRY = "country"; /// Страна происхождения товара
+        public static final String WORKER = "worker"; /// Краткое наименование производителя товара
     }
 }
 

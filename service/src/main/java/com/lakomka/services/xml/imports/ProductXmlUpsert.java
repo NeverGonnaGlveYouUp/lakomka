@@ -80,29 +80,61 @@ public class ProductXmlUpsert {
         if (!Objects.equals(existing.getName(), newProduct.getName())) {
             existing.setName(newProduct.getName());
         }
+
         if (compareBigDecimal(existing.getPriceOpt1(), newProduct.getPriceOpt1()) != 0) {
             existing.setPriceOpt1(newProduct.getPriceOpt1());
         }
+
         if (compareBigDecimal(existing.getPriceOpt2(), newProduct.getPriceOpt2()) != 0) {
             existing.setPriceOpt2(newProduct.getPriceOpt2());
         }
+
         if (compareBigDecimal(existing.getPriceNal(), newProduct.getPriceNal()) != 0) {
             existing.setPriceNal(newProduct.getPriceNal());
         }
+
         if (compareBigDecimal(existing.getPriceKons(), newProduct.getPriceKons()) != 0) {
             existing.setPriceKons(newProduct.getPriceKons());
         }
+
         if (!Objects.equals(existing.getUnit(), newProduct.getUnit())) {
             existing.setUnit(newProduct.getUnit());
         }
+
         if (!Objects.equals(existing.getUnitVid(), newProduct.getUnitVid())) {
             existing.setUnitVid(newProduct.getUnitVid());
         }
+
         if (!Objects.equals(existing.getPackag(), newProduct.getPackag())) {
             existing.setPackag(newProduct.getPackag());
         }
+
         if (!Objects.equals(existing.getProductGroup(), newProduct.getProductGroup())) {
             existing.setProductGroup(newProduct.getProductGroup());
+        }
+
+        if (!Objects.equals(existing.getDescription(), newProduct.getDescription())) {
+            existing.setDescription(newProduct.getDescription());
+        }
+
+        if (!Objects.equals(existing.getContent(), newProduct.getContent())) {
+            existing.setContent(newProduct.getContent());
+        }
+
+        if (!Objects.equals(existing.getCountry(), newProduct.getCountry())) {
+            existing.setCountry(newProduct.getCountry());
+        }
+
+        if (!Objects.equals(existing.getWorker(), newProduct.getWorker())) {
+            existing.setWorker(newProduct.getWorker());
+        }
+
+        if (!Objects.equals(existing.getZn(), newProduct.getZn())) {
+            existing.setZn(newProduct.getZn());
+        }
+
+        if (!Objects.equals(existing.getWeight(), newProduct.getWeight())) {
+            existing.setWeight(newProduct.getWeight());
         }
 
     }
@@ -163,6 +195,42 @@ public class ProductXmlUpsert {
             allFieldsEqual = false;
             changedFields.add(String.format("group: '%s' -> '%s'",
                     existing.getProductGroup(), newProduct.getProductGroup()));
+        }
+
+        if (!Objects.equals(existing.getDescription(), newProduct.getDescription())) {
+            allFieldsEqual = false;
+            changedFields.add(String.format("description: '%s' -> '%s'",
+                    existing.getDescription(), newProduct.getDescription()));
+        }
+
+        if (!Objects.equals(existing.getContent(), newProduct.getContent())) {
+            allFieldsEqual = false;
+            changedFields.add(String.format("content: '%s' -> '%s'",
+                    existing.getContent(), newProduct.getContent()));
+        }
+
+        if (!Objects.equals(existing.getCountry(), newProduct.getCountry())) {
+            allFieldsEqual = false;
+            changedFields.add(String.format("country: '%s' -> '%s'",
+                    existing.getCountry(), newProduct.getCountry()));
+        }
+
+        if (!Objects.equals(existing.getWorker(), newProduct.getWorker())) {
+            allFieldsEqual = false;
+            changedFields.add(String.format("worker: '%s' -> '%s'",
+                    existing.getWorker(), newProduct.getWorker()));
+        }
+
+        if (!Objects.equals(existing.getZn(), newProduct.getZn())) {
+            allFieldsEqual = false;
+            changedFields.add(String.format("zn: '%s' -> %s",
+                    existing.getZn(), newProduct.getZn()));
+        }
+
+        if (!Objects.equals(existing.getWeight(), newProduct.getWeight())) {
+            allFieldsEqual = false;
+            changedFields.add(String.format("weight: '%s' -> %s",
+                    existing.getWeight(), newProduct.getWeight()));
         }
 
         // Логируем изменения, если они есть и если это режим обновления

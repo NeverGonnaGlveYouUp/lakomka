@@ -30,7 +30,7 @@ public class ProductDto {
     private String group;
 
     public ProductFeedDto toProductFeedDto() {
-        return new ProductFeedDto(id, name, price, cartQuantity);
+        return new ProductFeedDto(id, name, price, cartQuantity, zn);
     }
 
 }

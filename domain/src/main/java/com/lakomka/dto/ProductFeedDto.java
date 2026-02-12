@@ -1,28 +1,22 @@
 package com.lakomka.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class ProductFeedDto {
-
     private Long id;
     private String name;
     private BigDecimal price;
     private Integer cartQuantity;
+    private Integer zn;
 
-    public ProductFeedDto(Long id, String name, BigDecimal price) {
+    public ProductFeedDto(Long id, String name, BigDecimal price, Integer cartQuantity, Integer zn) {
         this.id = id;
         this.name = name;
         this.price = price;
+        this.cartQuantity = cartQuantity;
+        this.zn = zn;
     }
-
-
 }

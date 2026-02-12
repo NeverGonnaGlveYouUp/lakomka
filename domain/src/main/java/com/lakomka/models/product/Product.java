@@ -169,7 +169,8 @@ public class Product {
                 id,
                 name,
                 priceSelector(basePrice),
-                0
+                0,
+                zn
         );
     }
 

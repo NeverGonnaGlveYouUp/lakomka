@@ -21,7 +21,7 @@ public class SchedulingPropertiesConfiguration {
     }
 
     @Bean
-    public SchedulingProperties schedulingProperties(SchedulingPropertiesConfiguration configuration) {
+    SchedulingProperties schedulingProperties(SchedulingPropertiesConfiguration configuration) {
         return new SchedulingProperties(configuration);
     }
 

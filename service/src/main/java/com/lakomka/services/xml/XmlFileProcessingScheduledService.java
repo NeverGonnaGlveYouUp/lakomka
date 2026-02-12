@@ -6,6 +6,7 @@ import com.lakomka.services.xml.imports.JPersonXmlParser;
 import com.lakomka.services.xml.imports.ProductXmlParser;
 import com.lakomka.services.xml.imports.XmlParser;
 import com.lakomka.util.DateFormatUtil;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,18 +15,27 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Service
 public class XmlFileProcessingScheduledService {
 
-    private static final String ERROR_FILE_NAME_SUFFIX = "_error_";
-    private final Map<String, XmlParser> xmlParserMap;
+    private static final String ERROR_FILE_NAME_INFIX = "_error_";
+    private static final String REF_PRODUCT_FILE_NAME_SUFFIX = "_ref_products.xml";
+    private static final String REF_JPERSONS_FILE_NAME_SUFFIX = "_ref_jpersons.xml";
+    private static final String REF_DISCOUNTS_FILE_NAME_SUFFIX = "_ref_discounts.xml";
+    private final Map<String, XmlParser> xmlParserMap = new HashMap<>();
     private final S3Service s3Service;
 
     @Value("${app.scheduling.enabled:true}")
     private boolean schedulingEnabled;
+
+    @PostConstruct
+    public void init() {
+        checkAndProcessFile();
+    }
 
     @Autowired
     private XmlFileProcessingScheduledService(
@@ -35,11 +45,20 @@ public class XmlFileProcessingScheduledService {
             DiscountXmlParser discountXmlParser
     ) {
         this.s3Service = s3Service;
-        xmlParserMap = Map.of(
-                "ref_products.xml", productXmlParser,
-                "ref_jpersons.xml", jPersonXmlParser,
-                "ref_discounts.xml", discountXmlParser
-        );
+        s3Service.listFiles().stream()
+                .filter(s ->
+                        s.endsWith(REF_PRODUCT_FILE_NAME_SUFFIX) ||
+                        s.endsWith(REF_JPERSONS_FILE_NAME_SUFFIX) ||
+                        s.endsWith(REF_DISCOUNTS_FILE_NAME_SUFFIX))
+                .forEach(s -> {
+                    if (s.endsWith(REF_PRODUCT_FILE_NAME_SUFFIX)) {
+                        xmlParserMap.put(s, productXmlParser);
+                    } else if (s.endsWith(REF_JPERSONS_FILE_NAME_SUFFIX)) {
+                        xmlParserMap.put(s, jPersonXmlParser);
+                    } else if (s.endsWith(REF_DISCOUNTS_FILE_NAME_SUFFIX)) {
+                        xmlParserMap.put(s, discountXmlParser);
+                    }
+                });
     }
 
     /**
@@ -82,8 +101,8 @@ public class XmlFileProcessingScheduledService {
                 log.info("Sending file to {} for processing", xmlParser.getClass().getSimpleName());
 
                 if (xmlParser.parse(fileContent)) {
-                    log.info("File processed successfully. Deleting file: {}", fileName);
-                    s3Service.deleteFile(fileName);
+//                    log.info("File processed successfully. Deleting file: {}", fileName);
+//                    s3Service.deleteFile(fileName);
                 } else {
                     log.error("File processing failed for: {}", fileName);
                     handleProcessingError(fileName);
@@ -109,7 +128,7 @@ public class XmlFileProcessingScheduledService {
         String fileExtension = fileName.substring(lastDotIndex);
         LocalDateTime now = LocalDateTime.now();
         String formattedDateTime = DateFormatUtil.formatDate(now, DateFormatUtil.WITH_SECONDS_FORMATTER);
-        return baseName + ERROR_FILE_NAME_SUFFIX + formattedDateTime + fileExtension;
+        return baseName + ERROR_FILE_NAME_INFIX + formattedDateTime + fileExtension;
     }
 
 }

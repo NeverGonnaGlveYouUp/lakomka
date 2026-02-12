@@ -203,8 +203,6 @@ const Login = () => {
                             handleCaptchaSuccess(e);
                         }}
                         onLoad={handleCaptchaLoad}
-                        shieldPosition={"top-left"}
-                        visible={true}
                         language='ru'/>
                     {error && (
                         <ShakeText variant="body2" sx={{ mt: 1 }}>

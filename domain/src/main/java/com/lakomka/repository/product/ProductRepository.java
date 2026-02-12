@@ -48,9 +48,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     MIN(LEAST(price_kons, price_nal, price_opt_1, price_opt_2))::INTEGER AS min_price,
                     MAX(weight) AS max_weight,
                     MIN(weight) AS min_weight,
-                    (SELECT STRING_AGG(DISTINCT worker, ', ') FROM product)::VARCHAR AS distinct_worker,
-                    (SELECT STRING_AGG(DISTINCT country, ', ') FROM product)::VARCHAR AS distinct_countries,
-                    (SELECT STRING_AGG(DISTINCT product_group, ', ') FROM product)::VARCHAR AS distinct_product_groups
+                    (SELECT STRING_AGG(DISTINCT worker, ';') FROM product)::VARCHAR AS distinct_worker,
+                    (SELECT STRING_AGG(DISTINCT country, ';') FROM product)::VARCHAR AS distinct_countries,
+                    (SELECT STRING_AGG(DISTINCT product_group, ';') FROM product)::VARCHAR AS distinct_product_groups
                     FROM product;
                     """)
     FilterBoundariesDto getFilterBoundaries();

@@ -143,7 +143,7 @@ const ProductPage = () => {
                     />
                     <Container sx={{ display: "flex", gap: "0.5rem", flexDirection: "column", padding: "0px", marginTop: "10px" }}>
                         <Typography sx={{ fontSize: '14px', fontWeight: 400 }}>{group}</Typography>
-                        <Typography sx={{ fontSize: '28px', fontWeight: 900 }}>{name}</Typography>
+                        <Typography sx={{ fontSize: '28px', fontWeight: 900, textTransform: "capitalize" }}>{name}</Typography>
                         <Typography sx={{ fontSize: '14px', fontWeight: 400 }}>Артикул: {article}</Typography>
                         <div>
                             <Typography sx={{ fontSize: '25px', fontWeight: 700 }}>Цена за {unit} {price} ₽</Typography>
@@ -217,35 +217,41 @@ const ProductPage = () => {
                     </Container>
                 </Container>
                 <Container maxWidth="lg" sx={{ display: "flex", gap: "1rem", flexDirection: "column" }}>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography sx={{ fontSize: '25px', fontWeight: 700 }} gutterBottom>
                         О товаре
                     </Typography>
                     <Container maxWidth="lg" sx={{ display: "flex", gap: "1rem", flexDirection: isDesktopResolution ? "row" : "column"}}>
                         <Grid container spacing={1.5} columns={{ xs: 4, md: 8, lg: 8 }}>
                             <Grid size={{ xs: 4, md: 4, lg: 4 }}>
-                                <Typography variant="subtitle1" size={{ xs: 4, md: 4, lg: 4 }} gutterBottom>
-                                    Описание
-                                </Typography>
                                 {description && (
-                                    <Typography variant="body1" gutterBottom>
-                                        {description}
-                                    </Typography>
+                                    <div>
+                                        <Typography sx={{ fontSize: '20px', fontWeight: 700 }} size={{ xs: 4, md: 4, lg: 4 }} gutterBottom>
+                                            Описание
+                                        </Typography>
+                                        <Typography variant="body1" gutterBottom>
+                                            {description}
+                                        </Typography>
+                                    </div>
                                 )}
                             </Grid>
                             <Grid size={{ xs: 4, md: 4, lg: 4 }}>
-                                <Typography variant="subtitle1" gutterBottom>
-                                    Состав
-                                </Typography>
                                 {content && (
-                                    <Typography variant="body1" gutterBottom>
-                                        {content}
-                                    </Typography>
+                                    <div>
+                                        <Typography sx={{ fontSize: '20px', fontWeight: 700 }} gutterBottom>
+                                            Состав
+                                        </Typography>
+                                        <Typography variant="body1" gutterBottom>
+                                            {content}
+                                        </Typography>
+                                    </div>
                                 )}
                             </Grid>
-                            <Grid size={{ xs: 4, md: 4, lg: 4 }}>
-                                <Typography variant="subtitle1" gutterBottom>
-                                    Характеристики
-                                </Typography>
+                            <Grid size={{ xs: 4, md: 4, lg: 4 }} sx={{ width: "fitContent" }}>
+                                {(weight || unit || unitVid || packag || country || worker || group) && (
+                                    <Typography sx={{ fontSize: '20px', fontWeight: 700 }} gutterBottom>
+                                        Характеристики
+                                    </Typography>
+                                )}
                                 {weight && (
                                     <Typography variant="body1" gutterBottom>
                                         Масса ед. товара: {weight} грамм
@@ -258,7 +264,7 @@ const ProductPage = () => {
                                 )}
                                 {packag && (
                                     <Typography variant="body1" gutterBottom>
-                                        Количество товара в одной упаковке: {packag} {unitVid}
+                                        Количество товара в одной упаковке: {packag} {unitVid}.
                                     </Typography>
                                 )}
                                 {country && (
@@ -281,23 +287,25 @@ const ProductPage = () => {
                     </Container>
                 </Container>
             </Container>
-            <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "1rem", flexDirection: "column" }}>
-                <Typography variant="h6" gutterBottom>
-                    Другие товары этого производителя
-                </Typography>
-                <Grid container spacing={1.5} columns={{ xs: 4, md: 8, lg: 16 }}>
-                    {otherProducts.map((item, index) => (
-                        <Grid key={index} size={{ xs: 4, md: 4, lg: 4 }}>
-                            <ProductCard
-                                id={item.id}
-                                image="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
-                                name={item.name}
-                                price={item.price}
-                            />
-                        </Grid>
-                    ))}
-                </Grid>
-            </Container>
+            {otherProducts.length !== 0 && (
+                <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "1rem", flexDirection: "column" }}>
+                    <Typography variant="h6" gutterBottom>
+                        Другие товары этого производителя
+                    </Typography>
+                    <Grid container spacing={1.5} columns={{ xs: 4, md: 8, lg: 16 }}>
+                        {otherProducts.map((item, index) => (
+                            <Grid key={index} size={{ xs: 4, md: 4, lg: 4 }}>
+                                <ProductCard
+                                    id={item.id}
+                                    image="/api/getImage/green-grass-cute-cat-hd-de37pmurfb12yl3j.jpg"
+                                    name={item.name}
+                                    price={item.price}
+                                />
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Container>
+            )}
         </div>
     );
 };

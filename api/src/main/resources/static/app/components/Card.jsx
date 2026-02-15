@@ -82,6 +82,7 @@ const ProductCard = ({ id, image, name, price, quantity, zn }) => {
           component="img"
           image={image}
           alt={name}
+          loading="lazy"
         />
         {(zn == 2) && (
           <CardContent

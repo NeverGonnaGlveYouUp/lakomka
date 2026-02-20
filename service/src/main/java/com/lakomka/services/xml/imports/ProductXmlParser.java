@@ -211,6 +211,7 @@ public class ProductXmlParser implements XmlParser {
                 product.setWorker(getFieldValue(WORKER));
 
                 // Parse numeric fields
+                product.setPackag(1.);
                 String packaging = getFieldValue(PACKAGING);
                 if (packaging != null && !packaging.trim().isEmpty()) {
                     try {
@@ -220,6 +221,7 @@ public class ProductXmlParser implements XmlParser {
                     }
                 }
 
+                product.setWeight(1);
                 String weight = getFieldValue(WEIGHT);
                 if (weight != null && !weight.trim().isEmpty()) {
                     try {
@@ -229,6 +231,7 @@ public class ProductXmlParser implements XmlParser {
                     }
                 }
 
+                product.setZn(1);
                 String zn = getFieldValue(ZN);
                 if (zn != null && !zn.trim().isEmpty()) {
                     try {

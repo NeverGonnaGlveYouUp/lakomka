@@ -28,15 +28,12 @@ public class Product {
     @Column(name = "id", nullable = false, precision = 12)
     private Long id;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "product")
     private Set<PersonCartItem> personCartItems = new HashSet<>();
 
-    @JsonIgnore
     @OneToOne(mappedBy = "product")
     private OrderItem orderItem;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "product")
     private Set<Discount> discounts = new HashSet<>();
 
@@ -112,7 +109,6 @@ public class Product {
     /**
      * Признак маркируемых товаров – 0 – товар не моркируемый, 1- маркируемый товар
      */
-    @JsonIgnore
     @Column(name = "mark")
     private boolean mark = false;
 

@@ -4,9 +4,7 @@ import com.lakomka.dto.FilterBoundariesDto;
 import com.lakomka.dto.ProductFeedDto;
 import com.lakomka.dto.SearchStringProductDto;
 import com.lakomka.models.product.Product;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,23 +20,13 @@ import java.util.stream.IntStream;
  */
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Modifying
-    @Transactional
     @Query(nativeQuery = true,
             value = """
-                    CREATE INDEX IF NOT EXISTS idx_product_name_trgm
-                    ON product
-                    USING gin (name gin_trgm_ops)
-                    """)
-    void createTrgmIndex();
-
-    @Query(nativeQuery = true,
-            value = """
-                    SELECT id, name
-                    FROM product
-                    ORDER BY word_similarity(name, :name) > 0 DESC
-                    LIMIT 12;
-                    """)
+                SELECT id, name
+                FROM product
+                ORDER BY name <->> :name
+                LIMIT 12;
+                """)
     List<SearchStringProductDto> findProductsBySearchString(@Param("name") String name);
 
     @Query(nativeQuery = true,
@@ -84,7 +72,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     WHEN :level = 'OPT2' THEN price_opt_2
                     WHEN :level = 'NAL' THEN price_nal
                     ELSE price_kons
-                    END AS price
+                    END AS price, zn
                     FROM product
                     WHERE product_group =
                     (SELECT product_group

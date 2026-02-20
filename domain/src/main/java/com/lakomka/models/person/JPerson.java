@@ -290,7 +290,7 @@ public class JPerson {
         dto.setPrim(this.prim);
         dto.setRest(this.rest);
         dto.setRestTime(this.restTime);
-        dto.setRouteDays(this.getRoute().getRouteDays());
+        dto.setRouteDays(Optional.ofNullable(this.getRoute()).orElseGet(Route::new).getRouteDays());
         dto.setSertifPrint(this.sertifPrint);
         dto.setShippingDelayDays(this.day);
         dto.setVzrDoc(this.vzrDoc);

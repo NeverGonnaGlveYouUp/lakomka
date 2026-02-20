@@ -181,7 +181,7 @@ const ProductPage = () => {
                                         setCartQuantity(e.target.value);
                                     }}
                                     onKeyPress={(event) => {
-                                        if (event?.key === '-' || event?.key === ',' || event?.key === '.' || event?.key === '0') {
+                                        if (event?.key === '-' || event?.key === ',' || event?.key === '.') {
                                           event.preventDefault();
                                         }
                                     }}

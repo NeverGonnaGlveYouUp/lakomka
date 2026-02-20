@@ -19,4 +19,12 @@ public class ProductFeedDto {
         this.cartQuantity = cartQuantity;
         this.zn = zn;
     }
+
+    public ProductFeedDto(Long id, String name, BigDecimal price, Integer zn) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.zn = zn;
+    }
+
 }

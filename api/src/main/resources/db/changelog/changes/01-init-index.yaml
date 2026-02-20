@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: install-pg-trgm-extension
+      author: your_name
+      changes:
+        - sql:
+            # Создаем расширение, если его еще нет
+            sql: CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+  - changeSet:
+      id: add-idx-product-name-trgm
+      author: your_name
+      runInTransaction: false
+      changes:
+        - sql:
+            dbms: postgresql
+            sql: CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_product_name_trgm ON product USING gin (name gin_trgm_ops);
+        - rollback:
+            sql: DROP INDEX CONCURRENTLY IF EXISTS idx_product_name_trgm;

@@ -451,7 +451,7 @@ const CartPage = () => {
                                 </Grid>
                             ))}
                         </Grid>
-                        <Paper sx={{ width: isDesktopResolution ? "34%" : "100%" }}>
+                        <Paper sx={{ width: isDesktopResolution ? "34%" : "100%", height: "fit-content" }}>
                             <Box
                                 component="form"
                                 sx={{ p: 2, display: "flex",
@@ -547,23 +547,36 @@ const CartPage = () => {
                                         )}
                                     </ListItem>
                                 </List>
-                                <SmartCaptcha
-                                    key={resetCaptcha}
-                                    sitekey={CAPTCHA_SITEKEY}
-                                    onJavascriptError={(e) => {
-                                        console.log(e.filename);
-                                        console.log(e.message);
-                                        handleCaptchaError(e);
-                                    }}
-                                    onNetworkError={() => {
-                                            handleCaptchaError("Network error");
-                                    }}
-                                    onSuccess={(e) => {
-                                        handleCaptchaSuccess(e);
-                                    }}
-                                    onLoad={handleCaptchaLoad}
-                                    language='ru'/>
-                                {!!!localStorage.getItem('jwtToken') && (
+                                {(!!localStorage.getItem('jwtToken') && !!localStorage.getItem('route') != "null") && (
+                                    <SmartCaptcha
+                                        key={resetCaptcha}
+                                        sitekey={CAPTCHA_SITEKEY}
+                                        onJavascriptError={(e) => {
+                                            console.log(e.filename);
+                                            console.log(e.message);
+                                            handleCaptchaError(e);
+                                        }}
+                                        onNetworkError={() => {
+                                                handleCaptchaError("Network error");
+                                        }}
+                                        onSuccess={(e) => {
+                                            handleCaptchaSuccess(e);
+                                        }}
+                                        onLoad={handleCaptchaLoad}
+                                        language='ru'/>
+                                )}
+                                {(!!localStorage.getItem('route') == "null") && (
+                                    <Alert severity="warning" sx={{ mb: "1rem" }}>
+                                        <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
+                                            {"Чтобы начать покупки вам необходимо заключить "}
+                                            <Link onClick={() => navigate("/info#dogovor")}>
+                                                договор
+                                            </Link>
+                                            {"."}
+                                        </Typography>
+                                    </Alert>
+                                )}
+                                {(!!!localStorage.getItem('jwtToken')) && (
                                     <Alert severity="warning" sx={{ mb: "1rem" }}>
                                         <Typography sx={{ fontSize: "16px", lineHeight: "19px", marginBottom: "1rem" }}>
                                             <Link onClick={() => navigate("/auth/login")}>
@@ -575,7 +588,7 @@ const CartPage = () => {
                                 )}
                                 <Button
                                     onClick={() => handleSubmit()}
-                                    disabled={isSubmitting || price==0 || !!!localStorage.getItem('jwtToken') || !captchaLoaded || !token}
+                                    disabled={isSubmitting || price==0 || !!!localStorage.getItem('jwtToken') || !captchaLoaded || !token || !!!localStorage.getItem('route')}
                                     type="submit"
                                     color="success"
                                     fullWidth

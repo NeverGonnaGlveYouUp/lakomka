@@ -44,6 +44,9 @@ const Navbar = () => {
                             'Authorization': 'Bearer ' + token
                         }
                     });
+                    if (response.data && response.data.route) {
+                        localStorage.setItem('route', response.data.route);
+                    } else localStorage.setItem('route', null);
                     if (response.data && response.data.userName) {
                         setLoggedUsername(response.data.userName);
                     }

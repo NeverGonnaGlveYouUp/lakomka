@@ -10,7 +10,6 @@ import com.lakomka.repository.product.ProductRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.DiscountService.Discounts;
 import com.lakomka.services.cart.CartService;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,11 +42,6 @@ public class ProductController {
     private final ProductRepository productRepository;
     private final DiscountService discountService;
     private final CartService cartService;
-
-    @PostConstruct
-    public void initialize() {
-        productRepository.createTrgmIndex();
-    }
 
     @ResponseBody
     @GetMapping("/products/search")

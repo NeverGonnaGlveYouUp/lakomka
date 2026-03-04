@@ -1,7 +1,7 @@
 package com.lakomka.validators;
 
-import com.lakomka.dto.RegistrationDto;
-import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
+import com.lakomka.dto.CreateJPersonDto;
+import com.lakomka.dtoAssemblers.RequisitesDtoAssembler;
 import com.lakomka.validators.RequisitesValidator.CompanyRequisites;
 import com.lakomka.validators.RequisitesValidator.IndividualRequisites;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RequisitesAdapter {
 
-    private final RegistrationDtoAssembler registrationDtoAssembler;
+    private final RequisitesDtoAssembler registrationDtoAssembler;
 
     /**
      * Создает объект реквизитов на основе DTO
      */
-    public Object createRequisites(RegistrationDto dto) {
+    public Object createRequisites(CreateJPersonDto dto) {
         if (registrationDtoAssembler.isJuridical(dto)) {
             return createCompanyRequisites(dto);
         } else if (registrationDtoAssembler.isIndividual(dto)) {
@@ -32,7 +32,7 @@ public class RequisitesAdapter {
     /**
      * Создает реквизиты для юридического лица
      */
-    public CompanyRequisites createCompanyRequisites(RegistrationDto dto) {
+    public CompanyRequisites createCompanyRequisites(CreateJPersonDto dto) {
         if (!registrationDtoAssembler.isJuridical(dto)) {
             throw new IllegalArgumentException("DTO не содержит данные юридического лица");
         }
@@ -47,7 +47,7 @@ public class RequisitesAdapter {
     /**
      * Создает реквизиты для ИП/физлица
      */
-    public IndividualRequisites createIndividualRequisites(RegistrationDto dto) {
+    public IndividualRequisites createIndividualRequisites(CreateJPersonDto dto) {
         if (!registrationDtoAssembler.isIndividual(dto)) {
             throw new IllegalArgumentException("DTO не содержит данные ИП/физлица");
         }
@@ -61,7 +61,7 @@ public class RequisitesAdapter {
     /**
      * Проверяет, валиден ли тип организации в DTO
      */
-    public boolean invalidOrganizationType(RegistrationDto dto) {
+    public boolean invalidOrganizationType(CreateJPersonDto dto) {
         return !registrationDtoAssembler.isJuridical(dto) && !registrationDtoAssembler.isIndividual(dto);
     }
 }

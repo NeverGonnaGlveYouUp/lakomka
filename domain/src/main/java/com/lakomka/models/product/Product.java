@@ -1,6 +1,5 @@
 package com.lakomka.models.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lakomka.dto.ProductDto;
 import com.lakomka.dto.ProductFeedDto;
 import com.lakomka.models.misc.Discount;

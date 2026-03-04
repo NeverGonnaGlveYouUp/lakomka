@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Builder
 @ToString
@@ -24,4 +25,6 @@ public class LoggedUser {
     public BigDecimal rest;
     public BigDecimal restTime;
     public String route;
+    public Long currentJPersonId;
+    public List<LoggedUser> jPersons;
 }

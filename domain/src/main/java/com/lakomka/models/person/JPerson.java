@@ -1,8 +1,7 @@
 package com.lakomka.models.person;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lakomka.dto.CreateJPersonDto;
 import com.lakomka.dto.JpersonXmlDto;
-import com.lakomka.dto.RegistrationDto;
 import com.lakomka.models.misc.Discount;
 import com.lakomka.models.misc.Route;
 import com.lakomka.util.DateFormatUtil;
@@ -29,7 +28,7 @@ public class JPerson {
     public JPerson() {
     }
 
-    public JPerson(RegistrationDto registrationDto) {
+    public JPerson(CreateJPersonDto registrationDto) {
         this.phone = registrationDto.getPhone();
         this.KPP = registrationDto.getKpp();
         this.INN = registrationDto.getInn();
@@ -38,7 +37,7 @@ public class JPerson {
         this.addressDelivery = registrationDto.getDeliveryAddress();
         this.nameFull = registrationDto.getNameFull();
         this.name = registrationDto.getName();
-        this.dpAgreement = registrationDto.isDpAgreement();
+        this.dpAgreement = true;
         this.contact = registrationDto.getContact();
         this.rest = new BigDecimal("0");
         this.restTime = new BigDecimal("0");
@@ -46,11 +45,11 @@ public class JPerson {
     }
 
     @Id
-    @Column(name = "base_person_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, precision = 12)
     private Long id;
 
-    @OneToOne
-    @MapsId
+    @ManyToOne
     @JoinColumn(name = "base_person_id")
     private BasePerson basePerson;
 
@@ -61,7 +60,6 @@ public class JPerson {
     @JoinColumn(name = "route_id")
     private Route route;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "jPerson")
     private Set<Discount> discounts = new HashSet<>();
 

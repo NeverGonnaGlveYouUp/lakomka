@@ -133,8 +133,8 @@ public abstract class OrderCommon {
      * @return дата
      */
     private Date getDatePay(OrderCreationRequest request, BasePerson basePerson) {
-        return nonNull(request.getDateDelivery()) && request.isPayVid() && basePerson.getJPerson().getDay() != 0 ?
-                getDateWithDayOffset(basePerson.getJPerson().getDay(), request.getDateDelivery()) :
+        return nonNull(request.getDateDelivery()) && request.isPayVid() && basePerson.getCurrentJPerson().getDay() != 0 ?
+                getDateWithDayOffset(basePerson.getCurrentJPerson().getDay(), request.getDateDelivery()) :
                 request.getDateDelivery();
     }
 

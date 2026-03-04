@@ -4,6 +4,7 @@ import com.lakomka.dto.JpersonXmlDto;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.person.BasePrice;
 import com.lakomka.models.person.JPerson;
+import com.lakomka.repository.person.BasePersonRepository;
 import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.util.DateFormatUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,8 @@ public class JPersonXmlUpsert {
     private final JPersonRepository jPersonRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final BasePersonRepository basePersonRepository;
+
     public Stat upsert(List<JpersonXmlDto> jpersonXmlDtoList) {
         int created = 0;
         int updated = 0;
@@ -41,14 +44,20 @@ public class JPersonXmlUpsert {
                     Optional<JPerson> existingJPersonOpt = jPersonRepository.findById(dto.getShopId());
                     if (existingJPersonOpt.isPresent()) {
                         JPerson existingJPerson = existingJPersonOpt.get();
-                        if (updateJPersonIfNeeded(existingJPerson, dto)) {
+                        boolean update = updateJPersonIfNeeded(existingJPerson, dto);
+                        if (update) {
                             updated++;
                             jPersonRepository.save(existingJPerson);
+                        } else if (dto.getShopBasePersonId() != null && dto.getOfficeId() != null) {
+                            // Create new JPerson for existing base person
+                            JPerson newJPerson = createNewJPerson(dto);
+                            jPersonRepository.save(newJPerson);
+                            created++;
                         } else {
                             unchanged++;
                         }
                     } else {
-                        // If shopId exists but entity doesn't exist, create new one (id will changed!)
+                        // If entity doesn't exist, create new one (id will changed!)
                         JPerson newJPerson = createNewJPerson(dto);
                         jPersonRepository.save(newJPerson);
                         created++;
@@ -64,7 +73,7 @@ public class JPersonXmlUpsert {
         return new Stat(jpersonXmlDtoList.size(), updated, created, unchanged, 0);
     }
 
-    private JPerson createNewJPerson(JpersonXmlDto dto) {
+    private JPerson createNewJPerson(JpersonXmlDto dto) throws Exception {
         JPerson jPerson = new JPerson();
 
         // Set basic fields
@@ -103,12 +112,17 @@ public class JPersonXmlUpsert {
         jPerson.setDiscounts(Set.of()); // todo
 
         // Create BasePerson for new JPerson
-        // Login = INN, Password = OGRN todo
-        BasePerson basePerson = new BasePerson();
-        basePerson.setLogin(dto.getINN());
-        basePerson.setPassword(passwordEncoder.encode(dto.getOGRN()));
-        basePerson.setJPerson(jPerson);
-        jPerson.setBasePerson(basePerson);
+        if(dto.getShopBasePersonId() != null){
+            Optional<BasePerson> basePersonOpt = basePersonRepository.findById(dto.getShopBasePersonId());
+            basePersonOpt.orElseThrow().addJPerson(jPerson);
+            basePersonRepository.save(basePersonOpt.get());
+        } else if (dto.getOfficeId() != null) {
+            BasePerson basePerson = new BasePerson();
+            basePerson.setLogin(dto.getINN());
+            basePerson.setPassword(passwordEncoder.encode(dto.getOGRN()));
+            basePerson.addJPerson(jPerson);
+            jPerson.setBasePerson(basePerson);
+        } else throw new Exception("no OfficeId provided");
 
         return jPerson;
     }
@@ -118,16 +132,21 @@ public class JPersonXmlUpsert {
 
         List<String> changedFields = new ArrayList<>();
 
-        // INN/OGRN is unchangeable ?
-//        if (dto.getOGRN() != null && !dto.getOGRN().equals(existing.getOGRN())) {
-//            changedFields.add(String.format("OGRN: '%s' -> '%s'", existing.getOGRN(), dto.getOGRN()));
-//            existing.setOGRN(dto.getOGRN());
-//        }
-//        if (dto.getINN() != null && !dto.getINN().equals(existing.getINN())) {
-//            changedFields.add(String.format("INN: '%s' -> '%s'", existing.getINN(), dto.getINN()));
-//            existing.setINN(dto.getINN());
-//        }
+        // continue update if we have this JPerson in database
+        if (dto.getShopBasePersonId() == null ||
+            dto.getShopBasePersonId().equals(existing.getBasePerson().getId()) &&
+            !dto.getShopId().equals(existing.getId())) {
+            return false;
+        }
 
+        if (dto.getOGRN() != null && !dto.getOGRN().equals(existing.getOGRN())) {
+            changedFields.add(String.format("OGRN: '%s' -> '%s'", existing.getOGRN(), dto.getOGRN()));
+            existing.setOGRN(dto.getOGRN());
+        }
+        if (dto.getINN() != null && !dto.getINN().equals(existing.getINN())) {
+            changedFields.add(String.format("INN: '%s' -> '%s'", existing.getINN(), dto.getINN()));
+            existing.setINN(dto.getINN());
+        }
         if (dto.getKPP() != null && !dto.getKPP().equals(existing.getKPP())) {
             changedFields.add(String.format("KPP: '%s' -> '%s'", existing.getKPP(), dto.getKPP()));
             existing.setKPP(dto.getKPP());

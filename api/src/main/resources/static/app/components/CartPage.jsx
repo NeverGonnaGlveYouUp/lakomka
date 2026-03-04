@@ -408,7 +408,7 @@ const CartPage = () => {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 3, display: "flex", gap: "2rem", flexDirection: "column" }}>
-            <Typography sx={{ margin: "10px 0 12px", lineHeight: "44px", fontSize: '44px', fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ margin: "10px 0 12px", fontWeight: 700 }} >
                 Корзина
             </Typography>
             <Box sx={{ flexGrow: 1, width: "-webkit - fill - available" }}>

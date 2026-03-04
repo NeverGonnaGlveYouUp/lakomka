@@ -28,14 +28,25 @@ const StyledCard = styled(Card)({
 });
 
 const StyledCardMedia = styled(CardMedia)({
-  width: '90.5%',
-  height: '100%',
-  'objectFit': 'cover',
-  'objectPosition': 'center',
-  'borderRadius': '3%',
+  width: 'calc(100% - 20px)',
+  aspectRatio: '1 / 1',
+  objectFit: 'cover',
+  objectPosition: 'center',
+  borderRadius: '12px',
   margin: '10px',
+  backgroundColor: '#f0f0f0',
+  transition: 'transform 0.3s ease-in-out, opacity 0.5s ease-in',
+  position: 'sticky',
+  top: '1px',
+
+  opacity: 0,
+  '&[src]': {
+    opacity: 1,
+  },
+
   '&:hover': {
-       top: '-10px',
+    transform: 'translateY(-5px) scale(1.02)',
+    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
   },
 });
 
@@ -83,6 +94,7 @@ const ProductCard = ({ id, image, name, price, quantity, zn }) => {
           image={image}
           alt={name}
           loading="lazy"
+          onLoad={(e) => e.currentTarget.style.opacity = '1'}
         />
         {(zn == 2) && (
           <CardContent
@@ -110,7 +122,7 @@ const ProductCard = ({ id, image, name, price, quantity, zn }) => {
             <Box display="flex" alignItems="center">
               <Typography
                   variant="body1"
-                  style={{
+                  sx={{
                       fontWeight: 700,
                       color: "rgba(16, 196, 76, 1)"
                   }}>
@@ -124,8 +136,9 @@ const ProductCard = ({ id, image, name, price, quantity, zn }) => {
                  width="-webkit-fill-available">
               <Typography
                   variant="body1"
-                  style={{
+                  sx={{
                       fontWeight: 500,
+                      fontSize: { lg: '18px', md: '22px' },
                       display: "-webkit-box",
                       textTransform: "capitalize",
                       "-webkit-box-orient": "vertical",

@@ -76,7 +76,6 @@ public class DatabaseInitializer implements CommandLineRunner {
         JPerson jPerson = new JPerson();
         jPerson.setName("Техно");
         jPerson.setNameFull("Инновационные решения для бизнеса и технологий");
-        jPerson.setBasePerson(person);
         jPerson.setAddress("г. Казань, ул. Баумана, д. 10.");
         jPerson.setContact("Иванов Андрей Сергеевич");
         jPerson.setDay(0);
@@ -101,7 +100,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson.setDay(5);
 
         jPersonRepository.save(jPerson);
-        person.setJPerson(jPerson);
+        person.addJPerson(jPerson);
         basePersonRepository.save(person);
 
         BasePerson person2 = new BasePerson();
@@ -111,7 +110,6 @@ public class DatabaseInitializer implements CommandLineRunner {
         JPerson jPerson2 = new JPerson();
         jPerson2.setName("ЭкоПак");
         jPerson2.setNameFull("Комплексные услуги по переработке и утилизации отходов");
-        jPerson2.setBasePerson(person2);
         jPerson2.setAddress("г. Екатеринбург, ул. Малышева, д. 21.");
         jPerson2.setContact("Петрова Мария Александровна");
         jPerson2.setDay(0);
@@ -134,7 +132,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         jPerson2.setPrim("Тестовый JP 2");
 
         jPersonRepository.save(jPerson2);
-        person2.setJPerson(jPerson2);
+        person2.addJPerson(jPerson2);
         basePersonRepository.save(person2);
 
         long discountId = 1;

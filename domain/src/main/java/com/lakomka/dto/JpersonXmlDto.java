@@ -18,6 +18,8 @@ public class JpersonXmlDto {
 
     private Long shopId;
 
+    private Long shopBasePersonId;
+
     private Long officeId;
 
     /**

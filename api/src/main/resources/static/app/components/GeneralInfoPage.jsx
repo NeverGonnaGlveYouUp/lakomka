@@ -25,7 +25,7 @@ const GeneralInfoPage = () => {
 
   return (
       <Container maxWidth="lg" sx={{ mt: 3, display: "flex", flexDirection: "column", gap: "2rem" }}>
-          <Typography sx={{ margin: "10px 0 12px", lineHeight: "44px", fontSize: '44px', fontWeight: 700 }}>
+          <Typography variant="h6" sx={{ margin: "10px 0 12px", fontWeight: 700 }} >
               Информация
           </Typography>
           <Container id="dogovor">

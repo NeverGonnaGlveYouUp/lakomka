@@ -1,7 +1,8 @@
 package com.lakomka.validators;
 
+import com.lakomka.dto.CreateJPersonDto;
 import com.lakomka.dto.RegistrationDto;
-import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
+import com.lakomka.dtoAssemblers.RequisitesDtoAssembler;
 import com.lakomka.validators.RequisitesValidator.CompanyRequisites;
 import com.lakomka.validators.RequisitesValidator.IndividualRequisites;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class RegistrationValidator implements Validator {
 
     private final RequisitesAdapter createCompanyRequisites;
 
-    private final RegistrationDtoAssembler registrationDtoAssembler;
+    private final RequisitesDtoAssembler registrationDtoAssembler;
 
     private final RequisitesValidator requisitesValidator;
 
@@ -26,7 +27,7 @@ public class RegistrationValidator implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
-        RegistrationDto dto = (RegistrationDto) target;
+        CreateJPersonDto dto = (CreateJPersonDto) target;
 
         // Базовая проверка обязательных полей
         validateRequiredFields(dto, errors);
@@ -58,7 +59,7 @@ public class RegistrationValidator implements Validator {
         validateBusinessRules(dto, errors);
     }
 
-    private void validateRequiredFields(RegistrationDto dto, Errors errors) {
+    private void validateRequiredFields(CreateJPersonDto dto, Errors errors) {
         if (dto.getInn() == null || dto.getInn().trim().isEmpty()) {
             errors.rejectValue("inn", "inn.required", "ИНН является обязательным полем");
         }
@@ -77,7 +78,7 @@ public class RegistrationValidator implements Validator {
         }
     }
 
-    private void validateJuridicalRequisites(RegistrationDto dto, Errors errors) {
+    private void validateJuridicalRequisites(CreateJPersonDto dto, Errors errors) {
         CompanyRequisites requisites = createCompanyRequisites.createCompanyRequisites(dto);
 
         // Валидируем ИНН юрлица
@@ -98,7 +99,7 @@ public class RegistrationValidator implements Validator {
         }
     }
 
-    private void validateIndividualRequisites(RegistrationDto dto, Errors errors) {
+    private void validateIndividualRequisites(CreateJPersonDto dto, Errors errors) {
         IndividualRequisites requisites = createCompanyRequisites.createIndividualRequisites(dto);
 
         // Валидируем ИНН физлица
@@ -120,7 +121,7 @@ public class RegistrationValidator implements Validator {
         }
     }
 
-    private void validateBusinessRules(RegistrationDto dto, Errors errors) {
+    private void validateBusinessRules(CreateJPersonDto dto, Errors errors) {
         // Проверка формата телефона
         if (dto.getPhone() != null && !dto.getPhone().trim().isEmpty()) {
             if (!isValidPhone(dto.getPhone())) {
@@ -145,7 +146,7 @@ public class RegistrationValidator implements Validator {
     /**
      * Валидация только реквизитов (ИНН, ОГРН, КПП)
      */
-    public void validateRequisitesOnly(RegistrationDto dto, Errors errors) {
+    public void validateRequisitesOnly(CreateJPersonDto dto, Errors errors) {
         if (createCompanyRequisites.invalidOrganizationType(dto)) {
             errors.rejectValue("inn", "inn.invalid.length",
                     "ИНН должен содержать 10 цифр (для юрлица) или 12 цифр (для ИП)");

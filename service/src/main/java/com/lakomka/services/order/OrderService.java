@@ -3,7 +3,6 @@ package com.lakomka.services.order;
 import com.lakomka.dto.OrderCreationRequest;
 import com.lakomka.dto.OrderDto;
 import com.lakomka.dto.OrderItemDto;
-import com.lakomka.models.order.Order;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.person.PersonEnum;
 import com.lakomka.utils.SessionUtil;

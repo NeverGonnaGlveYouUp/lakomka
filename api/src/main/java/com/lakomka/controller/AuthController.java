@@ -1,22 +1,14 @@
 package com.lakomka.controller;
 
-import com.lakomka.dto.AuthenticationRequest;
-import com.lakomka.dto.ChangePasswordRequest;
-import com.lakomka.dto.LoggedUser;
-import com.lakomka.dto.RegistrationDto;
-import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
+import com.lakomka.dto.*;
 import com.lakomka.models.misc.Route;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.person.JPerson;
-import com.lakomka.models.person.Person;
 import com.lakomka.repository.person.BasePersonRepository;
-import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.CaptchaService;
 import com.lakomka.services.cart.CartService;
-import com.lakomka.services.xml.exports.JPersonExport;
 import com.lakomka.utils.JwtUtil;
 import com.lakomka.validators.BasePersonValidator;
-import com.lakomka.validators.RegistrationValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -35,7 +27,6 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
@@ -49,15 +40,11 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final BasePersonRepository basePersonRepository;
-    private final JPersonRepository jPersonRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final BasePersonValidator basePersonValidator;
-    private final RegistrationValidator registrationValidator;
-    private final RegistrationDtoAssembler registrationDtoAssembler;
     private final CaptchaService captchaService;
     private final CartService cartService;
-    private final JPersonExport jPersonExport;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(
@@ -69,29 +56,14 @@ public class AuthController {
         }
 
         Errors errors = new BeanPropertyBindingResult(user, "user");
-        user.setInn(user.getInn().replaceAll("-", ""));
         basePersonValidator.validate(user, errors);
-        registrationValidator.validateRequisitesOnly(user, errors);
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors.getAllErrors());
         }
 
-        Object personType = registrationDtoAssembler.toEntity(user);
-
         BasePerson basePerson = new BasePerson(passwordEncoder, user);
-        log.info("Signup: BasePerson: {}", basePerson.getLogin());
-        if (personType instanceof JPerson jPerson) {
-            basePerson.setJPerson(jPerson);
-            jPerson.setBasePerson(basePerson);
-            basePerson = basePersonRepository.save(basePerson);
-            jPerson.setBasePerson(basePerson);
-            jPersonRepository.save(jPerson);
-            log.info("Signup: JPerson: {}", jPerson.getName());
-            jPersonExport.safeExportXml(List.of(jPerson));
-        } else if (personType instanceof Person person) {
-            ///todo: сейчас поддержки ФЛ нет
-            throw new UnsupportedOperationException("Поддержка ФЛ не реализована");
-        } else throw new RuntimeException("Неопознанный тип пользователя");
+        setCurrentJPersonOrNull(basePerson);
+        basePerson = basePersonRepository.save(basePerson);
 
         authUser(user.getLogin(), user.getPassword());
 
@@ -120,9 +92,10 @@ public class AuthController {
         authUser(authenticationRequest.getLogin(), authenticationRequest.getPassword());
 
         // Переносим товары из анонимной корзины в пользовательскую
-        BasePerson authenticatedUser = basePersonRepository.findByLogin(authenticationRequest.getLogin())
+        BasePerson basePerson = basePersonRepository.findByLogin(authenticationRequest.getLogin())
                 .orElseThrow(() -> new RuntimeException("Пользователь " + authenticationRequest.getLogin() + " не найден"));
-        cartService.moveGuestCartToUserCart(authenticatedUser, request);
+        cartService.moveGuestCartToUserCart(basePerson, request);
+        setCurrentJPersonOrNull(basePerson);
 
         log.info("Login: {}", authenticationRequest.getLogin());
         return ResponseEntity.status(HttpStatus.OK)
@@ -138,9 +111,12 @@ public class AuthController {
             return ResponseEntity.notFound().build();
         }
 
-        Optional<JPerson> optionalJPerson = jPersonRepository.findById(user.getId());
+        Optional<JPerson> optionalJPerson = Optional.ofNullable(user.getCurrentJPerson());
         if (optionalJPerson.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(
+                LoggedUser.builder()
+                    .userName(user.getLogin())
+                    .build());
         }
 
         JPerson jPerson = optionalJPerson.get();
@@ -161,9 +137,11 @@ public class AuthController {
                 .rest(jPerson.getRest())
                 .restTime(jPerson.getRestTime())
                 .route(Optional.ofNullable(jPerson.getRoute()).orElseGet(Route::new).getRouteString())
+                .currentJPersonId(jPerson.getId())
+                .jPersons(user.jPersonsToListDto())
                 .build();
         log.info(personDto.toString());
-        return ResponseEntity.ok().body(personDto);
+        return ResponseEntity.ok(personDto);
     }
 
     @GetMapping("/current-user")
@@ -264,6 +242,14 @@ public class AuthController {
         Authentication authenticate = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(login, password));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
+    }
+
+    private static void setCurrentJPersonOrNull(BasePerson basePerson) {
+        try {
+            basePerson.setCurrentJPerson(basePerson.getJPersons().get(0));
+        } catch (IndexOutOfBoundsException e) {
+            basePerson.setCurrentJPerson(null);
+        }
     }
 
     private record Token(String token, String type) {

@@ -1,25 +1,32 @@
 package com.lakomka.models.person;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lakomka.dto.AuthenticationRequest;
+import com.lakomka.dto.LoggedUser;
 import com.lakomka.dto.RegistrationDto;
+import com.lakomka.models.misc.Route;
+import com.lakomka.repository.person.BasePersonRepository;
+import com.lakomka.repository.person.JPersonRepository;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Table
 @Entity
 @Getter
 @Setter
-//@ToString(exclude = {"password", "repeatPassword", "person", "jPerson", "cart", "orders"})
-@ToString(exclude = {"password", "repeatPassword", "person", "jPerson"})
+@ToString(exclude = {"password", "repeatPassword", "person", "jPersons"})
 public class BasePerson implements UserDetails {
 
     @Id
@@ -36,20 +43,13 @@ public class BasePerson implements UserDetails {
     @Transient
     private String repeatPassword;
 
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "basePerson")
-//    private Set<Order> orders = new HashSet<>();
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "current_j_person_id")
+    private JPerson currentJPerson;
 
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "basePerson")
-//    private Set<PersonCartItem> cart = new HashSet<>();
+    @OneToMany(mappedBy = "basePerson", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JPerson> jPersons = new ArrayList<>();
 
-    @JsonIgnore
-    @PrimaryKeyJoinColumn
-    @OneToOne(mappedBy = "basePerson", cascade = CascadeType.ALL)
-    private JPerson jPerson;
-
-    @JsonIgnore
     @PrimaryKeyJoinColumn
     @OneToOne(mappedBy = "basePerson", cascade = CascadeType.ALL)
     private Person person;
@@ -100,4 +100,30 @@ public class BasePerson implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
+    public void addJPerson(JPerson jPerson) {
+        jPerson.setBasePerson(this);
+        jPersons.add(jPerson);
+    }
+
+    public List<LoggedUser> jPersonsToListDto(){
+        return jPersons.stream().map(jPerson -> LoggedUser.builder()
+                .name(jPerson.getName())
+                .nameFull(jPerson.getNameFull())
+                .address(jPerson.getAddress())
+                .OGRN(jPerson.getOGRN())
+                .INN(jPerson.getINN())
+                .KPP(jPerson.getKPP())
+                .phone(jPerson.getPhone())
+                .email(jPerson.getEmail())
+                .contact(jPerson.getContact())
+                .post(jPerson.getPost())
+                .addressDelivery(jPerson.getAddressDelivery())
+                .mapDelivery(jPerson.getMapDelivery())
+                .rest(jPerson.getRest())
+                .restTime(jPerson.getRestTime())
+                .route(Optional.ofNullable(jPerson.getRoute()).orElseGet(Route::new).getRouteString())
+                .build()).toList();
+    }
+
 }

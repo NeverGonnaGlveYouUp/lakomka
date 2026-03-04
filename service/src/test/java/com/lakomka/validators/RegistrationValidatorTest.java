@@ -1,8 +1,9 @@
 package com.lakomka.validators;
 
+import com.lakomka.dto.CreateJPersonDto;
 import com.lakomka.dto.OrganizationType;
 import com.lakomka.dto.RegistrationDto;
-import com.lakomka.dtoAssemblers.RegistrationDtoAssembler;
+import com.lakomka.dtoAssemblers.RequisitesDtoAssembler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("DataFlowIssue")
@@ -26,7 +26,7 @@ class RegistrationValidatorTest {
     @Mock
     private RequisitesValidator requisitesValidator;
 
-    private RegistrationDtoAssembler registrationDtoAssembler;
+    private RequisitesDtoAssembler registrationDtoAssembler;
 
     private RegistrationValidator validator;
 
@@ -34,7 +34,7 @@ class RegistrationValidatorTest {
 
     @BeforeEach
     void setUp() {
-        registrationDtoAssembler = new RegistrationDtoAssembler();
+        registrationDtoAssembler = new RequisitesDtoAssembler();
         requisitesAdapter = new RequisitesAdapter(registrationDtoAssembler);
         validator = new RegistrationValidator(
                 requisitesAdapter,
@@ -68,8 +68,8 @@ class RegistrationValidatorTest {
     @DisplayName("Валидный DTO юридического лица должен проходить проверку")
     void validate_withValidJuridicalDto_shouldNotHaveErrors() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        CreateJPersonDto dto = createValidJuridicalDto();
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем вызовы валидатора реквизитов - все методы не должны добавлять ошибки
         doNothing().when(requisitesValidator).validateInnJuridical(anyString(), anyString(), any(Errors.class));
@@ -90,8 +90,8 @@ class RegistrationValidatorTest {
     @DisplayName("DTO юридического лица с ошибками в реквизитах должен возвращать ошибки")
     void validate_withInvalidJuridicalRequisites_shouldHaveErrors() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        CreateJPersonDto dto = createValidJuridicalDto();
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем вызовы валидатора реквизитов - добавляем ошибки
         doAnswer(invocation -> {
@@ -119,9 +119,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO юридического лица без КПП должен вызывать ошибку")
     void validate_juridicalDtoWithoutKpp_shouldHaveError() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setKpp(null); // Убираем КПП
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Act
         validator.validate(dto, errors);
@@ -136,9 +136,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO юридического лица без юридического адреса должен вызывать ошибку")
     void validate_juridicalDtoWithoutJurAddress_shouldHaveError() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setJurAddress(null); // Убираем юрадрес
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем успешную валидацию реквизитов
         doNothing().when(requisitesValidator).validateInnJuridical(anyString(), anyString(), any(Errors.class));
@@ -162,8 +162,8 @@ class RegistrationValidatorTest {
     @DisplayName("Валидный DTO ИП должен проходить проверку")
     void validate_withValidIndividualDto_shouldNotHaveErrors() {
         // Arrange
-        RegistrationDto dto = createValidIndividualDto();
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        CreateJPersonDto dto = createValidIndividualDto();
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем вызовы валидатора реквизитов
         doNothing().when(requisitesValidator).validateInnIndividual(anyString(), anyString(), any(Errors.class));
@@ -183,9 +183,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO ИП с указанным КПП должен вызывать ошибку")
     void validate_individualDtoWithKpp_shouldHaveError() {
         // Arrange
-        RegistrationDto dto = createValidIndividualDto();
+        CreateJPersonDto dto = createValidIndividualDto();
         dto.setKpp("770501001"); // Указываем КПП для ИП - это ошибка
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем успешную валидацию остальных реквизитов
         doNothing().when(requisitesValidator).validateInnIndividual(anyString(), anyString(), any(Errors.class));
@@ -204,9 +204,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO ИП с ОГРН не 15 цифр должен вызывать ошибку")
     void validate_individualDtoWithWrongOgrnLength_shouldHaveError() {
         // Arrange
-        RegistrationDto dto = createValidIndividualDto();
+        CreateJPersonDto dto = createValidIndividualDto();
         dto.setOgrn("1027700229193"); // ОГРН 13 цифр вместо ОГРНИП 15 цифр
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем успешную валидацию ИНН, но не мокируем ОГРНИП (будет вызван реальный код)
         doNothing().when(requisitesValidator).validateInnIndividual(anyString(), anyString(), any(Errors.class));
@@ -228,9 +228,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO без ИНН должен вызывать ошибку")
     void validate_dtoWithoutInn_shouldHaveError() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setInn(null);
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Act
         validator.validate(dto, errors);
@@ -248,9 +248,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO без названия должен вызывать ошибку")
     void validate_dtoWithoutName_shouldHaveError() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setName(null);
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Act
         validator.validate(dto, errors);
@@ -265,9 +265,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO без ОГРН должен вызывать ошибку")
     void validate_dtoWithoutOgrn_shouldHaveError() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setOgrn(null);
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Act
         validator.validate(dto, errors);
@@ -292,9 +292,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO с ИНН неправильной длины должен вызывать ошибку")
     void validate_dtoWithInvalidInnLength_shouldHaveError(String invalidInn) {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setInn(invalidInn);
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         lenient().doCallRealMethod().when(requisitesValidator).validateInnIndividual(anyString(), anyString(), any());
 
@@ -326,9 +326,9 @@ class RegistrationValidatorTest {
     @DisplayName("Валидные форматы телефона должны проходить проверку")
     void validate_withValidPhoneFormats_shouldNotHaveErrors(String validPhone) {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setPhone(validPhone);
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем успешную валидацию реквизитов
         doNothing().when(requisitesValidator).validateInnJuridical(anyString(), anyString(), any(Errors.class));
@@ -354,9 +354,9 @@ class RegistrationValidatorTest {
     @DisplayName("Невалидные форматы телефона должны вызывать ошибку")
     void validate_withInvalidPhoneFormats_shouldHaveErrors(String invalidPhone) {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setPhone(invalidPhone);
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем успешную валидацию реквизитов
         doNothing().when(requisitesValidator).validateInnJuridical(anyString(), anyString(), any(Errors.class));
@@ -377,9 +377,9 @@ class RegistrationValidatorTest {
     @DisplayName("DTO с пустым телефоном должен проходить проверку")
     void validate_dtoWithEmptyPhone_shouldNotHaveError() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setPhone(null);
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем успешную валидацию реквизитов
         doNothing().when(requisitesValidator).validateInnJuridical(anyString(), anyString(), any(Errors.class));
@@ -401,8 +401,8 @@ class RegistrationValidatorTest {
     @DisplayName("validateRequisitesOnly с валидными реквизитами юрлица не должен возвращать ошибки")
     void validateRequisitesOnly_withValidJuridicalRequisites_shouldNotHaveErrors() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
-        Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
+        CreateJPersonDto dto = createValidJuridicalDto();
+        Errors errors = new BeanPropertyBindingResult(dto, "CreateJPersonDto");
 
         // Мокируем успешную валидацию реквизитов
         doNothing().when(requisitesValidator).validateInnJuridical(anyString(), anyString(), any(Errors.class));
@@ -423,7 +423,7 @@ class RegistrationValidatorTest {
     @DisplayName("validateRequisitesOnly с невалидным ИНН должен возвращать ошибку")
     void validateRequisitesOnly_withInvalidInn_shouldHaveErrors() {
         // Arrange
-        RegistrationDto dto = createValidJuridicalDto();
+        CreateJPersonDto dto = createValidJuridicalDto();
         dto.setInn("12345678901"); // 11 цифр - невалидная длина
         Errors errors = new BeanPropertyBindingResult(dto, "RegistrationDto");
 
@@ -467,7 +467,7 @@ class RegistrationValidatorTest {
     @DisplayName("DTO только с обязательными полями должен проходить базовую проверку")
     void validate_dtoWithOnlyRequiredFields_shouldPassBasicValidation() {
         // Arrange
-        RegistrationDto dto = new RegistrationDto();
+        CreateJPersonDto dto = new CreateJPersonDto();
         dto.setInn("7725088527");
         dto.setName("Тестовая компания");
         dto.setOgrn("1027700229193");
@@ -498,7 +498,7 @@ class RegistrationValidatorTest {
     void validate_parameterizedDifferentOrganizationTypes_shouldWorkCorrectly(
             String inn, String ogrn, String kpp, OrganizationType expectedType) {
         // Arrange
-        RegistrationDto dto = new RegistrationDto();
+        CreateJPersonDto dto = new CreateJPersonDto();
         dto.setInn(inn);
         dto.setOgrn(ogrn);
         dto.setKpp(kpp.isEmpty() ? null : kpp);
@@ -529,11 +529,8 @@ class RegistrationValidatorTest {
     // Вспомогательные методы
     // =============================================
 
-    private RegistrationDto createValidJuridicalDto() {
-        return new RegistrationDto(
-                "Яндекс",               // Логин
-                "password-password",         // Пароль
-                "password-password",         // Повтор пароля
+    private CreateJPersonDto createValidJuridicalDto() {
+        return new CreateJPersonDto(
                 "7725088527",           // ИНН Яндекс (10 цифр)
                 "770501001",            // КПП Яндекс
                 "1027700229193",        // ОГРН Яндекс (13 цифр)
@@ -550,11 +547,8 @@ class RegistrationValidatorTest {
         );
     }
 
-    private RegistrationDto createValidIndividualDto() {
-        return new RegistrationDto(
-                "неЯндекс",               // Логин
-                "assword-assword",         // Пароль
-                "assword-assword",         // Повтор пароля
+    private CreateJPersonDto createValidIndividualDto() {
+        return new CreateJPersonDto(
                 "500100796259",         // ИНН ИП (12 цифр)
                 null,                   // КПП для ИП должен быть null
                 "304500116000157",      // ОГРНИП (15 цифр)

@@ -11,6 +11,7 @@ import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.repository.order.OrderItemRepository;
 import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
+import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.repository.product.PersonCartItemRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.xml.exports.OrderExport;
@@ -35,10 +36,11 @@ public class UserOrderService extends OrderCommon {
             OrderItemRepository orderItemRepository,
             DiscountService discountService,
             PersonCartItemRepository cartItemRepository,
+            JPersonRepository jPersonRepository,
             BasePersonRepository basePersonRepository,
             OrderExport orderExport
     ) {
-        super(PersonEnum.JPERSON, orderRepository, orderItemRepository, discountService, basePersonRepository, orderExport);
+        super(PersonEnum.JPERSON, orderRepository, orderItemRepository, basePersonRepository, jPersonRepository, discountService, orderExport);
         this.cartItemRepository = cartItemRepository;
     }
 

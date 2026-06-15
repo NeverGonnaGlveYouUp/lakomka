@@ -12,6 +12,7 @@ import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.repository.order.OrderItemRepository;
 import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
+import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.cart.GuestCartService;
 import com.lakomka.services.xml.exports.OrderExport;
@@ -36,10 +37,11 @@ public class GuestOrderService extends OrderCommon {
             OrderItemRepository orderItemRepository,
             DiscountService discountService,
             GuestCartService guestCartService,
+            JPersonRepository jPersonRepository,
             BasePersonRepository basePersonRepository,
             OrderExport orderExport
     ) {
-        super(PersonEnum.GUEST, orderRepository, orderItemRepository, discountService, basePersonRepository, orderExport);
+        super(PersonEnum.GUEST, orderRepository, orderItemRepository, basePersonRepository, jPersonRepository, discountService, orderExport);
         this.guestCartService = guestCartService;
     }
 

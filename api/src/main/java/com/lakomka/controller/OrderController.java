@@ -7,7 +7,6 @@ import com.lakomka.models.person.BasePerson;
 import com.lakomka.services.CaptchaService;
 import com.lakomka.services.order.OrderCreationRequestService;
 import com.lakomka.services.order.OrderService;
-import com.lakomka.services.xml.exports.OrderExport;
 import com.lakomka.validators.OrderCreationValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,6 @@ public class OrderController {
 
     private final OrderService orderService;
     private final OrderCreationRequestService requestService;
-    private final OrderExport orderExport;
     private final OrderCreationValidator orderCreationValidator;
     private final CaptchaService captchaService;
 
@@ -109,22 +107,4 @@ public class OrderController {
         }
         return ResponseEntity.of(Optional.of(orderService.getOrderContent(user, request, orderId)));
     }
-
-
-    /**
-     * Export order to Xml file on S3 storage
-     *
-     * @param user    - user
-     * @param request - HttpServletRequest
-     * @return - true if success
-     */
-    @GetMapping("/export-to-s3")
-    public ResponseEntity<?> exportXml(
-            @AuthenticationPrincipal BasePerson user,
-            HttpServletRequest request,
-            @RequestParam long orderId
-    ) {
-        return ResponseEntity.of(Optional.of(orderExport.safeExportXml(user, request, orderId)));
-    }
-
 }

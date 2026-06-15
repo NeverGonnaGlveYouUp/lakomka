@@ -135,8 +135,8 @@ const ProductPage = () => {
                         <Typography sx={{ fontSize: { lg: '28px', md: '32px' }, fontWeight: 900, textTransform: "capitalize" }}>{name}</Typography>
                         <div>
                             <Typography sx={{ fontSize: { lg: '24px', md: '28px' }, fontWeight: 700 }}>Цена за {unit} {price} ₽</Typography>
-                            <Typography sx={{ fontSize: { lg: '18px', md: '22px' }, fontWeight: 400, marginTop: "4px" }}>При заказе в упаковках {price * packag} ₽ за шт.</Typography>
-                            <Typography sx={{ fontSize: { lg: '18px', md: '22px' }, fontWeight: 400 }}>Масса в упаковках {packag} {unit} за шт.</Typography>
+                            <Typography sx={{ fontSize: { lg: '18px', md: '22px' }, fontWeight: 400, marginTop: "4px" }}>Цена за упаковку {price * packag} ₽</Typography>
+                            <Typography sx={{ fontSize: { lg: '18px', md: '22px' }, fontWeight: 400 }}>Масса за упаковку {weight * packag * 0.001} кг.</Typography>
                         </div>
                         {cartQuantity > 0 ? (
                             <Container sx={{ display: "flex", gap: "0.5rem", flexDirection: "row", pt: "2rem" }}>
@@ -236,7 +236,7 @@ const ProductPage = () => {
                                 )}
                                 {weight && (
                                     <Typography variant="body1" sx={{ fontSize: { lg: '16px', md: '24px' } }} gutterBottom>
-                                        Масса ед. товара: {weight} грамм
+                                        Масса ед. товара: {weight * 0.001} кг.
                                     </Typography>
                                 )}
                                 {unit && unitVid && (

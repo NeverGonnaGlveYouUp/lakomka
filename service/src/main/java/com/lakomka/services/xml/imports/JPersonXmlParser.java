@@ -15,7 +15,10 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.lakomka.services.xml.imports.JPersonXmlParser.XmlFieldName.*;
 
@@ -82,19 +85,40 @@ public class JPersonXmlParser implements XmlParser {
 
     private static class JPersonHandler extends DefaultHandler {
 
+        public static final String SCHEMA_ELEMENT = "schema";
+        public static final String DATA_ELEMENT = "data";
+        public static final String RECORD_ELEMENT = "record";
+        public static final String FIELD_ELEMENT = "field";
+        public static final String F_ELEMENT = "f";
         @Getter
         private final List<JpersonXmlDto> validJPersons = new ArrayList<>();
+        private final List<String> fieldNames = Arrays.stream(XmlFieldName.class.getDeclaredFields())
+                .map(f -> {
+                    try {
+                        return (String) f.get(null);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toList();
         private JpersonXmlDto currentJPerson;
         private final StringBuilder currentValue = new StringBuilder();
+        private int fieldIndex = -1;
         @Getter
         private int recordsRead = 0;
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             currentValue.setLength(0); // Clear the StringBuilder
-            if (JPERSON_ITEM.equals(qName)) {
-                currentJPerson = new JpersonXmlDto();
-                validJPersons.add(currentJPerson);
+            switch (qName) {
+                case SCHEMA_ELEMENT, DATA_ELEMENT, FIELD_ELEMENT, F_ELEMENT:
+                    break;
+                case RECORD_ELEMENT:
+                    fieldIndex = -1;
+                    currentJPerson = new JpersonXmlDto();
+                    validJPersons.add(currentJPerson);
+                    break;
             }
         }
 
@@ -105,13 +129,14 @@ public class JPersonXmlParser implements XmlParser {
 
         @Override
         public void endElement(String uri, String localName, String qName) {
-            if (currentJPerson == null) {
+            if (currentJPerson == null || !Objects.equals(qName, "f")) {
                 return;
             }
 
+            fieldIndex = fieldIndex + 1;
             String value = currentValue.toString().trim();
 
-            switch (qName) {
+            switch (fieldNames.get(fieldIndex)) {
                 case ACC_PRINT:
                     currentJPerson.setAccPrint(Boolean.parseBoolean(value));
                     break;
@@ -132,9 +157,6 @@ public class JPersonXmlParser implements XmlParser {
                     break;
                 case DOGOVOR:
                     currentJPerson.setDogovor(Boolean.parseBoolean(value));
-                    break;
-                case DP_AGREEMENT:
-                    currentJPerson.setDpAgreement(Boolean.parseBoolean(value));
                     break;
                 case EDO:
                     currentJPerson.setEdo(Boolean.parseBoolean(value));
@@ -194,12 +216,15 @@ public class JPersonXmlParser implements XmlParser {
                     currentJPerson.setShippingDelayDays(Integer.parseInt(value));
                     break;
                 case SHOP_ID:
-                    currentJPerson.setShopId(Long.parseLong(value));
+                    currentJPerson.setShopId(value.isEmpty() ? null : Long.parseLong(value));
+                    break;
+                case OFFICE_ID:
+                    currentJPerson.setOfficeId(value.isEmpty() ? null : Long.parseLong(value));
                     break;
                 case VZR_DOC:
                     currentJPerson.setVzrDoc(Boolean.parseBoolean(value));
                     break;
-                case JPERSON_ITEM:
+                case RECORD_ELEMENT:
                     recordsRead++;
                     break;
             }
@@ -207,36 +232,35 @@ public class JPersonXmlParser implements XmlParser {
     }
 
     public static class XmlFieldName {
-        public static final String ACC_PRINT = "accPrint";
-        public static final String ADDRESS = "address";
-        public static final String ADDRESS_DELIVERY = "addressDelivery";
-        public static final String BASE_PRICE = "basePrice";
-        public static final String CONTACT = "contact";
-        public static final String DISCOUNTS = "discounts";
-        public static final String DOGOVOR = "dogovor";
-        public static final String DP_AGREEMENT = "dpAgreement";
-        public static final String EDO = "edo";
-        public static final String EDO_DATE = "edoDate";
-        public static final String EMAIL = "email";
-        public static final String GLOBAL_DISCOUNT = "globalDiscount";
+        public static final String SHOP_ID = "shopId";
+        public static final String OFFICE_ID = "offiseErpId";
+        public static final String OGRN = "OGRN";
         public static final String INN = "INN";
         public static final String KPP = "KPP";
-        public static final String MAP_DELIVERY = "mapDelivery";
         public static final String NAME = "name";
         public static final String NAME_FULL = "nameFull";
-        public static final String OGRN = "OGRN";
-        public static final String PAY_VID = "payVid";
-        public static final String PHONE = "phone";
+        public static final String ADDRESS = "address";
+        public static final String ADDRESS_DELIVERY = "addressDelivery";
+        public static final String MAP_DELIVERY = "mapDelivery";
+        public static final String BASE_PRICE = "basePrice";
+        public static final String CONTACT = "contact";
         public static final String POST = "post";
-        public static final String PRIM = "prim";
+        public static final String PHONE = "phone";
+        public static final String EMAIL = "email";
+        public static final String DOGOVOR = "dogovor";
+        public static final String PAY_VID = "payVid";
+        public static final String EDO = "edo";
+        public static final String EDO_DATE = "edoDate";
+        public static final String GLOBAL_DISCOUNT = "globalDiscount";
+        public static final String DISCOUNTS = "discounts";
         public static final String REST = "rest";
         public static final String REST_TIME = "restTime";
         public static final String ROUTE_DAYS = "routeDays";
-        public static final String SERTIF_PRINT = "sertifPrint";
         public static final String SHIPPING_DELAY_DAYS = "shippingDelayDays";
-        public static final String SHOP_ID = "shopId";
+        public static final String SERTIF_PRINT = "sertifPrint";
+        public static final String ACC_PRINT = "accPrint";
         public static final String VZR_DOC = "vzrDoc";
-        public static final String JPERSON_ITEM = "jperson";
+        public static final String PRIM = "prim";
     }
 
 }

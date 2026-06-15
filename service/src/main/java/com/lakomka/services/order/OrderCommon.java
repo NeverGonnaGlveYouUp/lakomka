@@ -6,11 +6,13 @@ import com.lakomka.dto.OrderItemDto;
 import com.lakomka.models.order.Order;
 import com.lakomka.models.order.OrderItem;
 import com.lakomka.models.person.BasePerson;
+import com.lakomka.models.person.JPerson;
 import com.lakomka.models.person.PersonEnum;
 import com.lakomka.models.product.PersonCartItem;
 import com.lakomka.repository.order.OrderItemRepository;
 import com.lakomka.repository.order.OrderRepository;
 import com.lakomka.repository.person.BasePersonRepository;
+import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.DiscountService;
 import com.lakomka.services.xml.exports.OrderExport;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,8 +36,9 @@ public abstract class OrderCommon {
     private final PersonEnum personEnum;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final DiscountService discountService;
     private final BasePersonRepository basePersonRepository;
+    private final JPersonRepository jPersonRepository;
+    private final DiscountService discountService;
     private final OrderExport orderExport;
 
     @Transactional
@@ -63,7 +66,7 @@ public abstract class OrderCommon {
         order.setDateDelivery(nonNull(request.getDateDelivery()) ? request.getDateDelivery() : new Date(0));
         order.setBitAccPrint(request.isBitAccPrint());
         order.setBitSertifPrint(request.isBitSertifPrint());
-        order.setDatePay(getDatePay(request, basePerson));
+        order.setDatePay(getDatePay(request));
         order.setEmail(nonNull(request.getEmail()) ? request.getEmail() : "");
         order.setTelephone(nonNull(request.getTelephone()) ? request.getTelephone() : "");
         order.setContact(nonNull(request.getContact()) ? request.getContact() : "");
@@ -132,9 +135,11 @@ public abstract class OrderCommon {
      *
      * @return дата
      */
-    private Date getDatePay(OrderCreationRequest request, BasePerson basePerson) {
-        return nonNull(request.getDateDelivery()) && request.isPayVid() && basePerson.getCurrentJPerson().getDay() != 0 ?
-                getDateWithDayOffset(basePerson.getCurrentJPerson().getDay(), request.getDateDelivery()) :
+    private Date getDatePay(OrderCreationRequest request) {
+        JPerson jPerson = jPersonRepository.findByKpp(request.getKpp()).orElse(new JPerson());
+        Integer datePayOffset = jPerson.getDay();
+        return request.isPayVid() && nonNull(datePayOffset) && datePayOffset != 0 ?
+                getDateWithDayOffset(datePayOffset, request.getDateDelivery()) :
                 request.getDateDelivery();
     }
 

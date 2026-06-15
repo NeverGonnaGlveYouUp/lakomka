@@ -33,7 +33,6 @@ public class RequisitesDtoAssembler {
         if (isIndividual(createJPersonDto)){
             ///todo: сейчас поддержки ФЛ нет
             return null;
-//            return new Person(registrationDto);
         } else if (isJuridical(createJPersonDto)) {
             return new JPerson(createJPersonDto);
         }

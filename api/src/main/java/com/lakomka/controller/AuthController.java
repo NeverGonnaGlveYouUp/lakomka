@@ -5,6 +5,7 @@ import com.lakomka.models.misc.Route;
 import com.lakomka.models.person.BasePerson;
 import com.lakomka.models.person.JPerson;
 import com.lakomka.repository.person.BasePersonRepository;
+import com.lakomka.repository.person.JPersonRepository;
 import com.lakomka.services.CaptchaService;
 import com.lakomka.services.cart.CartService;
 import com.lakomka.utils.JwtUtil;
@@ -40,6 +41,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final BasePersonRepository basePersonRepository;
+    private final JPersonRepository jPersonRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final BasePersonValidator basePersonValidator;
@@ -62,7 +64,6 @@ public class AuthController {
         }
 
         BasePerson basePerson = new BasePerson(passwordEncoder, user);
-        setCurrentJPersonOrNull(basePerson);
         basePerson = basePersonRepository.save(basePerson);
 
         authUser(user.getLogin(), user.getPassword());
@@ -95,7 +96,6 @@ public class AuthController {
         BasePerson basePerson = basePersonRepository.findByLogin(authenticationRequest.getLogin())
                 .orElseThrow(() -> new RuntimeException("Пользователь " + authenticationRequest.getLogin() + " не найден"));
         cartService.moveGuestCartToUserCart(basePerson, request);
-        setCurrentJPersonOrNull(basePerson);
 
         log.info("Login: {}", authenticationRequest.getLogin());
         return ResponseEntity.status(HttpStatus.OK)
@@ -111,13 +111,11 @@ public class AuthController {
             return ResponseEntity.notFound().build();
         }
 
-        Optional<JPerson> optionalJPerson = Optional.ofNullable(user.getCurrentJPerson());
+        Optional<JPerson> optionalJPerson = jPersonRepository.findById(user.getId());
         if (optionalJPerson.isEmpty()) {
-            return ResponseEntity.ok(
-                LoggedUser.builder()
-                    .userName(user.getLogin())
-                    .build());
+            return ResponseEntity.notFound().build();
         }
+
 
         JPerson jPerson = optionalJPerson.get();
         LoggedUser personDto = LoggedUser.builder()
@@ -137,8 +135,6 @@ public class AuthController {
                 .rest(jPerson.getRest())
                 .restTime(jPerson.getRestTime())
                 .route(Optional.ofNullable(jPerson.getRoute()).orElseGet(Route::new).getRouteString())
-                .currentJPersonId(jPerson.getId())
-                .jPersons(user.jPersonsToListDto())
                 .build();
         log.info(personDto.toString());
         return ResponseEntity.ok(personDto);
@@ -242,14 +238,6 @@ public class AuthController {
         Authentication authenticate = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(login, password));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
-    }
-
-    private static void setCurrentJPersonOrNull(BasePerson basePerson) {
-        try {
-            basePerson.setCurrentJPerson(basePerson.getJPersons().get(0));
-        } catch (IndexOutOfBoundsException e) {
-            basePerson.setCurrentJPerson(null);
-        }
     }
 
     private record Token(String token, String type) {

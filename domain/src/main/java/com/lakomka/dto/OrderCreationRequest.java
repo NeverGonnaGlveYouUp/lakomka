@@ -15,6 +15,7 @@ public class OrderCreationRequest {
     private String email;
     private String addressDelivery;
     private String prim;
+    private String kpp;
     private Date dateDelivery;
     private boolean bitAccPrint;
     private boolean bitSertifPrint;

@@ -25,6 +25,5 @@ public class LoggedUser {
     public BigDecimal rest;
     public BigDecimal restTime;
     public String route;
-    public Long currentJPersonId;
     public List<LoggedUser> jPersons;
 }

@@ -90,19 +90,19 @@ public class JPerson {
     /**
      * ОГРН
      */
-    @Column(name = "OGRN", columnDefinition = "char(15)", nullable = false)
+    @Column(name = "OGRN", nullable = false)
     private String OGRN;
 
     /**
      * ИНН
      */
-    @Column(name = "INN", columnDefinition = "char(12)", nullable = false)
+    @Column(name = "INN", nullable = false)
     private String INN;
 
     /**
      * КПП
      */
-    @Column(name = "KPP", columnDefinition = "char(9)", nullable = false)
+    @Column(name = "KPP", nullable = false, unique = true)
     private String KPP;
 
     /**
@@ -144,7 +144,7 @@ public class JPerson {
     /**
      * Базовая цена
      */
-    @Column(name = "base_price", columnDefinition = "char(4)", nullable = false)
+    @Column(name = "base_price", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private BasePrice basePrice;
 

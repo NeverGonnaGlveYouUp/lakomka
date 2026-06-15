@@ -4,18 +4,13 @@ import com.lakomka.dto.AuthenticationRequest;
 import com.lakomka.dto.LoggedUser;
 import com.lakomka.dto.RegistrationDto;
 import com.lakomka.models.misc.Route;
-import com.lakomka.repository.person.BasePersonRepository;
-import com.lakomka.repository.person.JPersonRepository;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,10 +37,6 @@ public class BasePerson implements UserDetails {
 
     @Transient
     private String repeatPassword;
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "current_j_person_id")
-    private JPerson currentJPerson;
 
     @OneToMany(mappedBy = "basePerson", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JPerson> jPersons = new ArrayList<>();

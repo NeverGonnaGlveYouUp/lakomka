@@ -31,16 +31,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(nativeQuery = true,
             value = """
-                    SELECT
+                SELECT
                     MAX(GREATEST(price_kons, price_nal, price_opt_1, price_opt_2))::INTEGER AS max_price,
                     MIN(LEAST(price_kons, price_nal, price_opt_1, price_opt_2))::INTEGER AS min_price,
                     MAX(weight) AS max_weight,
                     MIN(weight) AS min_weight,
-                    (SELECT STRING_AGG(DISTINCT worker, ';') FROM product)::VARCHAR AS distinct_worker,
-                    (SELECT STRING_AGG(DISTINCT country, ';') FROM product)::VARCHAR AS distinct_countries,
-                    (SELECT STRING_AGG(DISTINCT product_group, ';') FROM product)::VARCHAR AS distinct_product_groups
-                    FROM product;
-                    """)
+                    COALESCE(string_agg(DISTINCT product.worker, ';'), '') AS distinct_worker,
+                    COALESCE(string_agg(DISTINCT product.country, ';'), '') AS distinct_countries,
+                    COALESCE(string_agg(DISTINCT product.product_group, ';'), '') AS distinct_product_groups
+                FROM product;
+            """)
     FilterBoundariesDto getFilterBoundaries();
 
     List<Product> findByArticleIn(Collection<String> articles);
@@ -65,21 +65,23 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(nativeQuery = true,
             value = """
-                    SELECT id, name,
-                    CASE
-                    WHEN :level = 'KONS' THEN price_kons
-                    WHEN :level = 'OPT1' THEN price_opt_1
-                    WHEN :level = 'OPT2' THEN price_opt_2
-                    WHEN :level = 'NAL' THEN price_nal
-                    ELSE price_kons
-                    END AS price, zn
-                    FROM product
-                    WHERE product_group =
-                    (SELECT product_group
-                    FROM product
-                    WHERE id = :id) AND id <> :id
-                    ORDER BY RANDOM() LIMIT :quantity
-                    """)
+                SELECT p.id,
+                       p.name,
+                       CASE
+                         WHEN :level = 'KONS' THEN p.price_kons
+                         WHEN :level = 'OPT1' THEN p.price_opt_1
+                         WHEN :level = 'OPT2' THEN p.price_opt_2
+                         WHEN :level = 'NAL'  THEN p.price_nal
+                         ELSE p.price_kons
+                       END AS price,
+                       p.zn
+                FROM product p
+                JOIN product src ON src.id = :id
+                  AND p.product_group = src.product_group
+                WHERE p.id <> :id
+                ORDER BY RANDOM()
+                LIMIT :quantity;
+                """)
     List<ProductFeedDto> findRandomByProductGroup(
             @Param("id") Long productId,
             @Param("quantity") Integer quantity,
